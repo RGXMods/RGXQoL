@@ -11002,55 +11002,75 @@
 
 		end
 
-		----------------------------------------------------------------------
-		-- L45: Create panel in game options panel
-		----------------------------------------------------------------------
+	----------------------------------------------------------------------
+	-- L45: Create panel in game options panel
+	----------------------------------------------------------------------
 
-		do
+	do
 
-			local interPanel = CreateFrame("FRAME")
-			interPanel.name = "RGX QoL"
+		local interPanel = CreateFrame("FRAME")
+		interPanel.name = "RGX QoL"
 
-			local maintitle = RGXQoLLC:MakeTx(interPanel, "RGX QoL", 0, 0)
-			maintitle:SetFont(maintitle:GetFont(), 72)
-			maintitle:ClearAllPoints()
-			maintitle:SetPoint("TOP", 0, -72)
+		local maintitle = RGXQoLLC:MakeTx(interPanel, "RGX QoL", 0, 0)
+		maintitle:SetFont(maintitle:GetFont(), 72)
+		maintitle:ClearAllPoints()
+		maintitle:SetPoint("TOP", 0, -72)
 
-			local expTitle = RGXQoLLC:MakeTx(interPanel, L["World of Warcraft Classic"], 0, 0)
-			expTitle:SetFont(expTitle:GetFont(), 32)
-			expTitle:ClearAllPoints()
-			expTitle:SetPoint("TOP", 0, -152)
+		local expTitle = RGXQoLLC:MakeTx(interPanel, L["World of Warcraft Classic"], 0, 0)
+		expTitle:SetFont(expTitle:GetFont(), 32)
+		expTitle:ClearAllPoints()
+		expTitle:SetPoint("TOP", 0, -152)
 
-			local subTitle = RGXQoLLC:MakeTx(interPanel, "curseforge.com/wow/addons/leatrix-plus", 0, 0)
-			subTitle:SetFont(subTitle:GetFont(), 20)
-			subTitle:ClearAllPoints()
-			subTitle:SetPoint("BOTTOM", 0, 72)
+		local subTitle = RGXQoLLC:MakeTx(interPanel, "Powered by RGX Framework", 0, 0)
+		subTitle:SetFont(subTitle:GetFont(), 20)
+		subTitle:ClearAllPoints()
+		subTitle:SetPoint("BOTTOM", 0, 72)
 
-			local slashTitle = RGXQoLLC:MakeTx(interPanel, "/ltp", 0, 0)
-			slashTitle:SetFont(slashTitle:GetFont(), 72)
-			slashTitle:ClearAllPoints()
-			slashTitle:SetPoint("BOTTOM", subTitle, "TOP", 0, 40)
-			slashTitle:SetScript("OnMouseUp", function(self, button)
-				if button == "LeftButton" then
-					SlashCmdList["RGXQoL"]("")
-				end
-			end)
-			slashTitle:SetScript("OnEnter", function()
-				slashTitle.r,  slashTitle.g, slashTitle.b = slashTitle:GetTextColor()
-				slashTitle:SetTextColor(1, 1, 0)
-			end)
-			slashTitle:SetScript("OnLeave", function()
-				slashTitle:SetTextColor(slashTitle.r, slashTitle.g, slashTitle.b)
-			end)
+		local slashTitle = RGXQoLLC:MakeTx(interPanel, "/ltp", 0, 0)
+		slashTitle:SetFont(slashTitle:GetFont(), 72)
+		slashTitle:ClearAllPoints()
+		slashTitle:SetPoint("BOTTOM", subTitle, "TOP", 0, 40)
+		slashTitle:SetScript("OnMouseUp", function(self, button)
+			if button == "LeftButton" then
+				SlashCmdList["RGXQoL"]("")
+			end
+		end)
+		slashTitle:SetScript("OnEnter", function()
+			slashTitle.r, slashTitle.g, slashTitle.b = slashTitle:GetTextColor()
+			slashTitle:SetTextColor(1, 1, 0)
+		end)
+		slashTitle:SetScript("OnLeave", function()
+			slashTitle:SetTextColor(slashTitle.r, slashTitle.g, slashTitle.b)
+		end)
 
-			local pTex = interPanel:CreateTexture(nil, "BACKGROUND")
-			pTex:SetAllPoints()
-			pTex:SetTexture("Interface\\GLUES\\Models\\UI_MainMenu\\swordgradient2")
-			pTex:SetAlpha(0.2)
-			pTex:SetTexCoord(0, 1, 1, 0)
+		local pTex = interPanel:CreateTexture(nil, "BACKGROUND")
+		pTex:SetAllPoints()
+		pTex:SetTexture("Interface\\GLUES\\Models\\UI_MainMenu\\swordgradient2")
+		pTex:SetAlpha(0.2)
+		pTex:SetTexCoord(0, 1, 1, 0)
 
-			local category = Settings.RegisterCanvasLayoutCategory(interPanel, L["Leatrix Plus"])
-			Settings.RegisterAddOnCategory(category)
+		-- Embed the main panel content into the settings panel
+		-- so /ltp and the settings menu show the same thing
+		RGXQoLLC["PageF"]:SetParent(interPanel)
+		RGXQoLLC["PageF"]:ClearAllPoints()
+		RGXQoLLC["PageF"]:SetAllPoints(interPanel)
+		RGXQoLLC["PageF"]:SetMovable(false)
+		RGXQoLLC["PageF"]:EnableMouse(false)
+
+		-- Hide the standalone close button (settings panel has its own)
+		if RGXQoLCB["CloseB"] then RGXQoLCB["CloseB"]:Hide() end
+
+		-- Override the show/hide to work within the settings context
+		RGXQoLLC.ShowMainPanel = function()
+			RGXQoLLC:HideFrames()
+			RGXQoLLC["PageF"]:Show()
+			if RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]] then
+				RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]]:Show()
+			end
+		end
+
+		local category = Settings.RegisterCanvasLayoutCategory(interPanel, "RGX QoL")
+		Settings.RegisterAddOnCategory(category)
 
 		end
 
@@ -12471,17 +12491,18 @@
 				RGXQoLEvt:UnregisterAllEvents(); -- Don't save any settings
 				ReloadUI();
 			elseif str == "nosave" then
-				-- Prevent Leatrix Plus from overwriting RGXQoLDB at next logout
+				-- Prevent RGX QoL from overwriting RGXQoLDB at next logout
 				RGXQoLEvt:UnregisterEvent("PLAYER_LOGOUT")
-				RGXQoLLC:Print("Leatrix Plus will not overwrite RGXQoLDB at next logout.")
+				RGXQoLLC:Print("RGX QoL will not overwrite RGXQoLDB at next logout.")
 				return
 			elseif str == "reset" then
 				-- Reset panel positions
-				RGXQoLLC["MainPanelA"], RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"] = "CENTER", "CENTER", 0, 0
 				RGXQoLLC["PlusPanelScale"] = 1
 				RGXQoLLC["PlusPanelAlpha"] = 0
 				RGXQoLLC["PageF"]:SetScale(1)
-				RGXQoLLC["PageF"].t:SetAlpha(1 - RGXQoLLC["PlusPanelAlpha"])
+				if RGXQoLLC["PageF"].t then
+					RGXQoLLC["PageF"].t:SetAlpha(1 - RGXQoLLC["PlusPanelAlpha"])
+				end
 				-- Refresh panels
 				RGXQoLLC["PageF"]:ClearAllPoints()
 				RGXQoLLC["PageF"]:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
@@ -13971,19 +13992,8 @@
 			end
 			return
 		else
-			-- Prevent options panel from showing if a chat configuration panel is showing
-			if ChatConfigFrame:IsShown() then return end
-			-- Prevent options panel from showing if Blizzard Store is showing
-			if StoreFrame and StoreFrame:GetAttribute("isshown") then return end
-			-- Toggle the options panel if game options panel is not showing
-			if RGXQoLLC:IsPlusShowing() then
-				RGXQoLLC:HideFrames()
-				RGXQoLLC:HideConfigPanels()
-			else
-				RGXQoLLC:HideFrames()
-				RGXQoLLC["PageF"]:Show()
-			end
-			RGXQoLLC["Page"..RGXQoLLC["RGXQoLStartPage"]]:Show()
+			-- Open the Blizzard settings panel for RGX QoL
+			Settings.OpenToCategory("RGX QoL")
 		end
 	end
 
