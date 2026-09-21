@@ -4,10 +4,10 @@
 
 -- Create locale structure
 local GameLocale = GetLocale()
-local void, Leatrix_Plus = ...
+local void, RGXQoLAddon = ...
 local function localeFunc(L, key) return key end
 local L = setmetatable({}, {__index = localeFunc})
-Leatrix_Plus.L = L
+RGXQoLAddon.L = L
 
 if RGXQoLDB and RGXQoLDB.UseEnglishLanguage and RGXQoLDB.UseEnglishLanguage == "On" then return end
 

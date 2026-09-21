@@ -13,7 +13,7 @@
 	_G.RGXQoLDB = _G.RGXQoLDB or {}
 
 	-- Create locals
-	local LeaPlusLC, LeaPlusCB, LeaDropList, LeaConfigList, LeaLockList = {}, {}, {}, {}, {}
+	local RGXQoLLC, RGXQoLCB, RGXQoLDropList, RGXQoLConfigList, RGXQoLLockList = {}, {}, {}, {}, {}
 
 	-- WoW Forever beta safety: skip secure hooks for functions this client
 	-- lacks (the beta exposes a mixed API surface)
@@ -29,11 +29,11 @@
 	local void
 
 	-- Version
-	LeaPlusLC["AddonVer"] = "1.15.150"
+	RGXQoLLC["AddonVer"] = "1.15.150"
 
 	-- Get locale table
-	local void, Leatrix_Plus = ...
-	local L = Leatrix_Plus.L
+	local void, RGXQoLAddon = ...
+	local L = RGXQoLAddon.L
 
 	-- Check Wow version is valid
 	do
@@ -47,53 +47,53 @@
 		end
 		if gametocversion and gametocversion == 11504 then
 			-- Used for upcoming game patch
-			LeaPlusLC.NewPatch = true
+			RGXQoLLC.NewPatch = true
 		end
 	end
 
 	-- Check for ElvUI
-	if C_AddOns.IsAddOnLoaded("ElvUI") then LeaPlusLC.ElvUI = unpack(ElvUI) end
+	if C_AddOns.IsAddOnLoaded("ElvUI") then RGXQoLLC.ElvUI = unpack(ElvUI) end
 
 ----------------------------------------------------------------------
 --	L00: Leatrix Plus
 ----------------------------------------------------------------------
 
 	-- Initialise variables
-	LeaPlusLC["ShowErrorsFlag"] = 1
-	LeaPlusLC["NumberOfPages"] = 9
-	LeaPlusLC["MainPanelHeight"] = 370
+	RGXQoLLC["ShowErrorsFlag"] = 1
+	RGXQoLLC["NumberOfPages"] = 9
+	RGXQoLLC["MainPanelHeight"] = 370
 
 	-- Class colors
 	do
 		local void, playerClass = UnitClass("player")
 		if CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[playerClass] then
-			LeaPlusLC["RaidColors"] = CUSTOM_CLASS_COLORS
+			RGXQoLLC["RaidColors"] = CUSTOM_CLASS_COLORS
 		else
-			LeaPlusLC["RaidColors"] = RAID_CLASS_COLORS
+			RGXQoLLC["RaidColors"] = RAID_CLASS_COLORS
 		end
 	end
 
 	-- Create event frame
-	local LpEvt = CreateFrame("FRAME")
-	LpEvt:RegisterEvent("ADDON_LOADED")
-	LpEvt:RegisterEvent("PLAYER_LOGIN")
+	local RGXQoLEvt = CreateFrame("FRAME")
+	RGXQoLEvt:RegisterEvent("ADDON_LOADED")
+	RGXQoLEvt:RegisterEvent("PLAYER_LOGIN")
 
 	-- Set bindings translations
-	_G.BINDING_NAME_LEATRIX_PLUS_GLOBAL_TOGGLE = L["Toggle panel"]
-	_G.BINDING_NAME_LEATRIX_PLUS_GLOBAL_WEBLINK = L["Show web link"]
-	_G.BINDING_NAME_LEATRIX_PLUS_GLOBAL_RARE = L["Announce rare"]
+	_G.BINDING_NAME_RGXQO_GLOBAL_TOGGLE = L["Toggle panel"]
+	_G.BINDING_NAME_RGXQO_GLOBAL_WEBLINK = L["Show web link"]
+	_G.BINDING_NAME_RGXQO_GLOBAL_RARE = L["Announce rare"]
 
 ----------------------------------------------------------------------
 --	L01: Functions
 ----------------------------------------------------------------------
 
 	-- Print text
-	function LeaPlusLC:Print(text)
+	function RGXQoLLC:Print(text)
 		DEFAULT_CHAT_FRAME:AddMessage(L[text], 1.0, 0.85, 0.0)
 	end
 
 	-- Lock and unlock an item
-	function LeaPlusLC:LockItem(item, lock)
+	function RGXQoLLC:LockItem(item, lock)
 		if lock then
 			item:Disable()
 			item:SetAlpha(0.3)
@@ -104,19 +104,19 @@
 	end
 
 	-- Hide configuration panels
-	function LeaPlusLC:HideConfigPanels()
-		for k, v in pairs(LeaConfigList) do
+	function RGXQoLLC:HideConfigPanels()
+		for k, v in pairs(RGXQoLConfigList) do
 			v:Hide()
 		end
 	end
 
 	-- Decline a shared quest if needed
-	function LeaPlusLC:CheckIfQuestIsSharedAndShouldBeDeclined()
-		if LeaPlusLC["NoSharedQuests"] == "On" then
+	function RGXQoLLC:CheckIfQuestIsSharedAndShouldBeDeclined()
+		if RGXQoLLC["NoSharedQuests"] == "On" then
 			local npcName = UnitName("questnpc")
 			if npcName and UnitIsPlayer(npcName) then
 				if UnitInParty(npcName) or UnitInRaid(npcName) then
-					if not LeaPlusLC:FriendCheck(npcName) then
+					if not RGXQoLLC:FriendCheck(npcName) then
 						DeclineQuest()
 						return
 					end
@@ -126,11 +126,11 @@
 	end
 
 	-- Show a single line prefilled editbox with copy functionality
-	function LeaPlusLC:ShowSystemEditBox(word, focuschat)
-		if not LeaPlusLC.FactoryEditBox then
+	function RGXQoLLC:ShowSystemEditBox(word, focuschat)
+		if not RGXQoLLC.FactoryEditBox then
 			-- Create frame for first time
 			local eFrame = CreateFrame("FRAME", nil, UIParent)
-			LeaPlusLC.FactoryEditBox = eFrame
+			RGXQoLLC.FactoryEditBox = eFrame
 			eFrame:SetSize(700, 110)
 			eFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 150)
 			eFrame:SetFrameStrata("FULLSCREEN_DIALOG")
@@ -185,7 +185,7 @@
 					C_Timer.After(0.1, function()
 						eFrame:Hide()
 						ActionStatus_DisplayMessage(L["Copied to clipboard."], true)
-						if LeaPlusLC.FactoryEditBoxFocusChat then
+						if RGXQoLLC.FactoryEditBoxFocusChat then
 							local eBox = ChatEdit_ChooseBoxForSend()
 							ChatEdit_ActivateChat(eBox)
 						end
@@ -201,56 +201,56 @@
 			eFrame.b:HighlightText()
 			eFrame:Show()
 		end
-		if focuschat then LeaPlusLC.FactoryEditBoxFocusChat = true else LeaPlusLC.FactoryEditBoxFocusChat = nil end
-		LeaPlusLC.FactoryEditBox:Show()
-		LeaPlusLC.FactoryEditBox.b:SetText(word)
-		LeaPlusLC.FactoryEditBox.b:HighlightText()
-		LeaPlusLC.FactoryEditBox.b:SetScript("OnChar", function() LeaPlusLC.FactoryEditBox.b:SetFocus(true) LeaPlusLC.FactoryEditBox.b:SetText(word) LeaPlusLC.FactoryEditBox.b:HighlightText() end)
-		LeaPlusLC.FactoryEditBox.b:SetScript("OnKeyUp", function() LeaPlusLC.FactoryEditBox.b:SetFocus(true) LeaPlusLC.FactoryEditBox.b:SetText(word) LeaPlusLC.FactoryEditBox.b:HighlightText() end)
+		if focuschat then RGXQoLLC.FactoryEditBoxFocusChat = true else RGXQoLLC.FactoryEditBoxFocusChat = nil end
+		RGXQoLLC.FactoryEditBox:Show()
+		RGXQoLLC.FactoryEditBox.b:SetText(word)
+		RGXQoLLC.FactoryEditBox.b:HighlightText()
+		RGXQoLLC.FactoryEditBox.b:SetScript("OnChar", function() RGXQoLLC.FactoryEditBox.b:SetFocus(true) RGXQoLLC.FactoryEditBox.b:SetText(word) RGXQoLLC.FactoryEditBox.b:HighlightText() end)
+		RGXQoLLC.FactoryEditBox.b:SetScript("OnKeyUp", function() RGXQoLLC.FactoryEditBox.b:SetFocus(true) RGXQoLLC.FactoryEditBox.b:SetText(word) RGXQoLLC.FactoryEditBox.b:HighlightText() end)
 	end
 
 	-- Load a string variable or set it to default if it's not set to "On" or "Off"
-	function LeaPlusLC:LoadVarChk(var, def)
+	function RGXQoLLC:LoadVarChk(var, def)
 		if RGXQoLDB[var] and type(RGXQoLDB[var]) == "string" and RGXQoLDB[var] == "On" or RGXQoLDB[var] == "Off" then
-			LeaPlusLC[var] = RGXQoLDB[var]
+			RGXQoLLC[var] = RGXQoLDB[var]
 		else
-			LeaPlusLC[var] = def
+			RGXQoLLC[var] = def
 			RGXQoLDB[var] = def
 		end
 	end
 
 	-- Load a numeric variable and set it to default if it's not within a given range
-	function LeaPlusLC:LoadVarNum(var, def, valmin, valmax)
+	function RGXQoLLC:LoadVarNum(var, def, valmin, valmax)
 		if RGXQoLDB[var] and type(RGXQoLDB[var]) == "number" and RGXQoLDB[var] >= valmin and RGXQoLDB[var] <= valmax then
-			LeaPlusLC[var] = RGXQoLDB[var]
+			RGXQoLLC[var] = RGXQoLDB[var]
 		else
-			LeaPlusLC[var] = def
+			RGXQoLLC[var] = def
 			RGXQoLDB[var] = def
 		end
 	end
 
 	-- Load an anchor point variable and set it to default if the anchor point is invalid
-	function LeaPlusLC:LoadVarAnc(var, def)
+	function RGXQoLLC:LoadVarAnc(var, def)
 		if RGXQoLDB[var] and type(RGXQoLDB[var]) == "string" and RGXQoLDB[var] == "CENTER" or RGXQoLDB[var] == "TOP" or RGXQoLDB[var] == "BOTTOM" or RGXQoLDB[var] == "LEFT" or RGXQoLDB[var] == "RIGHT" or RGXQoLDB[var] == "TOPLEFT" or RGXQoLDB[var] == "TOPRIGHT" or RGXQoLDB[var] == "BOTTOMLEFT" or RGXQoLDB[var] == "BOTTOMRIGHT" then
-			LeaPlusLC[var] = RGXQoLDB[var]
+			RGXQoLLC[var] = RGXQoLDB[var]
 		else
-			LeaPlusLC[var] = def
+			RGXQoLLC[var] = def
 			RGXQoLDB[var] = def
 		end
 	end
 
 	-- Load a string variable and set it to default if it is not a string (used with minimap exclude list)
-	function LeaPlusLC:LoadVarStr(var, def)
+	function RGXQoLLC:LoadVarStr(var, def)
 		if RGXQoLDB[var] and type(RGXQoLDB[var]) == "string" then
-			LeaPlusLC[var] = RGXQoLDB[var]
+			RGXQoLLC[var] = RGXQoLDB[var]
 		else
-			LeaPlusLC[var] = def
+			RGXQoLLC[var] = def
 			RGXQoLDB[var] = def
 		end
 	end
 
 	-- Show tooltips for checkboxes
-	function LeaPlusLC:TipSee()
+	function RGXQoLLC:TipSee()
 		GameTooltip:SetOwner(self, "ANCHOR_NONE")
 		local parent = self:GetParent()
 		if parent:GetParent() and parent:GetParent():GetObjectType() == "ScrollFrame" then
@@ -270,7 +270,7 @@
 	end
 
 	-- Show tooltips for dropdown menu tooltips
-	function LeaPlusLC:ShowDropTip()
+	function RGXQoLLC:ShowDropTip()
 		GameTooltip:SetOwner(self, "ANCHOR_NONE")
 		local parent = self:GetParent():GetParent():GetParent()
 		local pscale = parent:GetEffectiveScale()
@@ -286,13 +286,13 @@
 	end
 
 	-- Show tooltips for configuration buttons and dropdown menus
-	function LeaPlusLC:ShowTooltip()
+	function RGXQoLLC:ShowTooltip()
 		GameTooltip:SetOwner(self, "ANCHOR_NONE")
-		local parent = LeaPlusLC["PageF"]
+		local parent = RGXQoLLC["PageF"]
 		local pscale = parent:GetEffectiveScale()
 		local gscale = UIParent:GetEffectiveScale()
 		local tscale = GameTooltip:GetEffectiveScale()
-		local gap = ((UIParent:GetRight() * gscale) - (LeaPlusLC["PageF"]:GetRight() * pscale))
+		local gap = ((UIParent:GetRight() * gscale) - (RGXQoLLC["PageF"]:GetRight() * pscale))
 		if gap < (250 * tscale) then
 			GameTooltip:SetPoint("TOPRIGHT", parent, "TOPLEFT", 0, 0)
 		else
@@ -302,9 +302,9 @@
 	end
 
 	-- Create configuration button
-	function LeaPlusLC:CfgBtn(name, parent)
+	function RGXQoLLC:CfgBtn(name, parent)
 		local CfgBtn = CreateFrame("BUTTON", nil, parent)
-		LeaPlusCB[name] = CfgBtn
+		RGXQoLCB[name] = CfgBtn
 		CfgBtn:SetWidth(20)
 		CfgBtn:SetHeight(20)
 		CfgBtn:SetPoint("LEFT", parent.f, "RIGHT", 0, 0)
@@ -319,43 +319,43 @@
 		CfgBtn:GetHighlightTexture():SetTexCoord(0, 0.50, 0, 0.50);
 
 		CfgBtn.tiptext = L["Click to configure the settings for this option."]
-		CfgBtn:SetScript("OnEnter", LeaPlusLC.ShowTooltip)
+		CfgBtn:SetScript("OnEnter", RGXQoLLC.ShowTooltip)
 		CfgBtn:SetScript("OnLeave", GameTooltip_Hide)
 	end
 
 	-- Create a help button to the right of a fontstring
-	function LeaPlusLC:CreateHelpButton(frame, panel, parent, tip)
-		LeaPlusLC:CfgBtn(frame, panel)
-		LeaPlusCB[frame]:ClearAllPoints()
-		LeaPlusCB[frame]:SetPoint("LEFT", parent, "RIGHT", -parent:GetWidth() + parent:GetStringWidth(), 0)
-		LeaPlusCB[frame]:SetSize(25, 25)
-		LeaPlusCB[frame].t:SetTexture("Interface\\COMMON\\help-i.blp")
-		LeaPlusCB[frame].t:SetTexCoord(0, 1, 0, 1)
-		LeaPlusCB[frame].t:SetVertexColor(0.9, 0.8, 0.0)
-		LeaPlusCB[frame]:SetHighlightTexture("Interface\\COMMON\\help-i.blp")
-		LeaPlusCB[frame]:GetHighlightTexture():SetTexCoord(0, 1, 0, 1)
-		LeaPlusCB[frame].tiptext = L[tip]
-		LeaPlusCB[frame]:SetScript("OnEnter", LeaPlusLC.TipSee)
+	function RGXQoLLC:CreateHelpButton(frame, panel, parent, tip)
+		RGXQoLLC:CfgBtn(frame, panel)
+		RGXQoLCB[frame]:ClearAllPoints()
+		RGXQoLCB[frame]:SetPoint("LEFT", parent, "RIGHT", -parent:GetWidth() + parent:GetStringWidth(), 0)
+		RGXQoLCB[frame]:SetSize(25, 25)
+		RGXQoLCB[frame].t:SetTexture("Interface\\COMMON\\help-i.blp")
+		RGXQoLCB[frame].t:SetTexCoord(0, 1, 0, 1)
+		RGXQoLCB[frame].t:SetVertexColor(0.9, 0.8, 0.0)
+		RGXQoLCB[frame]:SetHighlightTexture("Interface\\COMMON\\help-i.blp")
+		RGXQoLCB[frame]:GetHighlightTexture():SetTexCoord(0, 1, 0, 1)
+		RGXQoLCB[frame].tiptext = L[tip]
+		RGXQoLCB[frame]:SetScript("OnEnter", RGXQoLLC.TipSee)
 	end
 
 	-- Show a footer
-	function LeaPlusLC:MakeFT(frame, text, left, width)
-		local footer = LeaPlusLC:MakeTx(frame, text, left, 96)
+	function RGXQoLLC:MakeFT(frame, text, left, width)
+		local footer = RGXQoLLC:MakeTx(frame, text, left, 96)
 		footer:SetWidth(width); footer:SetJustifyH("LEFT"); footer:SetWordWrap(true); footer:ClearAllPoints()
 		footer:SetPoint("BOTTOMLEFT", left, 96)
 		return footer
 	end
 
 	-- Capitalise first character in a string
-	function LeaPlusLC:CapFirst(str)
+	function RGXQoLLC:CapFirst(str)
 		return gsub(string.lower(str), "^%l", strupper)
 	end
 
 	-- Toggle Zygor addon
-	function LeaPlusLC:ZygorToggle()
+	function RGXQoLLC:ZygorToggle()
 		if select(2, C_AddOns.GetAddOnInfo("ZygorGuidesViewerClassic")) then
 			if not C_AddOns.IsAddOnLoaded("ZygorGuidesViewerClassic") then
-				if LeaPlusLC:PlayerInCombat() then
+				if RGXQoLLC:PlayerInCombat() then
 					return
 				else
 					C_AddOns.EnableAddOn("ZygorGuidesViewerClassic")
@@ -367,13 +367,13 @@
 			end
 		else
 			-- Zygor cannot be found
-			LeaPlusLC:Print("Zygor addon not found.")
+			RGXQoLLC:Print("Zygor addon not found.")
 		end
 		return
 	end
 
 	-- Show memory usage stat
-	function LeaPlusLC:ShowMemoryUsage(frame, anchor, x, y)
+	function RGXQoLLC:ShowMemoryUsage(frame, anchor, x, y)
 
 		-- Create frame
 		local memframe = CreateFrame("FRAME", nil, frame)
@@ -409,12 +409,12 @@
 		end)
 
 		-- Release memory
-		LeaPlusLC.ShowMemoryUsage = nil
+		RGXQoLLC.ShowMemoryUsage = nil
 
 	end
 
 	-- Check if player is in LFG queue (battleground)
-	function LeaPlusLC:IsInLFGQueue()
+	function RGXQoLLC:IsInLFGQueue()
 
 		-- Looking for Group realms (check for everything)
 		if C_LFGList.HasActiveEntryInfo() then
@@ -432,32 +432,32 @@
 	end
 
 	-- Check if player is in combat
-	function LeaPlusLC:PlayerInCombat()
+	function RGXQoLLC:PlayerInCombat()
 		if (UnitAffectingCombat("player")) then
-			LeaPlusLC:Print("You cannot do that in combat.")
+			RGXQoLLC:Print("You cannot do that in combat.")
 			return true
 		end
 	end
 
 	--  Hide panel and pages
-	function LeaPlusLC:HideFrames()
+	function RGXQoLLC:HideFrames()
 
 		-- Hide option pages
-		for i = 0, LeaPlusLC["NumberOfPages"] do
-			if LeaPlusLC["Page"..i] then
-				LeaPlusLC["Page"..i]:Hide();
+		for i = 0, RGXQoLLC["NumberOfPages"] do
+			if RGXQoLLC["Page"..i] then
+				RGXQoLLC["Page"..i]:Hide();
 			end;
 		end
 
 		-- Hide options panel
-		LeaPlusLC["PageF"]:Hide();
+		RGXQoLLC["PageF"]:Hide();
 
 	end
 
 	-- Find out if Leatrix Plus is showing (main panel or config panel)
-	function LeaPlusLC:IsPlusShowing()
-		if LeaPlusLC["PageF"]:IsShown() then return true end
-		for k, v in pairs(LeaConfigList) do
+	function RGXQoLLC:IsPlusShowing()
+		if RGXQoLLC["PageF"]:IsShown() then return true end
+		for k, v in pairs(RGXQoLConfigList) do
 			if v:IsShown() then
 				return true
 			end
@@ -465,7 +465,7 @@
 	end
 
 	-- Check if a name is in your friends list or guild (does not check realm as realm is unknown for some checks)
-	function LeaPlusLC:FriendCheck(name, guid)
+	function RGXQoLLC:FriendCheck(name, guid)
 
 		-- Do nothing if name is empty (such as whispering from the Battle.net app)
 		if not name then return end
@@ -502,7 +502,7 @@
 		end
 
 		-- Check guild members if guild is enabled (new members may need to press J to refresh roster)
-		if LeaPlusLC["FriendlyGuild"] == "On" then
+		if RGXQoLLC["FriendlyGuild"] == "On" then
 			local gCount = GetNumGuildMembers()
 			for i = 1, gCount do
 				local gName, void, void, void, void, void, void, void, gOnline, void, void, void, void, gMobile, void, void, gGUID = GetGuildRosterInfo(i)
@@ -523,56 +523,56 @@
 ----------------------------------------------------------------------
 
 	-- Function to set lock state for configuration buttons
-	function LeaPlusLC:LockOption(option, item, reloadreq)
+	function RGXQoLLC:LockOption(option, item, reloadreq)
 		if reloadreq then
 			-- Option change requires UI reload
-			if LeaPlusLC[option] ~= RGXQoLDB[option] or LeaPlusLC[option] == "Off" then
-				LeaPlusLC:LockItem(LeaPlusCB[item], true)
+			if RGXQoLLC[option] ~= RGXQoLDB[option] or RGXQoLLC[option] == "Off" then
+				RGXQoLLC:LockItem(RGXQoLCB[item], true)
 			else
-				LeaPlusLC:LockItem(LeaPlusCB[item], false)
+				RGXQoLLC:LockItem(RGXQoLCB[item], false)
 			end
 		else
 			-- Option change does not require UI reload
-			if LeaPlusLC[option] == "Off" then
-				LeaPlusLC:LockItem(LeaPlusCB[item], true)
+			if RGXQoLLC[option] == "Off" then
+				RGXQoLLC:LockItem(RGXQoLCB[item], true)
 			else
-				LeaPlusLC:LockItem(LeaPlusCB[item], false)
+				RGXQoLLC:LockItem(RGXQoLCB[item], false)
 			end
 		end
 	end
 
 --	Set lock state for configuration buttons
-	function LeaPlusLC:SetDim()
-		LeaPlusLC:LockOption("AutomateQuests", "AutomateQuestsBtn", false)			-- Automate quests
-		LeaPlusLC:LockOption("AutoAcceptRes", "AutoAcceptResBtn", false)			-- Accept resurrection
-		LeaPlusLC:LockOption("AutoReleasePvP", "AutoReleasePvPBtn", false)			-- Release in PvP
-		LeaPlusLC:LockOption("AutoSellJunk", "AutoSellJunkBtn", false)				-- Sell junk automatically
-		LeaPlusLC:LockOption("AutoRepairGear", "AutoRepairBtn", false)				-- Repair automatically
-		LeaPlusLC:LockOption("InviteFromWhisper", "InvWhisperBtn", false)			-- Invite from whispers
-		LeaPlusLC:LockOption("FilterChatMessages", "FilterChatMessagesBtn", true)	-- Filter chat messages
-		LeaPlusLC:LockOption("MailFontChange", "MailTextBtn", true)					-- Resize mail text
-		LeaPlusLC:LockOption("QuestFontChange", "QuestTextBtn", true)				-- Resize quest text
-		LeaPlusLC:LockOption("BookFontChange", "BookTextBtn", true)					-- Resize book text
-		LeaPlusLC:LockOption("MinimapModder", "ModMinimapBtn", true)				-- Enhance minimap
-		LeaPlusLC:LockOption("TipModEnable", "MoveTooltipButton", true)				-- Enhance tooltip
-		LeaPlusLC:LockOption("EnhanceDressup", "EnhanceDressupBtn", true)			-- Enhance dressup
-		LeaPlusLC:LockOption("EnhanceQuestLog", "EnhanceQuestLogBtn", true)			-- Enhance quest log
-		LeaPlusLC:LockOption("EnhanceTrainers", "EnhanceTrainersBtn", true)			-- Enhance trainers
-		LeaPlusLC:LockOption("EnhanceFlightMap", "EnhanceFlightMapBtn", true)		-- Enhance flight map
-		LeaPlusLC:LockOption("ShowCooldowns", "CooldownsButton", true)				-- Show cooldowns
-		LeaPlusLC:LockOption("ShowBorders", "ModBordersBtn", true)					-- Show borders
-		LeaPlusLC:LockOption("ShowPlayerChain", "ModPlayerChain", true)				-- Show player chain
-		LeaPlusLC:LockOption("ShowDruidPowerBar", "ShowDruidPowerBarBtn", true)		-- Show druid power bar
-		LeaPlusLC:LockOption("ShowWowheadLinks", "ShowWowheadLinksBtn", true)		-- Show Wowhead links
-		LeaPlusLC:LockOption("ShowFlightTimes", "ShowFlightTimesBtn", true)			-- Show flight times
-		LeaPlusLC:LockOption("ManageWidget", "ManageWidgetButton", true)			-- Manage widget
-		LeaPlusLC:LockOption("ManageTimer", "ManageTimerButton", true)				-- Manage timer
-		LeaPlusLC:LockOption("ClassColFrames", "ClassColFramesBtn", true)			-- Class colored frames
-		LeaPlusLC:LockOption("SetWeatherDensity", "SetWeatherDensityBtn", false)	-- Set weather density
-		LeaPlusLC:LockOption("MuteGameSounds", "MuteGameSoundsBtn", false)			-- Mute game sounds
-		LeaPlusLC:LockOption("MuteMountSounds", "MuteMountSoundsBtn", false)		-- Mute mount sounds
-		LeaPlusLC:LockOption("MuteCustomSounds", "MuteCustomSoundsBtn", false)		-- Mute custom sounds
-		LeaPlusLC:LockOption("StandAndDismount", "DismountBtn", true)				-- Dismount me
+	function RGXQoLLC:SetDim()
+		RGXQoLLC:LockOption("AutomateQuests", "AutomateQuestsBtn", false)			-- Automate quests
+		RGXQoLLC:LockOption("AutoAcceptRes", "AutoAcceptResBtn", false)			-- Accept resurrection
+		RGXQoLLC:LockOption("AutoReleasePvP", "AutoReleasePvPBtn", false)			-- Release in PvP
+		RGXQoLLC:LockOption("AutoSellJunk", "AutoSellJunkBtn", false)				-- Sell junk automatically
+		RGXQoLLC:LockOption("AutoRepairGear", "AutoRepairBtn", false)				-- Repair automatically
+		RGXQoLLC:LockOption("InviteFromWhisper", "InvWhisperBtn", false)			-- Invite from whispers
+		RGXQoLLC:LockOption("FilterChatMessages", "FilterChatMessagesBtn", true)	-- Filter chat messages
+		RGXQoLLC:LockOption("MailFontChange", "MailTextBtn", true)					-- Resize mail text
+		RGXQoLLC:LockOption("QuestFontChange", "QuestTextBtn", true)				-- Resize quest text
+		RGXQoLLC:LockOption("BookFontChange", "BookTextBtn", true)					-- Resize book text
+		RGXQoLLC:LockOption("MinimapModder", "ModMinimapBtn", true)				-- Enhance minimap
+		RGXQoLLC:LockOption("TipModEnable", "MoveTooltipButton", true)				-- Enhance tooltip
+		RGXQoLLC:LockOption("EnhanceDressup", "EnhanceDressupBtn", true)			-- Enhance dressup
+		RGXQoLLC:LockOption("EnhanceQuestLog", "EnhanceQuestLogBtn", true)			-- Enhance quest log
+		RGXQoLLC:LockOption("EnhanceTrainers", "EnhanceTrainersBtn", true)			-- Enhance trainers
+		RGXQoLLC:LockOption("EnhanceFlightMap", "EnhanceFlightMapBtn", true)		-- Enhance flight map
+		RGXQoLLC:LockOption("ShowCooldowns", "CooldownsButton", true)				-- Show cooldowns
+		RGXQoLLC:LockOption("ShowBorders", "ModBordersBtn", true)					-- Show borders
+		RGXQoLLC:LockOption("ShowPlayerChain", "ModPlayerChain", true)				-- Show player chain
+		RGXQoLLC:LockOption("ShowDruidPowerBar", "ShowDruidPowerBarBtn", true)		-- Show druid power bar
+		RGXQoLLC:LockOption("ShowWowheadLinks", "ShowWowheadLinksBtn", true)		-- Show Wowhead links
+		RGXQoLLC:LockOption("ShowFlightTimes", "ShowFlightTimesBtn", true)			-- Show flight times
+		RGXQoLLC:LockOption("ManageWidget", "ManageWidgetButton", true)			-- Manage widget
+		RGXQoLLC:LockOption("ManageTimer", "ManageTimerButton", true)				-- Manage timer
+		RGXQoLLC:LockOption("ClassColFrames", "ClassColFramesBtn", true)			-- Class colored frames
+		RGXQoLLC:LockOption("SetWeatherDensity", "SetWeatherDensityBtn", false)	-- Set weather density
+		RGXQoLLC:LockOption("MuteGameSounds", "MuteGameSoundsBtn", false)			-- Mute game sounds
+		RGXQoLLC:LockOption("MuteMountSounds", "MuteMountSoundsBtn", false)		-- Mute mount sounds
+		RGXQoLLC:LockOption("MuteCustomSounds", "MuteCustomSoundsBtn", false)		-- Mute custom sounds
+		RGXQoLLC:LockOption("StandAndDismount", "DismountBtn", true)				-- Dismount me
 	end
 
 ----------------------------------------------------------------------
@@ -580,99 +580,99 @@
 ----------------------------------------------------------------------
 
 	-- Set the reload button state
-	function LeaPlusLC:ReloadCheck()
+	function RGXQoLLC:ReloadCheck()
 
 		-- Chat
-		if	(LeaPlusLC["UseEasyChatResizing"]	~= RGXQoLDB["UseEasyChatResizing"])	-- Use easy resizing
-		or	(LeaPlusLC["NoCombatLogTab"]		~= RGXQoLDB["NoCombatLogTab"])			-- Hide the combat log
-		or	(LeaPlusLC["NoChatButtons"]			~= RGXQoLDB["NoChatButtons"])			-- Hide chat buttons
-		or	(LeaPlusLC["UnclampChat"]			~= RGXQoLDB["UnclampChat"])			-- Unclamp chat frame
-		or	(LeaPlusLC["MoveChatEditBoxToTop"]	~= RGXQoLDB["MoveChatEditBoxToTop"])	-- Move editbox to top
-		or	(LeaPlusLC["MoreFontSizes"]			~= RGXQoLDB["MoreFontSizes"])			-- More font sizes
-		or	(LeaPlusLC["NoStickyChat"]			~= RGXQoLDB["NoStickyChat"])			-- Disable sticky chat
-		or	(LeaPlusLC["UseArrowKeysInChat"]	~= RGXQoLDB["UseArrowKeysInChat"])		-- Use arrow keys in chat
-		or	(LeaPlusLC["NoChatFade"]			~= RGXQoLDB["NoChatFade"])				-- Disable chat fade
-		or	(LeaPlusLC["ClassColorsInChat"]		~= RGXQoLDB["ClassColorsInChat"])		-- Use class colors in chat
-		or	(LeaPlusLC["RecentChatWindow"]		~= RGXQoLDB["RecentChatWindow"])		-- Recent chat window
-		or	(LeaPlusLC["MaxChatHstory"]			~= RGXQoLDB["MaxChatHstory"])			-- Increase chat history
-		or	(LeaPlusLC["FilterChatMessages"]	~= RGXQoLDB["FilterChatMessages"])		-- Filter chat messages
-		or	(LeaPlusLC["RestoreChatMessages"]	~= RGXQoLDB["RestoreChatMessages"])	-- Restore chat messages
+		if	(RGXQoLLC["UseEasyChatResizing"]	~= RGXQoLDB["UseEasyChatResizing"])	-- Use easy resizing
+		or	(RGXQoLLC["NoCombatLogTab"]		~= RGXQoLDB["NoCombatLogTab"])			-- Hide the combat log
+		or	(RGXQoLLC["NoChatButtons"]			~= RGXQoLDB["NoChatButtons"])			-- Hide chat buttons
+		or	(RGXQoLLC["UnclampChat"]			~= RGXQoLDB["UnclampChat"])			-- Unclamp chat frame
+		or	(RGXQoLLC["MoveChatEditBoxToTop"]	~= RGXQoLDB["MoveChatEditBoxToTop"])	-- Move editbox to top
+		or	(RGXQoLLC["MoreFontSizes"]			~= RGXQoLDB["MoreFontSizes"])			-- More font sizes
+		or	(RGXQoLLC["NoStickyChat"]			~= RGXQoLDB["NoStickyChat"])			-- Disable sticky chat
+		or	(RGXQoLLC["UseArrowKeysInChat"]	~= RGXQoLDB["UseArrowKeysInChat"])		-- Use arrow keys in chat
+		or	(RGXQoLLC["NoChatFade"]			~= RGXQoLDB["NoChatFade"])				-- Disable chat fade
+		or	(RGXQoLLC["ClassColorsInChat"]		~= RGXQoLDB["ClassColorsInChat"])		-- Use class colors in chat
+		or	(RGXQoLLC["RecentChatWindow"]		~= RGXQoLDB["RecentChatWindow"])		-- Recent chat window
+		or	(RGXQoLLC["MaxChatHstory"]			~= RGXQoLDB["MaxChatHstory"])			-- Increase chat history
+		or	(RGXQoLLC["FilterChatMessages"]	~= RGXQoLDB["FilterChatMessages"])		-- Filter chat messages
+		or	(RGXQoLLC["RestoreChatMessages"]	~= RGXQoLDB["RestoreChatMessages"])	-- Restore chat messages
 
 		-- Text
-		or	(LeaPlusLC["HideErrorMessages"]		~= RGXQoLDB["HideErrorMessages"])		-- Hide error messages
-		or	(LeaPlusLC["NoHitIndicators"]		~= RGXQoLDB["NoHitIndicators"])		-- Hide portrait text
-		or	(LeaPlusLC["HideZoneText"]			~= RGXQoLDB["HideZoneText"])			-- Hide zone text
-		or	(LeaPlusLC["HideKeybindText"]		~= RGXQoLDB["HideKeybindText"])		-- Hide keybind text
-		or	(LeaPlusLC["HideMacroText"]			~= RGXQoLDB["HideMacroText"])			-- Hide macro text
-		or	(LeaPlusLC["HideRaidGroupLabels"]	~= RGXQoLDB["HideRaidGroupLabels"])	-- Hide raid group labels
+		or	(RGXQoLLC["HideErrorMessages"]		~= RGXQoLDB["HideErrorMessages"])		-- Hide error messages
+		or	(RGXQoLLC["NoHitIndicators"]		~= RGXQoLDB["NoHitIndicators"])		-- Hide portrait text
+		or	(RGXQoLLC["HideZoneText"]			~= RGXQoLDB["HideZoneText"])			-- Hide zone text
+		or	(RGXQoLLC["HideKeybindText"]		~= RGXQoLDB["HideKeybindText"])		-- Hide keybind text
+		or	(RGXQoLLC["HideMacroText"]			~= RGXQoLDB["HideMacroText"])			-- Hide macro text
+		or	(RGXQoLLC["HideRaidGroupLabels"]	~= RGXQoLDB["HideRaidGroupLabels"])	-- Hide raid group labels
 
-		or	(LeaPlusLC["MailFontChange"]		~= RGXQoLDB["MailFontChange"])			-- Resize mail text
-		or	(LeaPlusLC["QuestFontChange"]		~= RGXQoLDB["QuestFontChange"])		-- Resize quest text
-		or	(LeaPlusLC["BookFontChange"]		~= RGXQoLDB["BookFontChange"])			-- Resize book text
+		or	(RGXQoLLC["MailFontChange"]		~= RGXQoLDB["MailFontChange"])			-- Resize mail text
+		or	(RGXQoLLC["QuestFontChange"]		~= RGXQoLDB["QuestFontChange"])		-- Resize quest text
+		or	(RGXQoLLC["BookFontChange"]		~= RGXQoLDB["BookFontChange"])			-- Resize book text
 
 		-- Interface
-		or	(LeaPlusLC["MinimapModder"]			~= RGXQoLDB["MinimapModder"])			-- Enhance minimap
-		or	(LeaPlusLC["HideMiniDayNight"]		~= RGXQoLDB["HideMiniDayNight"])		-- Hide the day and night indicator
-		or	(LeaPlusLC["HideMiniZoneText"]		~= RGXQoLDB["HideMiniZoneText"])		-- Hide the zone text bar
-		or	(LeaPlusLC["SquareMinimap"]			~= RGXQoLDB["SquareMinimap"])			-- Square minimap
-		or	(LeaPlusLC["MinimapButtonBag"]		~= RGXQoLDB["MinimapButtonBag"])		-- Minimap button bag
-		or	(LeaPlusLC["HideMiniTracking"]		~= RGXQoLDB["HideMiniTracking"])		-- Hide tracking button
-		or	(LeaPlusLC["HideMiniLFG"]			~= RGXQoLDB["HideMiniLFG"])			-- Hide the Looking for Group button
-		or	(LeaPlusLC["MiniExcludeList"]		~= RGXQoLDB["MiniExcludeList"])		-- Minimap exclude list
-		or	(LeaPlusLC["TipModEnable"]			~= RGXQoLDB["TipModEnable"])			-- Enhance tooltip
-		or	(LeaPlusLC["TipNoHealthBar"]		~= RGXQoLDB["TipNoHealthBar"])			-- Tooltip hide health bar
-		or	(LeaPlusLC["EnhanceDressup"]		~= RGXQoLDB["EnhanceDressup"])			-- Enhance dressup
-		or	(LeaPlusLC["EnhanceQuestLog"]		~= RGXQoLDB["EnhanceQuestLog"])		-- Enhance quest log
-		or	(LeaPlusLC["EnhanceQuestTaller"]	~= RGXQoLDB["EnhanceQuestTaller"])		-- Enhance quest taller
-		or	(LeaPlusLC["EnhanceProfessions"]	~= RGXQoLDB["EnhanceProfessions"])		-- Enhance professions
-		or	(LeaPlusLC["EnhanceTrainers"]		~= RGXQoLDB["EnhanceTrainers"])		-- Enhance trainers
-		or	(LeaPlusLC["EnhanceFlightMap"]		~= RGXQoLDB["EnhanceFlightMap"])		-- Enhance flight map
+		or	(RGXQoLLC["MinimapModder"]			~= RGXQoLDB["MinimapModder"])			-- Enhance minimap
+		or	(RGXQoLLC["HideMiniDayNight"]		~= RGXQoLDB["HideMiniDayNight"])		-- Hide the day and night indicator
+		or	(RGXQoLLC["HideMiniZoneText"]		~= RGXQoLDB["HideMiniZoneText"])		-- Hide the zone text bar
+		or	(RGXQoLLC["SquareMinimap"]			~= RGXQoLDB["SquareMinimap"])			-- Square minimap
+		or	(RGXQoLLC["MinimapButtonBag"]		~= RGXQoLDB["MinimapButtonBag"])		-- Minimap button bag
+		or	(RGXQoLLC["HideMiniTracking"]		~= RGXQoLDB["HideMiniTracking"])		-- Hide tracking button
+		or	(RGXQoLLC["HideMiniLFG"]			~= RGXQoLDB["HideMiniLFG"])			-- Hide the Looking for Group button
+		or	(RGXQoLLC["MiniExcludeList"]		~= RGXQoLDB["MiniExcludeList"])		-- Minimap exclude list
+		or	(RGXQoLLC["TipModEnable"]			~= RGXQoLDB["TipModEnable"])			-- Enhance tooltip
+		or	(RGXQoLLC["TipNoHealthBar"]		~= RGXQoLDB["TipNoHealthBar"])			-- Tooltip hide health bar
+		or	(RGXQoLLC["EnhanceDressup"]		~= RGXQoLDB["EnhanceDressup"])			-- Enhance dressup
+		or	(RGXQoLLC["EnhanceQuestLog"]		~= RGXQoLDB["EnhanceQuestLog"])		-- Enhance quest log
+		or	(RGXQoLLC["EnhanceQuestTaller"]	~= RGXQoLDB["EnhanceQuestTaller"])		-- Enhance quest taller
+		or	(RGXQoLLC["EnhanceProfessions"]	~= RGXQoLDB["EnhanceProfessions"])		-- Enhance professions
+		or	(RGXQoLLC["EnhanceTrainers"]		~= RGXQoLDB["EnhanceTrainers"])		-- Enhance trainers
+		or	(RGXQoLLC["EnhanceFlightMap"]		~= RGXQoLDB["EnhanceFlightMap"])		-- Enhance flight map
 
-		or	(LeaPlusLC["ShowVolume"]			~= RGXQoLDB["ShowVolume"])				-- Show volume slider
-		or	(LeaPlusLC["AhExtras"]				~= RGXQoLDB["AhExtras"])				-- Show auction controls
-		or	(LeaPlusLC["ShowCooldowns"]			~= RGXQoLDB["ShowCooldowns"])			-- Show cooldowns
-		or	(LeaPlusLC["DurabilityStatus"]		~= RGXQoLDB["DurabilityStatus"])		-- Show durability status
-		or	(LeaPlusLC["ShowVanityControls"]	~= RGXQoLDB["ShowVanityControls"])		-- Show vanity controls
-		or	(LeaPlusLC["ShowBagSearchBox"]		~= RGXQoLDB["ShowBagSearchBox"])		-- Show bag search box
-		or	(LeaPlusLC["ShowFreeBagSlots"]		~= RGXQoLDB["ShowFreeBagSlots"])		-- Show free bag slots
-		or	(LeaPlusLC["ShowRaidToggle"]		~= RGXQoLDB["ShowRaidToggle"])			-- Show raid button
-		or	(LeaPlusLC["ShowBorders"]			~= RGXQoLDB["ShowBorders"])			-- Show borders
-		or	(LeaPlusLC["ShowPlayerChain"]		~= RGXQoLDB["ShowPlayerChain"])		-- Show player chain
-		or	(LeaPlusLC["ShowReadyTimer"]		~= RGXQoLDB["ShowReadyTimer"])			-- Show ready timer
-		or	(LeaPlusLC["ShowDruidPowerBar"]		~= RGXQoLDB["ShowDruidPowerBar"])		-- Show druid power bar
-		or	(LeaPlusLC["ShowDruidStatusText"]	~= RGXQoLDB["ShowDruidStatusText"])	-- Show druid power bar status text
-		or	(LeaPlusLC["ShowWowheadLinks"]		~= RGXQoLDB["ShowWowheadLinks"])		-- Show Wowhead links
-		or	(LeaPlusLC["ShowFlightTimes"]		~= RGXQoLDB["ShowFlightTimes"])		-- Show flight times
+		or	(RGXQoLLC["ShowVolume"]			~= RGXQoLDB["ShowVolume"])				-- Show volume slider
+		or	(RGXQoLLC["AhExtras"]				~= RGXQoLDB["AhExtras"])				-- Show auction controls
+		or	(RGXQoLLC["ShowCooldowns"]			~= RGXQoLDB["ShowCooldowns"])			-- Show cooldowns
+		or	(RGXQoLLC["DurabilityStatus"]		~= RGXQoLDB["DurabilityStatus"])		-- Show durability status
+		or	(RGXQoLLC["ShowVanityControls"]	~= RGXQoLDB["ShowVanityControls"])		-- Show vanity controls
+		or	(RGXQoLLC["ShowBagSearchBox"]		~= RGXQoLDB["ShowBagSearchBox"])		-- Show bag search box
+		or	(RGXQoLLC["ShowFreeBagSlots"]		~= RGXQoLDB["ShowFreeBagSlots"])		-- Show free bag slots
+		or	(RGXQoLLC["ShowRaidToggle"]		~= RGXQoLDB["ShowRaidToggle"])			-- Show raid button
+		or	(RGXQoLLC["ShowBorders"]			~= RGXQoLDB["ShowBorders"])			-- Show borders
+		or	(RGXQoLLC["ShowPlayerChain"]		~= RGXQoLDB["ShowPlayerChain"])		-- Show player chain
+		or	(RGXQoLLC["ShowReadyTimer"]		~= RGXQoLDB["ShowReadyTimer"])			-- Show ready timer
+		or	(RGXQoLLC["ShowDruidPowerBar"]		~= RGXQoLDB["ShowDruidPowerBar"])		-- Show druid power bar
+		or	(RGXQoLLC["ShowDruidStatusText"]	~= RGXQoLDB["ShowDruidStatusText"])	-- Show druid power bar status text
+		or	(RGXQoLLC["ShowWowheadLinks"]		~= RGXQoLDB["ShowWowheadLinks"])		-- Show Wowhead links
+		or	(RGXQoLLC["ShowFlightTimes"]		~= RGXQoLDB["ShowFlightTimes"])		-- Show flight times
 
 		-- Frames
-		or	(LeaPlusLC["ManageWidget"]			~= RGXQoLDB["ManageWidget"])			-- Manage widget
-		or	(LeaPlusLC["ManageTimer"]			~= RGXQoLDB["ManageTimer"])			-- Manage timer
-		or	(LeaPlusLC["ClassColFrames"]		~= RGXQoLDB["ClassColFrames"])			-- Class colored frames
-		or	(LeaPlusLC["NoGryphons"]			~= RGXQoLDB["NoGryphons"])				-- Hide gryphons
-		or	(LeaPlusLC["NoClassBar"]			~= RGXQoLDB["NoClassBar"])				-- Hide stance bar
+		or	(RGXQoLLC["ManageWidget"]			~= RGXQoLDB["ManageWidget"])			-- Manage widget
+		or	(RGXQoLLC["ManageTimer"]			~= RGXQoLDB["ManageTimer"])			-- Manage timer
+		or	(RGXQoLLC["ClassColFrames"]		~= RGXQoLDB["ClassColFrames"])			-- Class colored frames
+		or	(RGXQoLLC["NoGryphons"]			~= RGXQoLDB["NoGryphons"])				-- Hide gryphons
+		or	(RGXQoLLC["NoClassBar"]			~= RGXQoLDB["NoClassBar"])				-- Hide stance bar
 
 		-- System
-		or	(LeaPlusLC["NoRestedEmotes"]		~= RGXQoLDB["NoRestedEmotes"])			-- Silence rested emotes
-		or	(LeaPlusLC["KeepAudioSynced"]		~= RGXQoLDB["KeepAudioSynced"])		-- Keep audio synced
-		or	(LeaPlusLC["NoBagAutomation"]		~= RGXQoLDB["NoBagAutomation"])		-- Disable bag automation
-		or	(LeaPlusLC["FasterLooting"]			~= RGXQoLDB["FasterLooting"])			-- Faster auto loot
-		or	(LeaPlusLC["FasterMovieSkip"]		~= RGXQoLDB["FasterMovieSkip"])		-- Faster movie skip
-		or	(LeaPlusLC["StandAndDismount"]		~= RGXQoLDB["StandAndDismount"])		-- Dismount me
-		or	(LeaPlusLC["ShowVendorPrice"]		~= RGXQoLDB["ShowVendorPrice"])		-- Show vendor price
-		or	(LeaPlusLC["CombatPlates"]			~= RGXQoLDB["CombatPlates"])			-- Combat plates
-		or	(LeaPlusLC["EasyItemDestroy"]		~= RGXQoLDB["EasyItemDestroy"])		-- Easy item destroy
+		or	(RGXQoLLC["NoRestedEmotes"]		~= RGXQoLDB["NoRestedEmotes"])			-- Silence rested emotes
+		or	(RGXQoLLC["KeepAudioSynced"]		~= RGXQoLDB["KeepAudioSynced"])		-- Keep audio synced
+		or	(RGXQoLLC["NoBagAutomation"]		~= RGXQoLDB["NoBagAutomation"])		-- Disable bag automation
+		or	(RGXQoLLC["FasterLooting"]			~= RGXQoLDB["FasterLooting"])			-- Faster auto loot
+		or	(RGXQoLLC["FasterMovieSkip"]		~= RGXQoLDB["FasterMovieSkip"])		-- Faster movie skip
+		or	(RGXQoLLC["StandAndDismount"]		~= RGXQoLDB["StandAndDismount"])		-- Dismount me
+		or	(RGXQoLLC["ShowVendorPrice"]		~= RGXQoLDB["ShowVendorPrice"])		-- Show vendor price
+		or	(RGXQoLLC["CombatPlates"]			~= RGXQoLDB["CombatPlates"])			-- Combat plates
+		or	(RGXQoLLC["EasyItemDestroy"]		~= RGXQoLDB["EasyItemDestroy"])		-- Easy item destroy
 
 		-- Settings
-		or	(LeaPlusLC["UseEnglishLanguage"]	~= RGXQoLDB["UseEnglishLanguage"])		-- Use English language
+		or	(RGXQoLLC["UseEnglishLanguage"]	~= RGXQoLDB["UseEnglishLanguage"])		-- Use English language
 
 		then
 			-- Enable the reload button
-			LeaPlusLC:LockItem(LeaPlusCB["ReloadUIButton"], false)
-			LeaPlusCB["ReloadUIButton"].f:Show()
+			RGXQoLLC:LockItem(RGXQoLCB["ReloadUIButton"], false)
+			RGXQoLCB["ReloadUIButton"].f:Show()
 		else
 			-- Disable the reload button
-			LeaPlusLC:LockItem(LeaPlusCB["ReloadUIButton"], true)
-			LeaPlusCB["ReloadUIButton"].f:Hide()
+			RGXQoLLC:LockItem(RGXQoLCB["ReloadUIButton"], true)
+			RGXQoLCB["ReloadUIButton"].f:Hide()
 		end
 
 	end
@@ -681,9 +681,9 @@
 --	L40: Player
 ----------------------------------------------------------------------
 
-	function LeaPlusLC:Player()
+	function RGXQoLLC:Player()
 
-		-- LeaPlusLC.NewPatch - Set WorldFrame level to ensure world frame mouse events work (WorldFrame:IsMouseMotionFocus())
+		-- RGXQoLLC.NewPatch - Set WorldFrame level to ensure world frame mouse events work (WorldFrame:IsMouseMotionFocus())
 		-- In case invalid WorldFrame frame level is stored in layout-local cache
 		WorldFrame:SetFrameLevel(1)
 
@@ -691,7 +691,7 @@
 		-- Hide raid group labels
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["HideRaidGroupLabels"] == "On" then
+		if RGXQoLLC["HideRaidGroupLabels"] == "On" then
 
 			-- Hide player frame group indiciator labels
 			hooksecurefunc("PlayerFrame_UpdateGroupIndicator", function()
@@ -750,13 +750,13 @@
 
 		-- Function to decline friend requests
 		local function DeclineReqs()
-			if LeaPlusLC["NoFriendRequests"] == "On" then
+			if RGXQoLLC["NoFriendRequests"] == "On" then
 				for i = BNGetNumFriendInvites(), 1, -1 do
 					local id, player = BNGetFriendInviteInfo(i)
 					if id and player then
 						BNDeclineFriendInvite(id)
 						C_Timer.After(0.1, function()
-							LeaPlusLC:Print(L["A friend request from"] .. " " .. player .. " " .. L["was automatically declined."])
+							RGXQoLLC:Print(L["A friend request from"] .. " " .. player .. " " .. L["was automatically declined."])
 						end)
 					end
 				end
@@ -769,7 +769,7 @@
 
 		-- Function to register or unregister the event
 		local function ControlEvent()
-			if LeaPlusLC["NoFriendRequests"] == "On" then
+			if RGXQoLLC["NoFriendRequests"] == "On" then
 				DecEvt:RegisterEvent("BN_FRIEND_INVITE_ADDED")
 				DeclineReqs()
 			else
@@ -778,7 +778,7 @@
 		end
 
 		-- Set event status when option is clicked and on startup
-		LeaPlusCB["NoFriendRequests"]:HookScript("OnClick", ControlEvent)
+		RGXQoLCB["NoFriendRequests"]:HookScript("OnClick", ControlEvent)
 		ControlEvent()
 
 		----------------------------------------------------------------------
@@ -790,11 +790,11 @@
 			-- Handler for event
 			local frame = CreateFrame("FRAME")
 			frame:SetScript("OnEvent", function(self, event, arg1)
-				if event == "DUEL_REQUESTED" and not LeaPlusLC:FriendCheck(arg1) then
+				if event == "DUEL_REQUESTED" and not RGXQoLLC:FriendCheck(arg1) then
 					CancelDuel()
 					StaticPopup_Hide("DUEL_REQUESTED")
 					return
-				elseif event == "DUEL_TO_THE_DEATH_REQUESTED" and not LeaPlusLC:FriendCheck(arg1) then
+				elseif event == "DUEL_TO_THE_DEATH_REQUESTED" and not RGXQoLLC:FriendCheck(arg1) then
 					CancelDuel()
 					StaticPopup_Hide("DUEL_TO_THE_DEATH_REQUESTED")
 					return
@@ -803,7 +803,7 @@
 
 			-- Function to set event
 			local function SetEvent()
-				if LeaPlusLC["NoDuelRequests"] == "On" then
+				if RGXQoLLC["NoDuelRequests"] == "On" then
 					frame:RegisterEvent("DUEL_REQUESTED")
 					frame:RegisterEvent("DUEL_TO_THE_DEATH_REQUESTED")
 				else
@@ -813,8 +813,8 @@
 			end
 
 			-- Set event on startup if enabled and when option is clicked
-			if LeaPlusLC["NoDuelRequests"] == "On" then SetEvent() end
-			LeaPlusCB["NoDuelRequests"]:HookScript("OnClick", SetEvent)
+			if RGXQoLLC["NoDuelRequests"] == "On" then SetEvent() end
+			RGXQoLCB["NoDuelRequests"]:HookScript("OnClick", SetEvent)
 
 		end
 
@@ -826,11 +826,11 @@
 
 			local frame = CreateFrame("FRAME")
 			frame:SetScript("OnEvent", function(self, event, arg1, arg2, ...)
-				if (not UnitExists("party1") or UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")) and strlower(strtrim(arg1)) == strlower(LeaPlusLC["InvKey"]) then
-					if not LeaPlusLC:IsInLFGQueue() then
+				if (not UnitExists("party1") or UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")) and strlower(strtrim(arg1)) == strlower(RGXQoLLC["InvKey"]) then
+					if not RGXQoLLC:IsInLFGQueue() then
 						if event == "CHAT_MSG_WHISPER" then
 							local void, void, void, void, void, void, void, void, void, guid = ...
-							if LeaPlusLC:FriendCheck(arg2, guid) or LeaPlusLC["InviteFriendsOnly"] == "Off" then
+							if RGXQoLLC:FriendCheck(arg2, guid) or RGXQoLLC["InviteFriendsOnly"] == "Off" then
 								-- If whisper name is same realm, remove realm name
 								local theWhisperName, theWhisperRealm = strsplit("-", arg2, 2)
 								if theWhisperRealm then
@@ -864,7 +864,7 @@
 
 			-- Function to set event
 			local function SetEvent()
-				if LeaPlusLC["InviteFromWhisper"] == "On" then
+				if RGXQoLLC["InviteFromWhisper"] == "On" then
 					frame:RegisterEvent("CHAT_MSG_WHISPER")
 					frame:RegisterEvent("CHAT_MSG_BN_WHISPER")
 				else
@@ -874,31 +874,31 @@
 			end
 
 			-- Set event on startup if enabled and when option is clicked
-			if LeaPlusLC["InviteFromWhisper"] == "On" then SetEvent() end
-			LeaPlusCB["InviteFromWhisper"]:HookScript("OnClick", SetEvent)
+			if RGXQoLLC["InviteFromWhisper"] == "On" then SetEvent() end
+			RGXQoLCB["InviteFromWhisper"]:HookScript("OnClick", SetEvent)
 
 			-- Create configuration panel
-			local InvPanel = LeaPlusLC:CreatePanel("Invite from whispers", "InvPanel")
+			local InvPanel = RGXQoLLC:CreatePanel("Invite from whispers", "InvPanel")
 
 			-- Add editbox
-			LeaPlusLC:MakeTx(InvPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(InvPanel, "InviteFriendsOnly", "Restrict to friends", 16, -92, false, "If checked, group invites will only be sent to friends.|n|nIf unchecked, group invites will be sent to everyone.")
+			RGXQoLLC:MakeTx(InvPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(InvPanel, "InviteFriendsOnly", "Restrict to friends", 16, -92, false, "If checked, group invites will only be sent to friends.|n|nIf unchecked, group invites will be sent to everyone.")
 
-			LeaPlusLC:MakeTx(InvPanel, "Keyword", 356, -72)
-			local KeyBox = LeaPlusLC:CreateEditBox("KeyBox", InvPanel, 140, 10, "TOPLEFT", 356, -92, "KeyBox", "KeyBox")
+			RGXQoLLC:MakeTx(InvPanel, "Keyword", 356, -72)
+			local KeyBox = RGXQoLLC:CreateEditBox("KeyBox", InvPanel, 140, 10, "TOPLEFT", 356, -92, "KeyBox", "KeyBox")
 
 			-- Function to show the keyword in the option tooltip
 			local function SetKeywordTip()
-				LeaPlusCB["InviteFromWhisper"].tiptext = gsub(LeaPlusCB["InviteFromWhisper"].tiptext, "(|cffffffff)[^|]*(|r)",  "%1" .. LeaPlusLC["InvKey"] .. "%2")
+				RGXQoLCB["InviteFromWhisper"].tiptext = gsub(RGXQoLCB["InviteFromWhisper"].tiptext, "(|cffffffff)[^|]*(|r)",  "%1" .. RGXQoLLC["InvKey"] .. "%2")
 			end
 
 			-- Function to save the keyword
 			local function SetInvKey()
 				local keytext = KeyBox:GetText()
 				if keytext and keytext ~= "" then
-					LeaPlusLC["InvKey"] = strtrim(KeyBox:GetText())
+					RGXQoLLC["InvKey"] = strtrim(KeyBox:GetText())
 				else
-					LeaPlusLC["InvKey"] = "inv"
+					RGXQoLLC["InvKey"] = "inv"
 				end
 				-- Show the keyword in the option tooltip
 				SetKeywordTip()
@@ -912,7 +912,7 @@
 
 			-- Refresh editbox with trimmed keyword when edit focus is lost (removes additional spaces)
 			KeyBox:SetScript("OnEditFocusLost", function()
-				KeyBox:SetText(LeaPlusLC["InvKey"])
+				KeyBox:SetText(RGXQoLLC["InvKey"])
 			end)
 
 			-- Help button hidden
@@ -923,16 +923,16 @@
 				-- Save the keyword
 				SetInvKey()
 				-- Show the options panel
-				InvPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page2"]:Show()
+				InvPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page2"]:Show()
 				return
 			end)
 
 			-- Add reset button
 			InvPanel.r:SetScript("OnClick", function()
 				-- Settings
-				LeaPlusLC["InviteFriendsOnly"] = "Off"
+				RGXQoLLC["InviteFriendsOnly"] = "Off"
 				-- Reset the keyword to default
-				LeaPlusLC["InvKey"] = "inv"
+				RGXQoLLC["InvKey"] = "inv"
 				-- Set the editbox to default
 				KeyBox:SetText("inv")
 				-- Save the keyword
@@ -942,25 +942,25 @@
 			end)
 
 			-- Ensure keyword is a string on startup
-			LeaPlusLC["InvKey"] = tostring(LeaPlusLC["InvKey"]) or "inv"
+			RGXQoLLC["InvKey"] = tostring(RGXQoLLC["InvKey"]) or "inv"
 
 			-- Set editbox value when shown
 			KeyBox:HookScript("OnShow", function()
-				KeyBox:SetText(LeaPlusLC["InvKey"])
+				KeyBox:SetText(RGXQoLLC["InvKey"])
 			end)
 
 			-- Configuration button handler
-			LeaPlusCB["InvWhisperBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["InvWhisperBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["InviteFriendsOnly"] = "On"
-					LeaPlusLC["InvKey"] = "inv"
-					KeyBox:SetText(LeaPlusLC["InvKey"])
+					RGXQoLLC["InviteFriendsOnly"] = "On"
+					RGXQoLLC["InvKey"] = "inv"
+					KeyBox:SetText(RGXQoLLC["InvKey"])
 					SetInvKey()
 				else
 					-- Show panel
 					InvPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -977,8 +977,8 @@
 
 				-- If a friend, accept if you're accepting friends and not queued
 				local void, void, void, void, void, guid = ...
-				if (LeaPlusLC["AcceptPartyFriends"] == "On" and LeaPlusLC:FriendCheck(arg1, guid)) then
-					if not LeaPlusLC:IsInLFGQueue() then
+				if (RGXQoLLC["AcceptPartyFriends"] == "On" and RGXQoLLC:FriendCheck(arg1, guid)) then
+					if not RGXQoLLC:IsInLFGQueue() then
 						AcceptGroup()
 						StaticPopup_ForEachShownDialog(function(self)
 							if self.which == "PARTY_INVITE" then
@@ -998,7 +998,7 @@
 
 			-- Function to set event
 			local function SetEvent()
-				if LeaPlusLC["AcceptPartyFriends"] == "On" then
+				if RGXQoLLC["AcceptPartyFriends"] == "On" then
 					frame:RegisterEvent("PARTY_INVITE_REQUEST")
 				else
 					frame:UnregisterEvent("PARTY_INVITE_REQUEST")
@@ -1006,8 +1006,8 @@
 			end
 
 			-- Set event on startup if enabled and when option is clicked
-			if LeaPlusLC["AcceptPartyFriends"] == "On" then SetEvent() end
-			LeaPlusCB["AcceptPartyFriends"]:HookScript("OnClick", SetEvent)
+			if RGXQoLLC["AcceptPartyFriends"] == "On" then SetEvent() end
+			RGXQoLCB["AcceptPartyFriends"]:HookScript("OnClick", SetEvent)
 
 		end
 
@@ -1021,8 +1021,8 @@
 			frame:SetScript("OnEvent", function(self, event, arg1, ...)
 				-- If not a friend and you're blocking invites, decline
 				local void, void, void, void, void, guid = ...
-				if LeaPlusLC["NoPartyInvites"] == "On" then
-					if LeaPlusLC:FriendCheck(arg1, guid) then
+				if RGXQoLLC["NoPartyInvites"] == "On" then
+					if RGXQoLLC:FriendCheck(arg1, guid) then
 						return
 					else
 						DeclineGroup()
@@ -1035,7 +1035,7 @@
 
 			-- Function to set event
 			local function SetEvent()
-				if LeaPlusLC["NoPartyInvites"] == "On" then
+				if RGXQoLLC["NoPartyInvites"] == "On" then
 					frame:RegisterEvent("PARTY_INVITE_REQUEST")
 				else
 					frame:UnregisterEvent("PARTY_INVITE_REQUEST")
@@ -1043,8 +1043,8 @@
 			end
 
 			-- Set event on startup if enabled and when option is clicked
-			if LeaPlusLC["NoPartyInvites"] == "On" then SetEvent() end
-			LeaPlusCB["NoPartyInvites"]:HookScript("OnClick", SetEvent)
+			if RGXQoLLC["NoPartyInvites"] == "On" then SetEvent() end
+			RGXQoLCB["NoPartyInvites"]:HookScript("OnClick", SetEvent)
 
 		end
 
@@ -1060,7 +1060,7 @@
 				if not UnitAffectingCombat("player") then
 					local sName = C_SummonInfo.GetSummonConfirmSummoner()
 					local sLocation = C_SummonInfo.GetSummonConfirmAreaName()
-					LeaPlusLC:Print(L["The summon from"] .. " " .. sName .. " (" .. sLocation .. ") " .. L["will be automatically accepted in 10 seconds unless cancelled."])
+					RGXQoLLC:Print(L["The summon from"] .. " " .. sName .. " (" .. sLocation .. ") " .. L["will be automatically accepted in 10 seconds unless cancelled."])
 					C_Timer.After(10, function()
 						local sNameNew = C_SummonInfo.GetSummonConfirmSummoner()
 						local sLocationNew = C_SummonInfo.GetSummonConfirmAreaName()
@@ -1076,7 +1076,7 @@
 
 			-- Function to set event
 			local function SetEvent()
-				if LeaPlusLC["AutoAcceptSummon"] == "On" then
+				if RGXQoLLC["AutoAcceptSummon"] == "On" then
 					frame:RegisterEvent("CONFIRM_SUMMON")
 				else
 					frame:UnregisterEvent("CONFIRM_SUMMON")
@@ -1084,8 +1084,8 @@
 			end
 
 			-- Set event on startup if enabled and when option is clicked
-			if LeaPlusLC["AutoAcceptSummon"] == "On" then SetEvent() end
-			LeaPlusCB["AutoAcceptSummon"]:HookScript("OnClick", SetEvent)
+			if RGXQoLLC["AutoAcceptSummon"] == "On" then SetEvent() end
+			RGXQoLCB["AutoAcceptSummon"]:HookScript("OnClick", SetEvent)
 
 		end
 
@@ -1126,7 +1126,7 @@
 
 			-- Function to set event
 			local function SetEvent()
-				if LeaPlusLC["NoConfirmLoot"] == "On" then
+				if RGXQoLLC["NoConfirmLoot"] == "On" then
 					frame:RegisterEvent("CONFIRM_LOOT_ROLL")
 					frame:RegisterEvent("LOOT_BIND_CONFIRM")
 					frame:RegisterEvent("MERCHANT_CONFIRM_TRADE_TIMER_REMOVAL")
@@ -1140,8 +1140,8 @@
 			end
 
 			-- Set event on startup if enabled and when option is clicked
-			if LeaPlusLC["NoConfirmLoot"] == "On" then SetEvent() end
-			LeaPlusCB["NoConfirmLoot"]:HookScript("OnClick", SetEvent)
+			if RGXQoLLC["NoConfirmLoot"] == "On" then SetEvent() end
+			RGXQoLCB["NoConfirmLoot"]:HookScript("OnClick", SetEvent)
 
 		end
 
@@ -1152,37 +1152,37 @@
 		do
 
 			-- Get mute table
-			local mountTable = Leatrix_Plus["mountTable"]
+			local mountTable = RGXQoLAddon["mountTable"]
 
 			-- Give table file level scope (its used during logout and for wipe and admin commands)
-			LeaPlusLC["mountTable"] = mountTable
+			RGXQoLLC["mountTable"] = mountTable
 
 			-- Load saved settings or set default values
 			for k, v in pairs(mountTable) do
 				if RGXQoLDB[k] and type(RGXQoLDB[k]) == "string" and RGXQoLDB[k] == "On" or RGXQoLDB[k] == "Off" then
-					LeaPlusLC[k] = RGXQoLDB[k]
+					RGXQoLLC[k] = RGXQoLDB[k]
 				else
-					LeaPlusLC[k] = "Off"
+					RGXQoLLC[k] = "Off"
 					RGXQoLDB[k] = "Off"
 				end
 			end
 
 			-- Create configuration panel
-			local MountPanel = LeaPlusLC:CreatePanel("Mute mount sounds", "MountPanel")
+			local MountPanel = RGXQoLLC:CreatePanel("Mute mount sounds", "MountPanel")
 
 			-- Add checkboxes
-			LeaPlusLC:MakeTx(MountPanel, "Mounts", 16, -72)
-			LeaPlusLC:MakeCB(MountPanel, "MuteMechSteps", "Mechsteps", 16, -92, false, "If checked, footsteps for mechanical mounts will be muted.")
-			LeaPlusLC:MakeCB(MountPanel, "MuteStriders", "Mechstriders", 16, -112, false, "If checked, mechanostriders will be quieter.")
-			LeaPlusLC:MakeCB(MountPanel, "MuteHorsesteps", "Horsesteps", 16, -132, false, "If checked, footsteps for horse mounts will be muted.")
+			RGXQoLLC:MakeTx(MountPanel, "Mounts", 16, -72)
+			RGXQoLLC:MakeCB(MountPanel, "MuteMechSteps", "Mechsteps", 16, -92, false, "If checked, footsteps for mechanical mounts will be muted.")
+			RGXQoLLC:MakeCB(MountPanel, "MuteStriders", "Mechstriders", 16, -112, false, "If checked, mechanostriders will be quieter.")
+			RGXQoLLC:MakeCB(MountPanel, "MuteHorsesteps", "Horsesteps", 16, -132, false, "If checked, footsteps for horse mounts will be muted.")
 
 			-- Set click width for sounds checkboxes
 			for k, v in pairs(mountTable) do
-				LeaPlusCB[k].f:SetWidth(90)
-				if LeaPlusCB[k].f:GetStringWidth() > 90 then
-					LeaPlusCB[k]:SetHitRectInsets(0, -80, 0, 0)
+				RGXQoLCB[k].f:SetWidth(90)
+				if RGXQoLCB[k].f:GetStringWidth() > 90 then
+					RGXQoLCB[k]:SetHitRectInsets(0, -80, 0, 0)
 				else
-					LeaPlusCB[k]:SetHitRectInsets(0, -LeaPlusCB[k].f:GetStringWidth() + 4, 0, 0)
+					RGXQoLCB[k]:SetHitRectInsets(0, -RGXQoLCB[k].f:GetStringWidth() + 4, 0, 0)
 				end
 			end
 
@@ -1191,7 +1191,7 @@
 				-- Sound features removed on this build (BLU owns sounds)
 				do return end
 				for k, v in pairs(mountTable) do
-					if LeaPlusLC["MuteMountSounds"] == "On" and LeaPlusLC[k] == "On" then
+					if RGXQoLLC["MuteMountSounds"] == "On" and RGXQoLLC[k] == "On" then
 						for i, e in pairs(v) do
 							local file, soundID = e:match("([^,]+)%#([^,]+)")
 							MuteSoundFile(soundID)
@@ -1206,20 +1206,20 @@
 			end
 
 			-- Setup mute on startup if option is enabled
-			if LeaPlusLC["MuteMountSounds"] == "On" then SetupMute() end
+			if RGXQoLLC["MuteMountSounds"] == "On" then SetupMute() end
 
 			-- Setup mute when options are clicked
 			for k, v in pairs(mountTable) do
-				LeaPlusCB[k]:HookScript("OnClick", SetupMute)
+				RGXQoLCB[k]:HookScript("OnClick", SetupMute)
 			end
-			LeaPlusCB["MuteMountSounds"]:HookScript("OnClick", SetupMute)
+			RGXQoLCB["MuteMountSounds"]:HookScript("OnClick", SetupMute)
 
 			-- Help button hidden
 			MountPanel.h:Hide()
 
 			-- Back button handler
 			MountPanel.b:SetScript("OnClick", function()
-				MountPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page7"]:Show()
+				MountPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page7"]:Show()
 				return
 			end)
 
@@ -1228,7 +1228,7 @@
 
 				-- Reset checkboxes
 				for k, v in pairs(mountTable) do
-					LeaPlusLC[k] = "Off"
+					RGXQoLLC[k] = "Off"
 				end
 				SetupMute()
 
@@ -1238,16 +1238,16 @@
 			end)
 
 			-- Show panal when options panel button is clicked
-			LeaPlusCB["MuteMountSoundsBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["MuteMountSoundsBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
 					for k, v in pairs(mountTable) do
-						LeaPlusLC[k] = "On"
+						RGXQoLLC[k] = "On"
 					end
 					SetupMute()
 				else
 					MountPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -1260,47 +1260,47 @@
 		do
 
 			-- Get mute table
-			local muteTable = Leatrix_Plus["muteTable"]
+			local muteTable = RGXQoLAddon["muteTable"]
 
 			-- Give table file level scope (its used during logout and for wipe and admin commands)
-			LeaPlusLC["muteTable"] = muteTable
+			RGXQoLLC["muteTable"] = muteTable
 
 			-- Load saved settings or set default values
 			for k, v in pairs(muteTable) do
 				if RGXQoLDB[k] and type(RGXQoLDB[k]) == "string" and RGXQoLDB[k] == "On" or RGXQoLDB[k] == "Off" then
-					LeaPlusLC[k] = RGXQoLDB[k]
+					RGXQoLLC[k] = RGXQoLDB[k]
 				else
-					LeaPlusLC[k] = "Off"
+					RGXQoLLC[k] = "Off"
 					RGXQoLDB[k] = "Off"
 				end
 			end
 
 			-- Create configuration panel
-			local SoundPanel = LeaPlusLC:CreatePanel("Mute game sounds", "SoundPanel")
+			local SoundPanel = RGXQoLLC:CreatePanel("Mute game sounds", "SoundPanel")
 
 			-- Add checkboxes
-			LeaPlusLC:MakeTx(SoundPanel, "General", 16, -72)
-			LeaPlusLC:MakeCB(SoundPanel, "MuteChimes", "Chimes", 16, -92, false, "If checked, clock hourly chimes will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteFizzle", "Fizzle", 16, -112, false, "If checked, the spell fizzle sounds will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteInterface", "Interface", 16, -132, false, "If checked, the interface button sound, the chat frame tab click sound and the game menu toggle sound will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteLogin", "Login", 16, -152, false, "If checked, login screen sounds will be muted when you logout of the game.|n|nNote that login screen sounds will not be muted when you initially launch the game.|n|nThey will only be muted when you logout of the game.  This includes manually logging out as well as being forcefully logged out by the game server for reasons such as being away for an extended period of time.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteTrains", "Trains", 16, -172, false, "If checked, train sounds will be muted.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteReady", "Ready", 16, -192, false, "If checked, the ready check sound will be muted.")
+			RGXQoLLC:MakeTx(SoundPanel, "General", 16, -72)
+			RGXQoLLC:MakeCB(SoundPanel, "MuteChimes", "Chimes", 16, -92, false, "If checked, clock hourly chimes will be muted.")
+			RGXQoLLC:MakeCB(SoundPanel, "MuteFizzle", "Fizzle", 16, -112, false, "If checked, the spell fizzle sounds will be muted.")
+			RGXQoLLC:MakeCB(SoundPanel, "MuteInterface", "Interface", 16, -132, false, "If checked, the interface button sound, the chat frame tab click sound and the game menu toggle sound will be muted.")
+			RGXQoLLC:MakeCB(SoundPanel, "MuteLogin", "Login", 16, -152, false, "If checked, login screen sounds will be muted when you logout of the game.|n|nNote that login screen sounds will not be muted when you initially launch the game.|n|nThey will only be muted when you logout of the game.  This includes manually logging out as well as being forcefully logged out by the game server for reasons such as being away for an extended period of time.")
+			RGXQoLLC:MakeCB(SoundPanel, "MuteTrains", "Trains", 16, -172, false, "If checked, train sounds will be muted.")
+			RGXQoLLC:MakeCB(SoundPanel, "MuteReady", "Ready", 16, -192, false, "If checked, the ready check sound will be muted.")
 
-			LeaPlusLC:MakeTx(SoundPanel, "Pets", 150, -72)
-			LeaPlusLC:MakeCB(SoundPanel, "MuteScreech", "Screech", 150, -92, false, "If checked, Screech will be muted.|n|nThis is a spell used by some flying pets.")
-			LeaPlusLC:MakeCB(SoundPanel, "MuteYawns", "Yawns", 150, -112, false, "If checked, yawns from hunter pet cats will be muted.")
+			RGXQoLLC:MakeTx(SoundPanel, "Pets", 150, -72)
+			RGXQoLLC:MakeCB(SoundPanel, "MuteScreech", "Screech", 150, -92, false, "If checked, Screech will be muted.|n|nThis is a spell used by some flying pets.")
+			RGXQoLLC:MakeCB(SoundPanel, "MuteYawns", "Yawns", 150, -112, false, "If checked, yawns from hunter pet cats will be muted.")
 
-			LeaPlusLC:MakeTx(SoundPanel, "Toys", 150, -152)
-			LeaPlusLC:MakeCB(SoundPanel, "MutePiccolo", "Piccolo", 150, -172, false, "If checked, Piccolo of the Flaming Fire wil be muted.|n|nNote that enabling this will also mute the harp sound of the warlock seduction spell.")
+			RGXQoLLC:MakeTx(SoundPanel, "Toys", 150, -152)
+			RGXQoLLC:MakeCB(SoundPanel, "MutePiccolo", "Piccolo", 150, -172, false, "If checked, Piccolo of the Flaming Fire wil be muted.|n|nNote that enabling this will also mute the harp sound of the warlock seduction spell.")
 
 			-- Set click width for sounds checkboxes
 			for k, v in pairs(muteTable) do
-				LeaPlusCB[k].f:SetWidth(90)
-				if LeaPlusCB[k].f:GetStringWidth() > 90 then
-					LeaPlusCB[k]:SetHitRectInsets(0, -80, 0, 0)
+				RGXQoLCB[k].f:SetWidth(90)
+				if RGXQoLCB[k].f:GetStringWidth() > 90 then
+					RGXQoLCB[k]:SetHitRectInsets(0, -80, 0, 0)
 				else
-					LeaPlusCB[k]:SetHitRectInsets(0, -LeaPlusCB[k].f:GetStringWidth() + 4, 0, 0)
+					RGXQoLCB[k]:SetHitRectInsets(0, -RGXQoLCB[k].f:GetStringWidth() + 4, 0, 0)
 				end
 			end
 
@@ -1309,7 +1309,7 @@
 				-- Sound features removed on this build (BLU owns sounds)
 				do return end
 				for k, v in pairs(muteTable) do
-					if LeaPlusLC["MuteGameSounds"] == "On" and LeaPlusLC[k] == "On" then
+					if RGXQoLLC["MuteGameSounds"] == "On" and RGXQoLLC[k] == "On" then
 						for i, e in pairs(v) do
 							local file, soundID = e:match("([^,]+)%#([^,]+)")
 							MuteSoundFile(soundID)
@@ -1324,20 +1324,20 @@
 			end
 
 			-- Setup mute on startup if option is enabled
-			if LeaPlusLC["MuteGameSounds"] == "On" then SetupMute() end
+			if RGXQoLLC["MuteGameSounds"] == "On" then SetupMute() end
 
 			-- Setup mute when options are clicked
 			for k, v in pairs(muteTable) do
-				LeaPlusCB[k]:HookScript("OnClick", SetupMute)
+				RGXQoLCB[k]:HookScript("OnClick", SetupMute)
 			end
-			LeaPlusCB["MuteGameSounds"]:HookScript("OnClick", SetupMute)
+			RGXQoLCB["MuteGameSounds"]:HookScript("OnClick", SetupMute)
 
 			-- Help button hidden
 			SoundPanel.h:Hide()
 
 			-- Back button handler
 			SoundPanel.b:SetScript("OnClick", function()
-				SoundPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page7"]:Show()
+				SoundPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page7"]:Show()
 				return
 			end)
 
@@ -1346,7 +1346,7 @@
 
 				-- Reset checkboxes
 				for k, v in pairs(muteTable) do
-					LeaPlusLC[k] = "Off"
+					RGXQoLLC[k] = "Off"
 				end
 				SetupMute()
 
@@ -1356,17 +1356,17 @@
 			end)
 
 			-- Show panal when options panel button is clicked
-			LeaPlusCB["MuteGameSoundsBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["MuteGameSoundsBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
 					for k, v in pairs(muteTable) do
-						LeaPlusLC[k] = "On"
+						RGXQoLLC[k] = "On"
 					end
-					LeaPlusLC["MuteReady"] = "Off"
+					RGXQoLLC["MuteReady"] = "Off"
 					SetupMute()
 				else
 					SoundPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -1388,7 +1388,7 @@
 
 			-- Mute or unmute sounds when logging out
 			logoutEvent:SetScript("OnEvent", function()
-				if LeaPlusLC["MuteGameSounds"] == "On" and LeaPlusLC["MuteLogin"] == "On" then
+				if RGXQoLLC["MuteGameSounds"] == "On" and RGXQoLLC["MuteLogin"] == "On" then
 					-- Mute logout table sounds on logout
 					for void, soundID in pairs(muteLogoutTable) do
 						MuteSoundFile(soundID)
@@ -1412,7 +1412,7 @@
 		-- Faster movie skip
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["FasterMovieSkip"] == "On" then
+		if RGXQoLLC["FasterMovieSkip"] == "On" then
 
 			-- Allow space bar, escape key and enter key to cancel cinematic without confirmation
 			CinematicFrame:HookScript("OnKeyDown", function(self, key)
@@ -1443,20 +1443,20 @@
 		-- Wowhead Links
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowWowheadLinks"] == "On" then
+		if RGXQoLLC["ShowWowheadLinks"] == "On" then
 
 			-- Create configuration panel
-			local WowheadPanel = LeaPlusLC:CreatePanel("Show Wowhead links", "WowheadPanel")
+			local WowheadPanel = RGXQoLLC:CreatePanel("Show Wowhead links", "WowheadPanel")
 
-			LeaPlusLC:MakeTx(WowheadPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(WowheadPanel, "WowheadLinkComments", "Links go directly to the comments section", 16, -92, false, "If checked, Wowhead links will go directly to the comments section.")
+			RGXQoLLC:MakeTx(WowheadPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(WowheadPanel, "WowheadLinkComments", "Links go directly to the comments section", 16, -92, false, "If checked, Wowhead links will go directly to the comments section.")
 
 			-- Help button hidden
 			WowheadPanel.h:Hide()
 
 			-- Back button handler
 			WowheadPanel.b:SetScript("OnClick", function()
-				WowheadPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show()
+				WowheadPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
@@ -1464,7 +1464,7 @@
 			WowheadPanel.r:SetScript("OnClick", function()
 
 				-- Reset controls
-				LeaPlusLC["WowheadLinkComments"] = "Off"
+				RGXQoLLC["WowheadLinkComments"] = "Off"
 
 				-- Refresh configuration panel
 				WowheadPanel:Hide(); WowheadPanel:Show()
@@ -1472,13 +1472,13 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["ShowWowheadLinksBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["ShowWowheadLinksBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["WowheadLinkComments"] = "Off"
+					RGXQoLLC["WowheadLinkComments"] = "Off"
 				else
 					WowheadPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -1536,7 +1536,7 @@
 					if questID == 0 then mEB:Hide() else mEB:Show() end
 
 					-- Set editbox text
-					if LeaPlusLC["WowheadLinkComments"] == "On" then
+					if RGXQoLLC["WowheadLinkComments"] == "On" then
 						mEB:SetText("https://" .. wowheadLoc .. "/quest=" .. questID .. "#comments")
 					else
 						mEB:SetText("https://" .. wowheadLoc .. "/quest=" .. questID)
@@ -1579,7 +1579,7 @@
 			end)
 
 			-- ElvUI fix to move Wowhead link inside the quest log frame
-			if LeaPlusLC.ElvUI then
+			if RGXQoLLC.ElvUI then
 				C_Timer.After(0.1, function()
 					QuestLogTitleText:ClearAllPoints()
 					QuestLogTitleText:SetPoint("TOPLEFT", QuestLogFrame, "TOPLEFT", 32, -18)
@@ -1616,7 +1616,7 @@
 
 			-- Function to setup events
 			local function SetupEvents()
-				if LeaPlusLC["AutomateGossip"] == "On" then
+				if RGXQoLLC["AutomateGossip"] == "On" then
 					gossipFrame:RegisterEvent("GOSSIP_SHOW")
 				else
 					gossipFrame:UnregisterEvent("GOSSIP_SHOW")
@@ -1624,8 +1624,8 @@
 			end
 
 			-- Setup events when option is clicked and on startup (if option is enabled)
-			LeaPlusCB["AutomateGossip"]:HookScript("OnClick", SetupEvents)
-			if LeaPlusLC["AutomateGossip"] == "On" then SetupEvents() end
+			RGXQoLCB["AutomateGossip"]:HookScript("OnClick", SetupEvents)
+			if RGXQoLLC["AutomateGossip"] == "On" then SetupEvents() end
 
 			-- Create tables for specific NPC IDs (these are automatically selected with no alt key requirement)
 			local npcTable = {
@@ -1672,7 +1672,7 @@
 
 			-- Show battleground name in battfield frame labels
 			hooksecurefunc("BattlefieldFrame_Update", function()
-				if LeaPlusLC["AutomateGossip"] == "On" then
+				if RGXQoLLC["AutomateGossip"] == "On" then
 					local localizedName = GetBattlegroundInfo()
 					if localizedName then
 						BattlefieldFrameFrameLabel:SetText(localizedName)
@@ -1686,7 +1686,7 @@
 		--	Faster looting
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["FasterLooting"] == "On" then
+		if RGXQoLLC["FasterLooting"] == "On" then
 
 			-- Time delay
 			local tDelay = 0
@@ -1729,7 +1729,7 @@
 		--	Disable bag automation
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoBagAutomation"] == "On" and not LeaLockList["NoBagAutomation"] then
+		if RGXQoLLC["NoBagAutomation"] == "On" and not RGXQoLLockList["NoBagAutomation"] then
 			RunScript("hooksecurefunc('OpenAllBags', CloseAllBags)")
 		end
 
@@ -1740,21 +1740,21 @@
 		do
 
 			-- Create configuration panel
-			local QuestPanel = LeaPlusLC:CreatePanel("Automate quests", "QuestPanel")
+			local QuestPanel = RGXQoLLC:CreatePanel("Automate quests", "QuestPanel")
 
-			LeaPlusLC:MakeTx(QuestPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(QuestPanel, "AutoQuestAvailable", "Accept available quests automatically", 16, -92, false, "If checked, available quests will be accepted automatically.")
-			LeaPlusLC:MakeCB(QuestPanel, "AutoQuestCompleted", "Turn-in completed quests automatically", 16, -112, false, "If checked, completed quests will be turned-in automatically.")
-			LeaPlusLC:MakeCB(QuestPanel, "AutoQuestShift", "Require override key for quest automation", 16, -132, false, "If checked, you will need to hold the override key down for quests to be automated.|n|nIf unchecked, holding the override key will prevent quests from being automated.")
+			RGXQoLLC:MakeTx(QuestPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(QuestPanel, "AutoQuestAvailable", "Accept available quests automatically", 16, -92, false, "If checked, available quests will be accepted automatically.")
+			RGXQoLLC:MakeCB(QuestPanel, "AutoQuestCompleted", "Turn-in completed quests automatically", 16, -112, false, "If checked, completed quests will be turned-in automatically.")
+			RGXQoLLC:MakeCB(QuestPanel, "AutoQuestShift", "Require override key for quest automation", 16, -132, false, "If checked, you will need to hold the override key down for quests to be automated.|n|nIf unchecked, holding the override key will prevent quests from being automated.")
 
-			LeaPlusLC:CreateDropdown("AutoQuestKeyMenu", "Override key", 146, "TOPLEFT", QuestPanel, "TOPLEFT", 356, -92, {{L["SHIFT"], 1}, {L["ALT"], 2}, {L["CONTROL"], 3}, {L["CMD (MAC)"], 4}})
+			RGXQoLLC:CreateDropdown("AutoQuestKeyMenu", "Override key", 146, "TOPLEFT", QuestPanel, "TOPLEFT", 356, -92, {{L["SHIFT"], 1}, {L["ALT"], 2}, {L["CONTROL"], 3}, {L["CMD (MAC)"], 4}})
 
 			-- Help button hidden
 			QuestPanel.h:Hide()
 
 			-- Back button handler
 			QuestPanel.b:SetScript("OnClick", function()
-				QuestPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page1"]:Show();
+				QuestPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
 				return
 			end)
 
@@ -1762,10 +1762,10 @@
 			QuestPanel.r:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["AutoQuestShift"] = "Off"
-				LeaPlusLC["AutoQuestAvailable"] = "On"
-				LeaPlusLC["AutoQuestCompleted"] = "On"
-				LeaPlusLC["AutoQuestKeyMenu"] = 1
+				RGXQoLLC["AutoQuestShift"] = "Off"
+				RGXQoLLC["AutoQuestAvailable"] = "On"
+				RGXQoLLC["AutoQuestCompleted"] = "On"
+				RGXQoLLC["AutoQuestKeyMenu"] = 1
 
 				-- Refresh panel
 				QuestPanel:Hide(); QuestPanel:Show()
@@ -1773,25 +1773,25 @@
 			end)
 
 			-- Show panal when options panel button is clicked
-			LeaPlusCB["AutomateQuestsBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["AutomateQuestsBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["AutoQuestShift"] = "Off"
-					LeaPlusLC["AutoQuestAvailable"] = "On"
-					LeaPlusLC["AutoQuestCompleted"] = "On"
-					LeaPlusLC["AutoQuestKeyMenu"] = 1
+					RGXQoLLC["AutoQuestShift"] = "Off"
+					RGXQoLLC["AutoQuestAvailable"] = "On"
+					RGXQoLLC["AutoQuestCompleted"] = "On"
+					RGXQoLLC["AutoQuestKeyMenu"] = 1
 				else
 					QuestPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
 			-- Function to determine if override key is being held
 			local function IsOverrideKeyDown()
-				if LeaPlusLC["AutoQuestKeyMenu"] == 1 and IsShiftKeyDown()
-				or LeaPlusLC["AutoQuestKeyMenu"] == 2 and IsAltKeyDown()
-				or LeaPlusLC["AutoQuestKeyMenu"] == 3 and IsControlKeyDown()
-				or LeaPlusLC["AutoQuestKeyMenu"] == 4 and IsMetaKeyDown()
+				if RGXQoLLC["AutoQuestKeyMenu"] == 1 and IsShiftKeyDown()
+				or RGXQoLLC["AutoQuestKeyMenu"] == 2 and IsAltKeyDown()
+				or RGXQoLLC["AutoQuestKeyMenu"] == 3 and IsControlKeyDown()
+				or RGXQoLLC["AutoQuestKeyMenu"] == 4 and IsMetaKeyDown()
 				then
 					return true
 				end
@@ -2049,7 +2049,7 @@
 
 			-- Function to setup events
 			local function SetupEvents()
-				if LeaPlusLC["AutomateQuests"] == "On" then
+				if RGXQoLLC["AutomateQuests"] == "On" then
 					qFrame:RegisterEvent("QUEST_DETAIL")
 					qFrame:RegisterEvent("QUEST_ACCEPT_CONFIRM")
 					qFrame:RegisterEvent("QUEST_PROGRESS")
@@ -2064,15 +2064,15 @@
 			end
 
 			-- Setup events when option is clicked and on startup (if option is enabled)
-			LeaPlusCB["AutomateQuests"]:HookScript("OnClick", SetupEvents)
-			if LeaPlusLC["AutomateQuests"] == "On" then SetupEvents() end
+			RGXQoLCB["AutomateQuests"]:HookScript("OnClick", SetupEvents)
+			if RGXQoLLC["AutomateQuests"] == "On" then SetupEvents() end
 
 			-- Event handler
 			qFrame:SetScript("OnEvent", function(self, event, arg1)
 
 				-- Block shared quests if option is enabled
 				if event == "QUEST_DETAIL" then
-					LeaPlusLC:CheckIfQuestIsSharedAndShouldBeDeclined()
+					RGXQoLLC:CheckIfQuestIsSharedAndShouldBeDeclined()
 				end
 
 				-- Clear progress items when quest interaction has ceased
@@ -2087,8 +2087,8 @@
 				end
 
 				-- Check for SHIFT key modifier
-				if LeaPlusLC["AutoQuestShift"] == "On" and not IsOverrideKeyDown() then return
-				elseif LeaPlusLC["AutoQuestShift"] == "Off" and IsOverrideKeyDown() then return
+				if RGXQoLLC["AutoQuestShift"] == "On" and not IsOverrideKeyDown() then return
+				elseif RGXQoLLC["AutoQuestShift"] == "Off" and IsOverrideKeyDown() then return
 				end
 
 				----------------------------------------------------------------------
@@ -2097,7 +2097,7 @@
 
 				-- Accept quests with a quest detail window
 				if event == "QUEST_DETAIL" then
-					if LeaPlusLC["AutoQuestAvailable"] == "On" then
+					if RGXQoLLC["AutoQuestAvailable"] == "On" then
 						-- Don't accept blocked quests
 						if isNpcBlocked("Accept") then return end
 						-- Accept quest
@@ -2108,7 +2108,7 @@
 
 				-- Accept quests which require confirmation (such as sharing escort quests)
 				if event == "QUEST_ACCEPT_CONFIRM" then
-					if LeaPlusLC["AutoQuestAvailable"] == "On" then
+					if RGXQoLLC["AutoQuestAvailable"] == "On" then
 						ConfirmAcceptQuest()
 						StaticPopup_Hide("QUEST_ACCEPT")
 					end
@@ -2120,7 +2120,7 @@
 
 				-- Turn-in progression quests
 				if event == "QUEST_PROGRESS" and IsQuestCompletable() then
-					if LeaPlusLC["AutoQuestCompleted"] == "On" then
+					if RGXQoLLC["AutoQuestCompleted"] == "On" then
 						-- Don't continue quests for blocked NPCs
 						if isNpcBlocked("Complete") then return end
 						-- Don't continue if quest requires blocked item
@@ -2134,7 +2134,7 @@
 
 				-- Turn in completed quests if only one reward item is being offered
 				if event == "QUEST_COMPLETE" then
-					if LeaPlusLC["AutoQuestCompleted"] == "On" then
+					if RGXQoLLC["AutoQuestCompleted"] == "On" then
 						-- Don't complete quests for blocked NPCs
 						if isNpcBlocked("Complete") then return end
 						-- Don't complete if quest requires blocked item
@@ -2150,7 +2150,7 @@
 
 				-- Show quest dialog for quests that use the objective tracker (it will be completed automatically)
 				if event == "QUEST_AUTOCOMPLETE" then
-					if LeaPlusLC["AutoQuestCompleted"] == "On" then
+					if RGXQoLLC["AutoQuestCompleted"] == "On" then
 						local index = GetQuestLogIndexByID(arg1)
 						if GetQuestLogIsAutoComplete(index) then
 							ShowQuestComplete(index)
@@ -2173,7 +2173,7 @@
 						-- Select quests
 						if event == "QUEST_GREETING" then
 							-- Select quest greeting completed quests
-							if LeaPlusLC["AutoQuestCompleted"] == "On" then
+							if RGXQoLLC["AutoQuestCompleted"] == "On" then
 								for i = 1, GetNumActiveQuests() do
 									local title, isComplete = GetActiveTitle(i)
 									if title and isComplete then
@@ -2182,7 +2182,7 @@
 								end
 							end
 							-- Select quest greeting available quests
-							if LeaPlusLC["AutoQuestAvailable"] == "On" then
+							if RGXQoLLC["AutoQuestAvailable"] == "On" then
 								for i = 1, GetNumAvailableQuests() do
 									local title, isComplete = GetAvailableTitle(i)
 									if title and not isComplete then
@@ -2193,7 +2193,7 @@
 						else
 							-- Select gossip completed quests
 							-- questInfo.isComplete can return false for completed quests with no objectives in Classic Era (test with first quest for level 1 Orc) (does not currently apply to Wrath Classic or Dragonflight)
-							if LeaPlusLC["AutoQuestCompleted"] == "On" then
+							if RGXQoLLC["AutoQuestCompleted"] == "On" then
 								local gossipQuests = C_GossipInfo.GetActiveQuests()
 								for titleIndex, questInfo in ipairs(gossipQuests) do
 									if questInfo.title and (questInfo.isComplete or questInfo.questID and IsQuestComplete(questInfo.questID)) then
@@ -2204,7 +2204,7 @@
 								end
 							end
 							-- Select gossip available quests
-							if LeaPlusLC["AutoQuestAvailable"] == "On" then
+							if RGXQoLLC["AutoQuestAvailable"] == "On" then
 								local GossipQuests = C_GossipInfo.GetAvailableQuests()
 								for titleIndex, questInfo in ipairs(GossipQuests) do
 									if questInfo.questID and DoesQuestHaveRequirementsMet(questInfo.questID) then
@@ -2269,16 +2269,16 @@
 			end
 
 			-- Create configuration panel
-			local SellJunkFrame = LeaPlusLC:CreatePanel("Sell junk automatically", "SellJunkFrame")
-			LeaPlusLC:MakeTx(SellJunkFrame, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(SellJunkFrame, "AutoSellShowSummary", "Show vendor summary in chat", 16, -92, false, "If checked, a vendor summary will be shown in chat when junk is automatically sold.")
+			local SellJunkFrame = RGXQoLLC:CreatePanel("Sell junk automatically", "SellJunkFrame")
+			RGXQoLLC:MakeTx(SellJunkFrame, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(SellJunkFrame, "AutoSellShowSummary", "Show vendor summary in chat", 16, -92, false, "If checked, a vendor summary will be shown in chat when junk is automatically sold.")
 
 			-- Help button hidden
 			SellJunkFrame.h:Hide()
 
 			-- Back button handler
 			SellJunkFrame.b:SetScript("OnClick", function()
-				SellJunkFrame:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page1"]:Show();
+				SellJunkFrame:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
 				return
 			end)
 
@@ -2287,7 +2287,7 @@
 			SellJunkFrame.r:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["AutoSellShowSummary"] = "On"
+				RGXQoLLC["AutoSellShowSummary"] = "On"
 
 				-- Refresh panel
 				SellJunkFrame:Hide(); SellJunkFrame:Show()
@@ -2295,13 +2295,13 @@
 			end)
 
 			-- Show panal when options panel button is clicked
-			LeaPlusCB["AutoSellJunkBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["AutoSellJunkBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["AutoSellShowSummary"] = "On"
+					RGXQoLLC["AutoSellShowSummary"] = "On"
 				else
 					SellJunkFrame:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -2314,16 +2314,16 @@
 			end
 
 			-- Create excluded box
-			local titleTX = LeaPlusLC:MakeTx(SellJunkFrame, "Exclusions", 356, -72)
+			local titleTX = RGXQoLLC:MakeTx(SellJunkFrame, "Exclusions", 356, -72)
 			titleTX:SetWidth(200)
 			titleTX:SetWordWrap(false)
 			titleTX:SetJustifyH("LEFT")
 
 			-- Show help button for exclusions
-			LeaPlusLC:CreateHelpButton("SellJunkExcludeHelpButton", SellJunkFrame, titleTX, "Enter item IDs separated by commas.  Item IDs can be found in item tooltips while this panel is showing.|n|nJunk items entered here will not be sold automatically.|n|nWhite items entered here will be sold automatically.|n|nThe editbox tooltip will show you more information about the items you have entered.")
+			RGXQoLLC:CreateHelpButton("SellJunkExcludeHelpButton", SellJunkFrame, titleTX, "Enter item IDs separated by commas.  Item IDs can be found in item tooltips while this panel is showing.|n|nJunk items entered here will not be sold automatically.|n|nWhite items entered here will be sold automatically.|n|nThe editbox tooltip will show you more information about the items you have entered.")
 
 			local eb = CreateFrame("Frame", nil, SellJunkFrame, "BackdropTemplate")
-			eb:SetSize(200, LeaPlusLC.MainPanelHeight - 180)
+			eb:SetSize(200, RGXQoLLC.MainPanelHeight - 180)
 			eb:SetPoint("TOPLEFT", 350, -92)
 			eb:SetBackdrop({
 				bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -2376,19 +2376,19 @@
 					end
 				end
 
-				LeaPlusLC["AutoSellExcludeList"] = whiteString
-				eb.Text:SetText(LeaPlusLC["AutoSellExcludeList"])
+				RGXQoLLC["AutoSellExcludeList"] = whiteString
+				eb.Text:SetText(RGXQoLLC["AutoSellExcludeList"])
 
 			end
 
 			-- Save the excluded list when it changes and at startup
 			eb.Text:SetScript("OnTextChanged", UpdateWhiteList)
-			eb.Text:SetText(LeaPlusLC["AutoSellExcludeList"])
+			eb.Text:SetText(RGXQoLLC["AutoSellExcludeList"])
 			UpdateWhiteList()
 
 			-- Create whitelist on startup and option or preset is clicked
 			UpdateWhiteList()
-			LeaPlusCB["AutoSellJunkBtn"]:HookScript("OnClick", function()
+			RGXQoLCB["AutoSellJunkBtn"]:HookScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
 					UpdateWhiteList()
@@ -2493,11 +2493,11 @@
 
 			-- Show the button tooltip for the editbox
 			eb:SetScript("OnEnter", MakeTooltipString)
-			eb:HookScript("OnEnter", LeaPlusLC.TipSee)
+			eb:HookScript("OnEnter", RGXQoLLC.TipSee)
 			eb:HookScript("OnEnter", function() GameTooltip:SetText(eb.tiptext, nil, nil, nil, nil, false) end)
 			eb:SetScript("OnLeave", GameTooltip_Hide)
 			eb.Text:SetScript("OnEnter", MakeTooltipString)
-			eb.Text:HookScript("OnEnter", LeaPlusLC.ShowDropTip)
+			eb.Text:HookScript("OnEnter", RGXQoLLC.ShowDropTip)
 			eb.Text:HookScript("OnEnter", function() GameTooltip:SetText(eb.tiptext, nil, nil, nil, nil, false) end)
 			eb.Text:SetScript("OnLeave", GameTooltip_Hide)
 
@@ -2565,8 +2565,8 @@
 				-- Stop selling if no items were sold for this iteration or iteration limit was reached
 				if SoldCount == 0 or SellJunkTicker and SellJunkTicker._remainingIterations == 1 then
 					StopSelling()
-					if totalPrice > 0 and LeaPlusLC["AutoSellShowSummary"] == "On" then
-						LeaPlusLC:Print(L["Sold junk for"] .. " " .. GetCoinText(totalPrice) .. ".")
+					if totalPrice > 0 and RGXQoLLC["AutoSellShowSummary"] == "On" then
+						RGXQoLLC:Print(L["Sold junk for"] .. " " .. GetCoinText(totalPrice) .. ".")
 					end
 				end
 
@@ -2574,7 +2574,7 @@
 
 			-- Function to setup events
 			local function SetupEvents()
-				if LeaPlusLC["AutoSellJunk"] == "On" then
+				if RGXQoLLC["AutoSellJunk"] == "On" then
 					SellJunkFrame:RegisterEvent("MERCHANT_SHOW");
 					SellJunkFrame:RegisterEvent("MERCHANT_CLOSED");
 				else
@@ -2584,8 +2584,8 @@
 			end
 
 			-- Setup events when option is clicked and on startup (if option is enabled)
-			LeaPlusCB["AutoSellJunk"]:HookScript("OnClick", SetupEvents)
-			if LeaPlusLC["AutoSellJunk"] == "On" then SetupEvents() end
+			RGXQoLCB["AutoSellJunk"]:HookScript("OnClick", SetupEvents)
+			if RGXQoLLC["AutoSellJunk"] == "On" then SetupEvents() end
 
 			-- Event handler
 			SellJunkFrame:SetScript("OnEvent", function(self, event, arg1, arg2)
@@ -2633,8 +2633,8 @@
 						if GetMoney() >= RepairCost then
 							RepairAllItems()
 							-- Show cost summary
-							if LeaPlusLC["AutoRepairShowSummary"] == "On" then
-								LeaPlusLC:Print(L["Repaired for"] .. " " .. GetCoinText(RepairCost) .. ".")
+							if RGXQoLLC["AutoRepairShowSummary"] == "On" then
+								RGXQoLLC:Print(L["Repaired for"] .. " " .. GetCoinText(RepairCost) .. ".")
 							end
 						end
 					end
@@ -2646,7 +2646,7 @@
 
 			-- Function to setup event
 			local function SetupEvent()
-				if LeaPlusLC["AutoRepairGear"] == "On" then
+				if RGXQoLLC["AutoRepairGear"] == "On" then
 					RepairFrame:RegisterEvent("MERCHANT_SHOW")
 				else
 					RepairFrame:UnregisterEvent("MERCHANT_SHOW")
@@ -2654,24 +2654,24 @@
 			end
 
 			-- Setup event when option is clicked and on startup (if option is enabled)
-			LeaPlusCB["AutoRepairGear"]:HookScript("OnClick", SetupEvent)
-			if LeaPlusLC["AutoRepairGear"] == "On" then SetupEvent() end
+			RGXQoLCB["AutoRepairGear"]:HookScript("OnClick", SetupEvent)
+			if RGXQoLLC["AutoRepairGear"] == "On" then SetupEvent() end
 
 			-- Event handler
 			RepairFrame:SetScript("OnEvent", RepairFunc)
 
 			-- Create configuration panel
-			local RepairPanel = LeaPlusLC:CreatePanel("Repair automatically", "RepairPanel")
+			local RepairPanel = RGXQoLLC:CreatePanel("Repair automatically", "RepairPanel")
 
-			LeaPlusLC:MakeTx(RepairPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(RepairPanel, "AutoRepairShowSummary", "Show repair summary in chat", 16, -92, false, "If checked, a repair summary will be shown in chat when your gear is automatically repaired.")
+			RGXQoLLC:MakeTx(RepairPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(RepairPanel, "AutoRepairShowSummary", "Show repair summary in chat", 16, -92, false, "If checked, a repair summary will be shown in chat when your gear is automatically repaired.")
 
 			-- Help button hidden
 			RepairPanel.h:Hide()
 
 			-- Back button handler
 			RepairPanel.b:SetScript("OnClick", function()
-				RepairPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page1"]:Show();
+				RepairPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
 				return
 			end)
 
@@ -2679,7 +2679,7 @@
 			RepairPanel.r:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["AutoRepairShowSummary"] = "On"
+				RGXQoLLC["AutoRepairShowSummary"] = "On"
 
 				-- Refresh panel
 				RepairPanel:Hide(); RepairPanel:Show()
@@ -2687,13 +2687,13 @@
 			end)
 
 			-- Show panal when options panel button is clicked
-			LeaPlusCB["AutoRepairBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["AutoRepairBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["AutoRepairShowSummary"] = "On"
+					RGXQoLLC["AutoRepairShowSummary"] = "On"
 				else
 					RepairPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -2703,7 +2703,7 @@
 		-- Hide the combat log
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoCombatLogTab"] == "On" and not LeaLockList["NoCombatLogTab"] then
+		if RGXQoLLC["NoCombatLogTab"] == "On" and not RGXQoLLockList["NoCombatLogTab"] then
 
 			-- Function to setup the combat log tab
 			local function SetupCombatLogTab()
@@ -2729,7 +2729,7 @@
 			else
 				-- If combat log is undocked, do nothing but show warning
 				C_Timer.After(1, function()
-					LeaPlusLC:Print("Combat log cannot be hidden while undocked.")
+					RGXQoLLC:Print("Combat log cannot be hidden while undocked.")
 				end)
 			end
 
@@ -2739,7 +2739,7 @@
 		--	Show player chain
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowPlayerChain"] == "On" and not LeaLockList["ShowPlayerChain"] then
+		if RGXQoLLC["ShowPlayerChain"] == "On" and not RGXQoLLockList["ShowPlayerChain"] then
 
 			PlayerFrameTexture:ClearAllPoints()
 			PlayerFrameTexture:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", -17, -4)
@@ -2749,10 +2749,10 @@
 			PetPortrait:GetParent():SetFrameLevel(4)
 
 			-- Create configuration panel
-			local ChainPanel = LeaPlusLC:CreatePanel("Show player chain", "ChainPanel")
+			local ChainPanel = RGXQoLLC:CreatePanel("Show player chain", "ChainPanel")
 
 			-- Add dropdown menu
-			LeaPlusLC:CreateDropdown("PlayerChainMenu", "Chain style", 146, "TOPLEFT", ChainPanel, "TOPLEFT", 16, -92, {{L["RARE"], 1}, {L["ELITE"], 2}, {L["RARE ELITE"], 3}})
+			RGXQoLLC:CreateDropdown("PlayerChainMenu", "Chain style", 146, "TOPLEFT", ChainPanel, "TOPLEFT", 16, -92, {{L["RARE"], 1}, {L["ELITE"], 2}, {L["RARE ELITE"], 3}})
 
 			-- Set chain style
 			local function SetChainStyle()
@@ -2764,12 +2764,12 @@
 				end
 
 				-- Get dropdown menu value
-				local chain = LeaPlusLC["PlayerChainMenu"] -- Numeric value
+				local chain = RGXQoLLC["PlayerChainMenu"] -- Numeric value
 
 				-- Set chain style according to value
 				if chain == 1 then -- Rare
 					if C_AddOns.IsAddOnLoaded("EasyFrames") then
-						PlayerFrameTexture:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus.blp")
+						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
 						if EasyFramesLightTexture then
 							PlayerFrameTexture:SetTexCoord(0, 0.2265, 0.875, 0.9726)
 						else
@@ -2781,7 +2781,7 @@
 					end
 				elseif chain == 2 then -- Elite
 					if C_AddOns.IsAddOnLoaded("EasyFrames") then
-						PlayerFrameTexture:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus.blp")
+						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
 						if EasyFramesLightTexture then
 							PlayerFrameTexture:SetTexCoord(0.5, 0.7265, 0.875, 0.9726)
 						else
@@ -2793,14 +2793,14 @@
 					end
 				elseif chain == 3 then -- Rare Elite
 					if C_AddOns.IsAddOnLoaded("EasyFrames") then
-						PlayerFrameTexture:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus.blp")
+						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
 						if EasyFramesLightTexture then
 							PlayerFrameTexture:SetTexCoord(0.25, 0.4765, 0.875, 0.9726)
 						else
 							PlayerFrameTexture:SetTexCoord(0.25, 0.4765, 0.75, 0.8476)
 						end
 					else
-						PlayerFrameTexture:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus.blp")
+						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
 						PlayerFrameTexture:SetTexCoord(0.75, 0.9765, 0.75, 0.8476)
 					end
 				end
@@ -2828,7 +2828,7 @@
 			end)
 
 			-- Set style when a drop menu is selected (procs when the list is hidden)
-			LeaPlusCB["PlayerChainMenu"]:RegisterCallback("OnMenuClose", SetChainStyle)
+			RGXQoLCB["PlayerChainMenu"]:RegisterCallback("OnMenuClose", SetChainStyle)
 
 			-- Help button hidden
 			ChainPanel.h:Hide()
@@ -2836,25 +2836,25 @@
 			-- Back button handler
 			ChainPanel.b:SetScript("OnClick", function()
 				ChainPanel:Hide()
-				LeaPlusLC["PageF"]:Show()
-				LeaPlusLC["Page5"]:Show()
+				RGXQoLLC["PageF"]:Show()
+				RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
 			-- Reset button handler
 			ChainPanel.r:SetScript("OnClick", function()
-				LeaPlusLC["PlayerChainMenu"] = 2
+				RGXQoLLC["PlayerChainMenu"] = 2
 				ChainPanel:Hide(); ChainPanel:Show()
 				SetChainStyle()
 			end)
 
 			-- Show the panel when the configuration button is clicked
-			LeaPlusCB["ModPlayerChain"]:SetScript("OnClick", function()
+			RGXQoLCB["ModPlayerChain"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
-					LeaPlusLC["PlayerChainMenu"] = 3;
+					RGXQoLLC["PlayerChainMenu"] = 3;
 					SetChainStyle();
 				else
-					LeaPlusLC:HideFrames();
+					RGXQoLLC:HideFrames();
 					ChainPanel:Show();
 				end
 			end)
@@ -2865,7 +2865,7 @@
 		-- Show raid frame toggle button
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowRaidToggle"] == "On" and not LeaLockList["ShowRaidToggle"] then
+		if RGXQoLLC["ShowRaidToggle"] == "On" and not RGXQoLLockList["ShowRaidToggle"] then
 
 			-- Check to make sure raid toggle button exists
 			if CompactRaidFrameManagerDisplayFrameHiddenModeToggle then
@@ -2895,7 +2895,7 @@
 		-- Hide hit indicators (portrait text)
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoHitIndicators"] == "On" and not LeaLockList["NoHitIndicators"] then
+		if RGXQoLLC["NoHitIndicators"] == "On" and not RGXQoLLockList["NoHitIndicators"] then
 			hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
 			hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
 		end
@@ -2904,7 +2904,7 @@
 		-- Class colored frames
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ClassColFrames"] == "On" and not LeaLockList["ClassColFrames"] then
+		if RGXQoLLC["ClassColFrames"] == "On" and not RGXQoLLockList["ClassColFrames"] then
 
 			-- Create background frame for player frame
 			local PlayFN = CreateFrame("FRAME", nil, PlayerFrame)
@@ -2920,13 +2920,13 @@
 			PlayFN.t:SetAllPoints()
 			PlayFN.t:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-LevelBackground")
 
-			local c = LeaPlusLC["RaidColors"][select(2, UnitClass("player"))]
+			local c = RGXQoLLC["RaidColors"][select(2, UnitClass("player"))]
 			if c then PlayFN.t:SetVertexColor(c.r, c.g, c.b) end
 
 			-- Create color function for target and focus frames
 			local function TargetFrameCol()
 				if UnitIsPlayer("target") then
-					local c = LeaPlusLC["RaidColors"][select(2, UnitClass("target"))]
+					local c = RGXQoLLC["RaidColors"][select(2, UnitClass("target"))]
 					if c then TargetFrameNameBackground:SetVertexColor(c.r, c.g, c.b) end
 				end
 			end
@@ -2935,31 +2935,31 @@
 			ColTar:SetScript("OnEvent", TargetFrameCol) -- Events are registered if target option is enabled
 
 			-- Create configuration panel
-			local ClassFrame = LeaPlusLC:CreatePanel("Class colored frames", "ClassFrame")
+			local ClassFrame = RGXQoLLC:CreatePanel("Class colored frames", "ClassFrame")
 
-			LeaPlusLC:MakeTx(ClassFrame, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(ClassFrame, "ClassColPlayer", "Show player frame in class color", 16, -92, false, "If checked, the player frame background will be shown in class color.")
-			LeaPlusLC:MakeCB(ClassFrame, "ClassColTarget", "Show target frame in class color", 16, -112, false, "If checked, the target frame background will be shown in class color.")
+			RGXQoLLC:MakeTx(ClassFrame, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(ClassFrame, "ClassColPlayer", "Show player frame in class color", 16, -92, false, "If checked, the player frame background will be shown in class color.")
+			RGXQoLLC:MakeCB(ClassFrame, "ClassColTarget", "Show target frame in class color", 16, -112, false, "If checked, the target frame background will be shown in class color.")
 
 			-- Help button hidden
 			ClassFrame.h:Hide()
 
 			-- Back button handler
 			ClassFrame.b:SetScript("OnClick", function()
-				ClassFrame:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page6"]:Show()
+				ClassFrame:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page6"]:Show()
 				return
 			end)
 
 			-- Function to set class colored frames
 			local function SetClassColFrames()
 				-- Player frame
-				if LeaPlusLC["ClassColPlayer"] == "On" then
+				if RGXQoLLC["ClassColPlayer"] == "On" then
 					PlayFN:Show()
 				else
 					PlayFN:Hide()
 				end
 				-- Target frame
-				if LeaPlusLC["ClassColTarget"] == "On" then
+				if RGXQoLLC["ClassColTarget"] == "On" then
 					ColTar:RegisterEvent("GROUP_ROSTER_UPDATE")
 					ColTar:RegisterEvent("PLAYER_TARGET_CHANGED")
 					ColTar:RegisterEvent("UNIT_FACTION")
@@ -2971,16 +2971,16 @@
 			end
 
 			-- Run function when options are clicked and on startup
-			LeaPlusCB["ClassColPlayer"]:HookScript("OnClick", SetClassColFrames)
-			LeaPlusCB["ClassColTarget"]:HookScript("OnClick", SetClassColFrames)
+			RGXQoLCB["ClassColPlayer"]:HookScript("OnClick", SetClassColFrames)
+			RGXQoLCB["ClassColTarget"]:HookScript("OnClick", SetClassColFrames)
 			SetClassColFrames()
 
 			-- Reset button handler
 			ClassFrame.r:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["ClassColPlayer"] = "On"
-				LeaPlusLC["ClassColTarget"] = "On"
+				RGXQoLLC["ClassColPlayer"] = "On"
+				RGXQoLLC["ClassColTarget"] = "On"
 
 				-- Update colors and refresh configuration panel
 				SetClassColFrames()
@@ -2989,15 +2989,15 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["ClassColFramesBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["ClassColFramesBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["ClassColPlayer"] = "On"
-					LeaPlusLC["ClassColTarget"] = "On"
+					RGXQoLLC["ClassColPlayer"] = "On"
+					RGXQoLLC["ClassColTarget"] = "On"
 					SetClassColFrames()
 				else
 					ClassFrame:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -3007,7 +3007,7 @@
 		--	Quest text size
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["QuestFontChange"] == "On" then
+		if RGXQoLLC["QuestFontChange"] == "On" then
 
 			-- Set gossip frame scroll box layout
 			GossipFrame.GreetingPanel.ScrollBox:SetHeight(320)
@@ -3016,22 +3016,22 @@
 			GossipFrame.GreetingPanel.ScrollBar:SetPoint("BOTTOMLEFT", GossipFrame.GreetingPanel.ScrollBox, "BOTTOMRIGHT", 4, -14)
 
 			-- Create configuration panel
-			local QuestTextPanel = LeaPlusLC:CreatePanel("Resize quest text", "QuestTextPanel")
+			local QuestTextPanel = RGXQoLLC:CreatePanel("Resize quest text", "QuestTextPanel")
 
-			LeaPlusLC:MakeTx(QuestTextPanel, "Text size", 16, -72)
-			LeaPlusLC:MakeSL(QuestTextPanel, "LeaPlusQuestFontSize", "Drag to set the font size of quest text.", 10, 30, 1, 16, -92, "%.0f")
+			RGXQoLLC:MakeTx(QuestTextPanel, "Text size", 16, -72)
+			RGXQoLLC:MakeSL(QuestTextPanel, "LeaPlusQuestFontSize", "Drag to set the font size of quest text.", 10, 30, 1, 16, -92, "%.0f")
 
 			-- Function to update the font size
 			local function QuestSizeUpdate()
 				local a, b, c = QuestFont:GetFont()
-				QuestTitleFont:SetFont(a, LeaPlusLC["LeaPlusQuestFontSize"] + 3, c)
-				QuestFont:SetFont(a, LeaPlusLC["LeaPlusQuestFontSize"] + 1, c)
+				QuestTitleFont:SetFont(a, RGXQoLLC["LeaPlusQuestFontSize"] + 3, c)
+				QuestFont:SetFont(a, RGXQoLLC["LeaPlusQuestFontSize"] + 1, c)
 				local d, e, f = QuestFontNormalSmall:GetFont()
-				QuestFontNormalSmall:SetFont(d, LeaPlusLC["LeaPlusQuestFontSize"], f)
+				QuestFontNormalSmall:SetFont(d, RGXQoLLC["LeaPlusQuestFontSize"], f)
 			end
 
 			-- Set text size when slider changes and on startup
-			LeaPlusCB["LeaPlusQuestFontSize"]:HookScript("OnValueChanged", QuestSizeUpdate)
+			RGXQoLCB["LeaPlusQuestFontSize"]:HookScript("OnValueChanged", QuestSizeUpdate)
 			QuestSizeUpdate()
 
 			-- Help button hidden
@@ -3039,7 +3039,7 @@
 
 			-- Back button handler
 			QuestTextPanel.b:SetScript("OnClick", function()
-				QuestTextPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page4"]:Show()
+				QuestTextPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page4"]:Show()
 				return
 			end)
 
@@ -3047,7 +3047,7 @@
 			QuestTextPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				LeaPlusLC["LeaPlusQuestFontSize"] = 12
+				RGXQoLLC["LeaPlusQuestFontSize"] = 12
 				QuestSizeUpdate()
 
 				-- Refresh side panel
@@ -3056,14 +3056,14 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["QuestTextBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["QuestTextBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["LeaPlusQuestFontSize"] = 18
+					RGXQoLLC["LeaPlusQuestFontSize"] = 18
 					QuestSizeUpdate()
 				else
 					QuestTextPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -3073,26 +3073,26 @@
 		--	Resize mail text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MailFontChange"] == "On" then
+		if RGXQoLLC["MailFontChange"] == "On" then
 
 			-- Create configuration panel
-			local MailTextPanel = LeaPlusLC:CreatePanel("Resize mail text", "MailTextPanel")
+			local MailTextPanel = RGXQoLLC:CreatePanel("Resize mail text", "MailTextPanel")
 
-			LeaPlusLC:MakeTx(MailTextPanel, "Text size", 16, -72)
-			LeaPlusLC:MakeSL(MailTextPanel, "LeaPlusMailFontSize", "Drag to set the font size of mail text.", 10, 30, 1, 16, -92, "%.0f")
+			RGXQoLLC:MakeTx(MailTextPanel, "Text size", 16, -72)
+			RGXQoLLC:MakeSL(MailTextPanel, "LeaPlusMailFontSize", "Drag to set the font size of mail text.", 10, 30, 1, 16, -92, "%.0f")
 
 			-- Function to set the text size
 			local function MailSizeUpdate()
 				local MailFont, void, flags = QuestFont:GetFont()
-				OpenMailBodyText:SetFont("h1", MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
-				OpenMailBodyText:SetFont("h2", MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
-				OpenMailBodyText:SetFont("h3", MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
-				OpenMailBodyText:SetFont("p", MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
-				MailEditBox:GetEditBox():SetFont(MailFont, LeaPlusLC["LeaPlusMailFontSize"], flags)
+				OpenMailBodyText:SetFont("h1", MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
+				OpenMailBodyText:SetFont("h2", MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
+				OpenMailBodyText:SetFont("h3", MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
+				OpenMailBodyText:SetFont("p", MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
+				MailEditBox:GetEditBox():SetFont(MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
 			end
 
 			-- Set text size after changing slider and on startup
-			LeaPlusCB["LeaPlusMailFontSize"]:HookScript("OnValueChanged", MailSizeUpdate)
+			RGXQoLCB["LeaPlusMailFontSize"]:HookScript("OnValueChanged", MailSizeUpdate)
 			MailSizeUpdate()
 
 			-- Help button hidden
@@ -3100,7 +3100,7 @@
 
 			-- Back button handler
 			MailTextPanel.b:SetScript("OnClick", function()
-				MailTextPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page4"]:Show()
+				MailTextPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page4"]:Show()
 				return
 			end)
 
@@ -3108,7 +3108,7 @@
 			MailTextPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				LeaPlusLC["LeaPlusMailFontSize"] = 15
+				RGXQoLLC["LeaPlusMailFontSize"] = 15
 
 				-- Refresh side panel
 				MailTextPanel:Hide(); MailTextPanel:Show()
@@ -3116,14 +3116,14 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["MailTextBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["MailTextBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["LeaPlusMailFontSize"] = 22
+					RGXQoLLC["LeaPlusMailFontSize"] = 22
 					MailSizeUpdate()
 				else
 					MailTextPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -3133,22 +3133,22 @@
 		--	Resize book text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["BookFontChange"] == "On" then
+		if RGXQoLLC["BookFontChange"] == "On" then
 
 			-- Create configuration panel
-			local BookTextPanel = LeaPlusLC:CreatePanel("Resize book text", "BookTextPanel")
+			local BookTextPanel = RGXQoLLC:CreatePanel("Resize book text", "BookTextPanel")
 
-			LeaPlusLC:MakeTx(BookTextPanel, "Text size", 16, -72)
-			LeaPlusLC:MakeSL(BookTextPanel, "LeaPlusBookFontSize", "Drag to set the font size of book text.", 10, 30, 1, 16, -92, "%.0f")
+			RGXQoLLC:MakeTx(BookTextPanel, "Text size", 16, -72)
+			RGXQoLLC:MakeSL(BookTextPanel, "LeaPlusBookFontSize", "Drag to set the font size of book text.", 10, 30, 1, 16, -92, "%.0f")
 
 			-- Function to set the text size
 			local function BookSizeUpdate()
 				local BookFont, void, flags = QuestFont:GetFont()
-				ItemTextFontNormal:SetFont(BookFont, LeaPlusLC["LeaPlusBookFontSize"], flags)
+				ItemTextFontNormal:SetFont(BookFont, RGXQoLLC["LeaPlusBookFontSize"], flags)
 			end
 
 			-- Set text size after changing slider and on startup
-			LeaPlusCB["LeaPlusBookFontSize"]:HookScript("OnValueChanged", BookSizeUpdate)
+			RGXQoLCB["LeaPlusBookFontSize"]:HookScript("OnValueChanged", BookSizeUpdate)
 			BookSizeUpdate()
 
 			-- Help button hidden
@@ -3156,7 +3156,7 @@
 
 			-- Back button handler
 			BookTextPanel.b:SetScript("OnClick", function()
-				BookTextPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page4"]:Show()
+				BookTextPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page4"]:Show()
 				return
 			end)
 
@@ -3164,7 +3164,7 @@
 			BookTextPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				LeaPlusLC["LeaPlusBookFontSize"] = 15
+				RGXQoLLC["LeaPlusBookFontSize"] = 15
 
 				-- Refresh side panel
 				BookTextPanel:Hide(); BookTextPanel:Show()
@@ -3172,14 +3172,14 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["BookTextBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["BookTextBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["LeaPlusBookFontSize"] = 22
+					RGXQoLLC["LeaPlusBookFontSize"] = 22
 					BookSizeUpdate()
 				else
 					BookTextPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -3189,7 +3189,7 @@
 		--	Show durability status
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["DurabilityStatus"] == "On" then
+		if RGXQoLLC["DurabilityStatus"] == "On" then
 
 			-- Create durability button
 			local cButton = CreateFrame("BUTTON", nil, PaperDollFrame)
@@ -3278,7 +3278,7 @@
 					if validItems == true then
 						-- Show simple status line instead
 						if tonumber(durapercent) >= 0 then -- Ensure character has some durability items equipped
-							LeaPlusLC:Print(L["You have"] .. " " .. string.format("%.0f", durapercent) .. "%" .. " " .. L["durability"] .. ".")
+							RGXQoLLC:Print(L["You have"] .. " " .. string.format("%.0f", durapercent) .. "%" .. " " .. L["durability"] .. ".")
 						end
 					end
 
@@ -3315,7 +3315,7 @@
 		--	Hide zone text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["HideZoneText"] == "On" then
+		if RGXQoLLC["HideZoneText"] == "On" then
 			ZoneTextFrame:SetScript("OnShow", ZoneTextFrame.Hide);
 			SubZoneTextFrame:SetScript("OnShow", SubZoneTextFrame.Hide);
 		end
@@ -3324,7 +3324,7 @@
 		--	Disable sticky chat
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoStickyChat"] == "On" and not LeaLockList["NoStickyChat"] then
+		if RGXQoLLC["NoStickyChat"] == "On" and not RGXQoLLockList["NoStickyChat"] then
 			-- These taint if set to anything other than nil
 			ChatTypeInfo.WHISPER.sticky = nil
 			ChatTypeInfo.BN_WHISPER.sticky = nil
@@ -3335,7 +3335,7 @@
 		--	Hide stance bar
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoClassBar"] == "On" and not LeaLockList["NoClassBar"] then
+		if RGXQoLLC["NoClassBar"] == "On" and not RGXQoLLockList["NoClassBar"] then
 			local stancebar = CreateFrame("FRAME", nil, UIParent)
 			stancebar:Hide()
 			StanceBar:UnregisterAllEvents()
@@ -3346,7 +3346,7 @@
 		--	Hide gryphons
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoGryphons"] == "On" and not LeaLockList["NoGryphons"] then
+		if RGXQoLLC["NoGryphons"] == "On" and not RGXQoLLockList["NoGryphons"] then
 			MainMenuBarLeftEndCap:Hide();
 			MainMenuBarRightEndCap:Hide();
 		end
@@ -3355,7 +3355,7 @@
 		--	Disable chat fade
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoChatFade"] == "On" and not LeaLockList["NoChatFade"] then
+		if RGXQoLLC["NoChatFade"] == "On" and not RGXQoLLockList["NoChatFade"] then
 			-- Process normal and existing chat frames
 			for i = 1, 50 do
 				if _G["ChatFrame" .. i] then
@@ -3375,7 +3375,7 @@
 		--	Use easy chat frame resizing
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["UseEasyChatResizing"] == "On" and not LeaLockList["UseEasyChatResizing"] then
+		if RGXQoLLC["UseEasyChatResizing"] == "On" and not RGXQoLLockList["UseEasyChatResizing"] then
 			ChatFrame1Tab:HookScript("OnMouseDown", function(self,arg1)
 				if arg1 == "LeftButton" then
 					if select(8, GetChatWindowInfo(1)) then
@@ -3395,7 +3395,7 @@
 		--	Increase chat history
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MaxChatHstory"] == "On" and not LeaLockList["MaxChatHstory"] then
+		if RGXQoLLC["MaxChatHstory"] == "On" and not RGXQoLLockList["MaxChatHstory"] then
 			-- Process normal and existing chat frames
 			for i = 1, 50 do
 				if _G["ChatFrame" .. i] then
@@ -3415,14 +3415,14 @@
 		--	Hide error messages
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["HideErrorMessages"] == "On" then
+		if RGXQoLLC["HideErrorMessages"] == "On" then
 
 			--	Error message events
 			local OrigErrHandler = UIErrorsFrame:GetScript('OnEvent')
 			UIErrorsFrame:SetScript('OnEvent', function (self, event, id, err, ...)
 				if event == "UI_ERROR_MESSAGE" then
 					-- Hide error messages
-					if LeaPlusLC["ShowErrorsFlag"] == 1 then
+					if RGXQoLLC["ShowErrorsFlag"] == 1 then
 						if 	err == ERR_INV_FULL or
 							err == ERR_QUEST_LOG_FULL or
 							err == ERR_RAID_GROUP_ONLY or
@@ -3448,7 +3448,7 @@
 		-- Easy item destroy
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["EasyItemDestroy"] == "On" then
+		if RGXQoLLC["EasyItemDestroy"] == "On" then
 
 			-- Get the type "DELETE" into the field to confirm text
 			local TypeDeleteLine = gsub(DELETE_GOOD_ITEM, "[\r\n]", "@")
@@ -3495,7 +3495,7 @@
 		-- Unclamp chat frame
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["UnclampChat"] == "On" and not LeaLockList["UnclampChat"] then
+		if RGXQoLLC["UnclampChat"] == "On" and not RGXQoLLockList["UnclampChat"] then
 
 			-- Process normal and existing chat frames on startup
 			for i = 1, 50 do
@@ -3524,7 +3524,7 @@
 		-- Enhance flight map
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["EnhanceFlightMap"] == "On" then
+		if RGXQoLLC["EnhanceFlightMap"] == "On" then
 
 			-- Hide flight map textures
 			local regions = {TaxiFrame:GetRegions()}
@@ -3553,11 +3553,11 @@
 				local a, void, r, x, y = TaxiFrame:GetPoint()
 				x = tonumber(string.format("%.2f", x))
 				y = tonumber(string.format("%.2f", y))
-				local xb = tonumber(string.format("%.2f", LeaPlusLC["FlightMapX"]))
-				local yb = tonumber(string.format("%.2f", LeaPlusLC["FlightMapY"]))
-				if a ~= LeaPlusLC["FlightMapA"] or r ~= LeaPlusLC["FlightMapR"] or x ~= xb or y ~= yb then
+				local xb = tonumber(string.format("%.2f", RGXQoLLC["FlightMapX"]))
+				local yb = tonumber(string.format("%.2f", RGXQoLLC["FlightMapY"]))
+				if a ~= RGXQoLLC["FlightMapA"] or r ~= RGXQoLLC["FlightMapR"] or x ~= xb or y ~= yb then
 					TaxiFrame:ClearAllPoints()
-					TaxiFrame:SetPoint(LeaPlusLC["FlightMapA"], UIParent, LeaPlusLC["FlightMapR"], LeaPlusLC["FlightMapX"], LeaPlusLC["FlightMapY"])
+					TaxiFrame:SetPoint(RGXQoLLC["FlightMapA"], UIParent, RGXQoLLC["FlightMapR"], RGXQoLLC["FlightMapX"], RGXQoLLC["FlightMapY"])
 				end
 			end)
 
@@ -3566,9 +3566,9 @@
 				for i = 1, NUM_TAXI_BUTTONS do
 					local button = _G["TaxiButton"..i]
 					if button and button:IsVisible() then
-						_G["TaxiButton" .. i]:SetSize(LeaPlusLC["LeaPlusTaxiIconSize"], LeaPlusLC["LeaPlusTaxiIconSize"])
-						if button:GetHighlightTexture() then button:GetHighlightTexture():SetSize(LeaPlusLC["LeaPlusTaxiIconSize"] * 2, LeaPlusLC["LeaPlusTaxiIconSize"] * 2) end
-						if button:GetPushedTexture() then button:GetPushedTexture():SetSize(LeaPlusLC["LeaPlusTaxiIconSize"] * 2, LeaPlusLC["LeaPlusTaxiIconSize"] * 2) end
+						_G["TaxiButton" .. i]:SetSize(RGXQoLLC["LeaPlusTaxiIconSize"], RGXQoLLC["LeaPlusTaxiIconSize"])
+						if button:GetHighlightTexture() then button:GetHighlightTexture():SetSize(RGXQoLLC["LeaPlusTaxiIconSize"] * 2, RGXQoLLC["LeaPlusTaxiIconSize"] * 2) end
+						if button:GetPushedTexture() then button:GetPushedTexture():SetSize(RGXQoLLC["LeaPlusTaxiIconSize"] * 2, RGXQoLLC["LeaPlusTaxiIconSize"] * 2) end
 				   end
 				end
 			end)
@@ -3581,23 +3581,23 @@
 			--UIPanelWindows["TaxiFrame"].width = 0
 
 			-- Create configuration panel
-			local TaxiPanel = LeaPlusLC:CreatePanel("Enhance flight map", "TaxiPanel")
+			local TaxiPanel = RGXQoLLC:CreatePanel("Enhance flight map", "TaxiPanel")
 
-			LeaPlusLC:MakeTx(TaxiPanel, "Map scale", 356, -72)
-			LeaPlusLC:MakeSL(TaxiPanel, "LeaPlusTaxiMapScale", "Drag to set the scale of the flight map.", 1, 3, 0.05, 356, -92, "%.0f")
+			RGXQoLLC:MakeTx(TaxiPanel, "Map scale", 356, -72)
+			RGXQoLLC:MakeSL(TaxiPanel, "LeaPlusTaxiMapScale", "Drag to set the scale of the flight map.", 1, 3, 0.05, 356, -92, "%.0f")
 
-			LeaPlusLC:MakeTx(TaxiPanel, "Icon size", 356, -132)
-			LeaPlusLC:MakeSL(TaxiPanel, "LeaPlusTaxiIconSize", "Drag to set the size of the icons.", 5, 30, 1, 356, -152, "%.0f")
+			RGXQoLLC:MakeTx(TaxiPanel, "Icon size", 356, -132)
+			RGXQoLLC:MakeSL(TaxiPanel, "LeaPlusTaxiIconSize", "Drag to set the size of the icons.", 5, 30, 1, 356, -152, "%.0f")
 
-			LeaPlusLC:MakeTx(TaxiPanel, "Position", 16, -72)
-			TaxiPanel.txt = LeaPlusLC:MakeWD(TaxiPanel, "Hold ALT and drag the flight map to move it.", 16, -92, 500)
+			RGXQoLLC:MakeTx(TaxiPanel, "Position", 16, -72)
+			TaxiPanel.txt = RGXQoLLC:MakeWD(TaxiPanel, "Hold ALT and drag the flight map to move it.", 16, -92, 500)
 			TaxiPanel.txt:SetWordWrap(true)
 			TaxiPanel.txt:SetWidth(300)
 
 			-- Function to set flight map scale
 			local function SetFlightMapScale()
-				TaxiFrame:SetScale(LeaPlusLC["LeaPlusTaxiMapScale"])
-				LeaPlusCB["LeaPlusTaxiMapScale"].f:SetFormattedText("%.0f%%", LeaPlusLC["LeaPlusTaxiMapScale"] * 100)
+				TaxiFrame:SetScale(RGXQoLLC["LeaPlusTaxiMapScale"])
+				RGXQoLCB["LeaPlusTaxiMapScale"].f:SetFormattedText("%.0f%%", RGXQoLLC["LeaPlusTaxiMapScale"] * 100)
 			end
 
 			-- Function to set icon size (used for reset and when slider changes)
@@ -3605,17 +3605,17 @@
 				for i = 1, NUM_TAXI_BUTTONS do
 					local button = _G["TaxiButton"..i]
 					if button and button:IsVisible() then
-						_G["TaxiButton" .. i]:SetSize(LeaPlusLC["LeaPlusTaxiIconSize"], LeaPlusLC["LeaPlusTaxiIconSize"])
-						if button:GetHighlightTexture() then button:GetHighlightTexture():SetSize(LeaPlusLC["LeaPlusTaxiIconSize"] * 2, LeaPlusLC["LeaPlusTaxiIconSize"] * 2) end
-						if button:GetPushedTexture() then button:GetPushedTexture():SetSize(LeaPlusLC["LeaPlusTaxiIconSize"] * 2, LeaPlusLC["LeaPlusTaxiIconSize"] * 2) end
+						_G["TaxiButton" .. i]:SetSize(RGXQoLLC["LeaPlusTaxiIconSize"], RGXQoLLC["LeaPlusTaxiIconSize"])
+						if button:GetHighlightTexture() then button:GetHighlightTexture():SetSize(RGXQoLLC["LeaPlusTaxiIconSize"] * 2, RGXQoLLC["LeaPlusTaxiIconSize"] * 2) end
+						if button:GetPushedTexture() then button:GetPushedTexture():SetSize(RGXQoLLC["LeaPlusTaxiIconSize"] * 2, RGXQoLLC["LeaPlusTaxiIconSize"] * 2) end
 				   end
 				end
-				LeaPlusCB["LeaPlusTaxiIconSize"].f:SetFormattedText("%.0f%%", LeaPlusLC["LeaPlusTaxiIconSize"] * 10)
+				RGXQoLCB["LeaPlusTaxiIconSize"].f:SetFormattedText("%.0f%%", RGXQoLLC["LeaPlusTaxiIconSize"] * 10)
 			end
 
 			-- Set flight map scale when slider changes and on startup
-			LeaPlusCB["LeaPlusTaxiMapScale"]:HookScript("OnValueChanged", SetFlightMapScale)
-			LeaPlusCB["LeaPlusTaxiIconSize"]:HookScript("OnValueChanged", SetFlightMapIconSize)
+			RGXQoLCB["LeaPlusTaxiMapScale"]:HookScript("OnValueChanged", SetFlightMapScale)
+			RGXQoLCB["LeaPlusTaxiIconSize"]:HookScript("OnValueChanged", SetFlightMapIconSize)
 			SetFlightMapScale()
 
 			-- Help button tooltip
@@ -3623,7 +3623,7 @@
 
 			-- Back button handler
 			TaxiPanel.b:SetScript("OnClick", function()
-				TaxiPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show()
+				TaxiPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
@@ -3631,15 +3631,15 @@
 			TaxiPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				LeaPlusLC["LeaPlusTaxiMapScale"] = 1.9
-				LeaPlusLC["LeaPlusTaxiIconSize"] = 10
+				RGXQoLLC["LeaPlusTaxiMapScale"] = 1.9
+				RGXQoLLC["LeaPlusTaxiIconSize"] = 10
 				SetFlightMapScale()
-				LeaPlusLC["FlightMapA"] = "TOPLEFT"
-				LeaPlusLC["FlightMapR"] = "TOPLEFT"
-				LeaPlusLC["FlightMapX"] = 0
-				LeaPlusLC["FlightMapY"] = 61
+				RGXQoLLC["FlightMapA"] = "TOPLEFT"
+				RGXQoLLC["FlightMapR"] = "TOPLEFT"
+				RGXQoLLC["FlightMapX"] = 0
+				RGXQoLLC["FlightMapY"] = 61
 				TaxiFrame:ClearAllPoints()
-				TaxiFrame:SetPoint(LeaPlusLC["FlightMapA"], UIParent, LeaPlusLC["FlightMapR"], LeaPlusLC["FlightMapX"], LeaPlusLC["FlightMapY"])
+				TaxiFrame:SetPoint(RGXQoLLC["FlightMapA"], UIParent, RGXQoLLC["FlightMapR"], RGXQoLLC["FlightMapX"], RGXQoLLC["FlightMapY"])
 
 				-- Refresh side panel
 				TaxiPanel:Hide(); TaxiPanel:Show()
@@ -3647,23 +3647,23 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["EnhanceFlightMapBtn"]:SetScript("OnClick", function()
-				if LeaPlusLC:PlayerInCombat() then
+			RGXQoLCB["EnhanceFlightMapBtn"]:SetScript("OnClick", function()
+				if RGXQoLLC:PlayerInCombat() then
 					return
 				else
 					if IsShiftKeyDown() and IsControlKeyDown() then
 						-- Preset profile
-						LeaPlusLC["LeaPlusTaxiMapScale"] = 1.9
-						LeaPlusLC["LeaPlusTaxiIconSize"] = 10
-						LeaPlusLC["FlightMapA"] = "TOPLEFT"
-						LeaPlusLC["FlightMapR"] = "TOPLEFT"
-						LeaPlusLC["FlightMapX"] = 0
-						LeaPlusLC["FlightMapY"] = 61
+						RGXQoLLC["LeaPlusTaxiMapScale"] = 1.9
+						RGXQoLLC["LeaPlusTaxiIconSize"] = 10
+						RGXQoLLC["FlightMapA"] = "TOPLEFT"
+						RGXQoLLC["FlightMapR"] = "TOPLEFT"
+						RGXQoLLC["FlightMapX"] = 0
+						RGXQoLLC["FlightMapY"] = 61
 						SetFlightMapScale()
 						SetFlightMapIconSize()
 					else
 						TaxiPanel:Show()
-						LeaPlusLC:HideFrames()
+						RGXQoLLC:HideFrames()
 					end
 				end
 			end)
@@ -3686,11 +3686,11 @@
 			TaxiFrame:SetScript("OnDragStop", function()
 				TaxiFrame:StopMovingOrSizing()
 				TaxiFrame:SetUserPlaced(false)
-				LeaPlusLC["FlightMapA"], void, LeaPlusLC["FlightMapR"], LeaPlusLC["FlightMapX"], LeaPlusLC["FlightMapY"] = TaxiFrame:GetPoint()
+				RGXQoLLC["FlightMapA"], void, RGXQoLLC["FlightMapR"], RGXQoLLC["FlightMapX"], RGXQoLLC["FlightMapY"] = TaxiFrame:GetPoint()
 			end)
 
 			-- ElvUI fixes
-			if LeaPlusLC.ElvUI then
+			if RGXQoLLC.ElvUI then
 				if TaxiFrame.backdrop then
 					border:ClearAllPoints()
 					border:SetPoint("TOPLEFT", 22, -70)
@@ -3706,7 +3706,7 @@
 		-- Keep audio synced
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["KeepAudioSynced"] == "On" then
+		if RGXQoLLC["KeepAudioSynced"] == "On" then
 
 			SetCVar("Sound_OutputDriverIndex", "0")
 			local event = CreateFrame("FRAME")
@@ -3727,19 +3727,19 @@
 		do
 
 			-- Create configuration panel
-			local MuteCustomPanel = LeaPlusLC:CreatePanel("Mute custom sounds", "MuteCustomPanel")
+			local MuteCustomPanel = RGXQoLLC:CreatePanel("Mute custom sounds", "MuteCustomPanel")
 
-			local titleTX = LeaPlusLC:MakeTx(MuteCustomPanel, "Editor", 16, -72)
+			local titleTX = RGXQoLLC:MakeTx(MuteCustomPanel, "Editor", 16, -72)
 			titleTX:SetWidth(534)
 			titleTX:SetWordWrap(false)
 			titleTX:SetJustifyH("LEFT")
 
 			-- Show help button for title
-			LeaPlusLC:CreateHelpButton("MuteGameSoundsCustomHelpButton", MuteCustomPanel, titleTX, "Enter sound file IDs separated by comma then click the Mute button.|n|nIf you wish, you can enter a brief note for each file ID but do not include numbers in your notes.|n|nFor example, you can enter 'DevAura 569679, RetAura 568744' to mute the Devotion Aura and Retribution Aura spells.|n|nUse Leatrix Sounds to find, test and play sound file IDs.")
+			RGXQoLLC:CreateHelpButton("MuteGameSoundsCustomHelpButton", MuteCustomPanel, titleTX, "Enter sound file IDs separated by comma then click the Mute button.|n|nIf you wish, you can enter a brief note for each file ID but do not include numbers in your notes.|n|nFor example, you can enter 'DevAura 569679, RetAura 568744' to mute the Devotion Aura and Retribution Aura spells.|n|nUse Leatrix Sounds to find, test and play sound file IDs.")
 
 			-- Add large editbox
 			local eb = CreateFrame("Frame", nil, MuteCustomPanel, "BackdropTemplate")
-			eb:SetSize(548, LeaPlusLC.MainPanelHeight - 180)
+			eb:SetSize(548, RGXQoLLC.MainPanelHeight - 180)
 			eb:SetPoint("TOPLEFT", 10, -92)
 			eb:SetBackdrop({
 				bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -3778,15 +3778,15 @@
 			local function SaveString(self, userInput)
 				local keytext = eb.Text:GetText()
 				if keytext and keytext ~= "" then
-					LeaPlusLC["MuteCustomList"] = strtrim(eb.Text:GetText())
+					RGXQoLLC["MuteCustomList"] = strtrim(eb.Text:GetText())
 				else
-					LeaPlusLC["MuteCustomList"] = ""
+					RGXQoLLC["MuteCustomList"] = ""
 				end
 			end
 
 			-- Save the custom sound list when it changes and at startup
 			eb.Text:SetScript("OnTextChanged", SaveString)
-			eb.Text:SetText(LeaPlusLC["MuteCustomList"])
+			eb.Text:SetText(RGXQoLLC["MuteCustomList"])
 			SaveString()
 
 			-- Help button hidden
@@ -3794,7 +3794,7 @@
 
 			-- Back button handler
 			MuteCustomPanel.b:SetScript("OnClick", function()
-				MuteCustomPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page7"]:Show()
+				MuteCustomPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page7"]:Show()
 				return
 			end)
 
@@ -3802,14 +3802,14 @@
 			MuteCustomPanel.r:Hide()
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["MuteCustomSoundsBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["MuteCustomSoundsBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["MuteCustomList"] = "Devotion Aura 569679, Retribution Aura 568744"
-					eb.Text:SetText(LeaPlusLC["MuteCustomList"])
+					RGXQoLLC["MuteCustomList"] = "Devotion Aura 569679, Retribution Aura 568744"
+					eb.Text:SetText(RGXQoLLC["MuteCustomList"])
 				else
 					MuteCustomPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -3819,7 +3819,7 @@
 				do return end
 				-- local mutedebug = true -- Debug
 				local counter = 0
-				local muteString = LeaPlusLC["MuteCustomList"]
+				local muteString = RGXQoLLC["MuteCustomList"]
 				if muteString and muteString ~= "" then
 					muteString = muteString:gsub("%s", ",")
 					muteString = muteString:gsub("[\n]", ",")
@@ -3844,15 +3844,15 @@
 					if userInput then
 						if unmute then
 							if counter == 1 then
-								LeaPlusLC:Print(L["Unmuted"] .. " " .. counter .. " " .. L["sound"] .. ".")
+								RGXQoLLC:Print(L["Unmuted"] .. " " .. counter .. " " .. L["sound"] .. ".")
 							else
-								LeaPlusLC:Print(L["Unmuted"] .. " " .. counter .. " " .. L["sounds"] .. ".")
+								RGXQoLLC:Print(L["Unmuted"] .. " " .. counter .. " " .. L["sounds"] .. ".")
 							end
 						else
 							if counter == 1 then
-								LeaPlusLC:Print(L["Muted"] .. " " .. counter .. " " .. L["sound"] .. ".")
+								RGXQoLLC:Print(L["Muted"] .. " " .. counter .. " " .. L["sound"] .. ".")
 							else
-								LeaPlusLC:Print(L["Muted"] .. " " .. counter .. " " .. L["sounds"] .. ".")
+								RGXQoLLC:Print(L["Muted"] .. " " .. counter .. " " .. L["sounds"] .. ".")
 							end
 						end
 					end
@@ -3860,13 +3860,13 @@
 			end
 
 			-- Mute custom list on startup if option is enabled
-			if LeaPlusLC["MuteCustomSounds"] == "On" then
+			if RGXQoLLC["MuteCustomSounds"] == "On" then
 				MuteCustomListFunc()
 			end
 
 			-- Mute or unmute when option is clicked
-			LeaPlusCB["MuteCustomSounds"]:HookScript("OnClick", function()
-				if LeaPlusLC["MuteCustomSounds"] == "On" then
+			RGXQoLCB["MuteCustomSounds"]:HookScript("OnClick", function()
+				if RGXQoLLC["MuteCustomSounds"] == "On" then
 					MuteCustomListFunc(false, false)
 				else
 					MuteCustomListFunc(true, false)
@@ -3874,27 +3874,27 @@
 			end)
 
 			-- Add mute button
-			local MuteCustomNowButton = LeaPlusLC:CreateButton("MuteCustomNowButton", MuteCustomPanel, "Mute", "BOTTOMLEFT", 16, 53, 0, 25, true, "Click to mute sounds in the list.")
-			LeaPlusCB["MuteCustomNowButton"]:SetScript("OnClick", function() MuteCustomListFunc(false, true) end)
+			local MuteCustomNowButton = RGXQoLLC:CreateButton("MuteCustomNowButton", MuteCustomPanel, "Mute", "BOTTOMLEFT", 16, 53, 0, 25, true, "Click to mute sounds in the list.")
+			RGXQoLCB["MuteCustomNowButton"]:SetScript("OnClick", function() MuteCustomListFunc(false, true) end)
 
 			-- Add unmute button
-			local UnmuteCustomNowButton = LeaPlusLC:CreateButton("UnmuteCustomNowButton", MuteCustomPanel, "Unmute", "BOTTOMLEFT", 16, 53, 0, 25, true, "Click to unmute sounds in the list.")
-			LeaPlusCB["UnmuteCustomNowButton"]:ClearAllPoints()
-			LeaPlusCB["UnmuteCustomNowButton"]:SetPoint("LEFT", MuteCustomNowButton, "RIGHT", 10, 0)
-			LeaPlusCB["UnmuteCustomNowButton"]:SetScript("OnClick", function() MuteCustomListFunc(true, true) end)
+			local UnmuteCustomNowButton = RGXQoLLC:CreateButton("UnmuteCustomNowButton", MuteCustomPanel, "Unmute", "BOTTOMLEFT", 16, 53, 0, 25, true, "Click to unmute sounds in the list.")
+			RGXQoLCB["UnmuteCustomNowButton"]:ClearAllPoints()
+			RGXQoLCB["UnmuteCustomNowButton"]:SetPoint("LEFT", MuteCustomNowButton, "RIGHT", 10, 0)
+			RGXQoLCB["UnmuteCustomNowButton"]:SetScript("OnClick", function() MuteCustomListFunc(true, true) end)
 
 			-- Add play sound file editbox
 			local willPlay, musicHandle
-			local MuteCustomSoundsStopButton = LeaPlusLC:CreateButton("MuteCustomSoundsStopButton", MuteCustomPanel, "Stop", "TOPRIGHT", -18, -66, 0, 25, true, "")
+			local MuteCustomSoundsStopButton = RGXQoLLC:CreateButton("MuteCustomSoundsStopButton", MuteCustomPanel, "Stop", "TOPRIGHT", -18, -66, 0, 25, true, "")
 			MuteCustomSoundsStopButton:SetScript("OnClick", function()
 				if musicHandle then StopSound(musicHandle) end
 			end)
 
-			local MuteCustomSoundsPlayButton = LeaPlusLC:CreateButton("MuteCustomSoundsPlayButton", MuteCustomPanel, "Play", "TOPRIGHT", -18, -66, 0, 25, true, "")
+			local MuteCustomSoundsPlayButton = RGXQoLLC:CreateButton("MuteCustomSoundsPlayButton", MuteCustomPanel, "Play", "TOPRIGHT", -18, -66, 0, 25, true, "")
 			MuteCustomSoundsPlayButton:ClearAllPoints()
 			MuteCustomSoundsPlayButton:SetPoint("RIGHT", MuteCustomSoundsStopButton, "LEFT", -10, 0)
 
-			local MuteCustomSoundsSoundBox = LeaPlusLC:CreateEditBox("MuteCustomSoundsSoundBox", eb, 80, 8, "TOPRIGHT", -10, 20, "PlaySoundBox", "PlaySoundBox")
+			local MuteCustomSoundsSoundBox = RGXQoLLC:CreateEditBox("MuteCustomSoundsSoundBox", eb, 80, 8, "TOPRIGHT", -10, 20, "PlaySoundBox", "PlaySoundBox")
 			MuteCustomSoundsSoundBox:SetNumeric(true)
 			MuteCustomSoundsSoundBox:ClearAllPoints()
 			MuteCustomSoundsSoundBox:SetPoint("RIGHT", MuteCustomSoundsPlayButton, "LEFT", -10, 0)
@@ -3915,10 +3915,10 @@
 				end
 			end)
 
-			local titlePlayer = LeaPlusLC:MakeTx(MuteCustomPanel, "Player", 16, -72)
+			local titlePlayer = RGXQoLLC:MakeTx(MuteCustomPanel, "Player", 16, -72)
 			titlePlayer:ClearAllPoints()
 			titlePlayer:SetPoint("TOPLEFT", MuteCustomSoundsSoundBox, "TOPLEFT", -4, 16)
-			LeaPlusLC:CreateHelpButton("MuteGameSoundsCustomPlayHelpButton", MuteCustomPanel, titlePlayer, "If you want to listen to a sound file, enter the sound file ID into the editbox and click the play button.|n|nYou can scroll the mousewheel over the editbox to play neighbouring sound files.")
+			RGXQoLLC:CreateHelpButton("MuteGameSoundsCustomPlayHelpButton", MuteCustomPanel, titlePlayer, "If you want to listen to a sound file, enter the sound file ID into the editbox and click the play button.|n|nYou can scroll the mousewheel over the editbox to play neighbouring sound files.")
 		end
 
 		----------------------------------------------------------------------
@@ -3928,11 +3928,11 @@
 		do
 
 			local eFrame = CreateFrame("FRAME")
-			eFrame:SetScript("OnEvent", LeaPlusLC.CheckIfQuestIsSharedAndShouldBeDeclined)
+			eFrame:SetScript("OnEvent", RGXQoLLC.CheckIfQuestIsSharedAndShouldBeDeclined)
 
 			-- Function to set event
 			local function SetSharedQuestsFunc()
-				if LeaPlusLC["NoSharedQuests"] == "On" then
+				if RGXQoLLC["NoSharedQuests"] == "On" then
 					eFrame:RegisterEvent("QUEST_DETAIL")
 				else
 					eFrame:UnregisterEvent("QUEST_DETAIL")
@@ -3940,7 +3940,7 @@
 			end
 
 			-- Set event when option is clicked and on startup
-			LeaPlusCB["NoSharedQuests"]:HookScript("OnClick", SetSharedQuestsFunc)
+			RGXQoLCB["NoSharedQuests"]:HookScript("OnClick", SetSharedQuestsFunc)
 			SetSharedQuestsFunc()
 
 		end
@@ -3949,7 +3949,7 @@
 		-- Restore chat messages
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["RestoreChatMessages"] == "On" and not LeaLockList["RestoreChatMessages"] then
+		if RGXQoLLC["RestoreChatMessages"] == "On" and not RGXQoLLockList["RestoreChatMessages"] then
 
 			local historyFrame = CreateFrame("FRAME")
 			historyFrame:RegisterEvent("PLAYER_LOGIN")
@@ -4083,7 +4083,7 @@
 		-- Manage timer
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ManageTimer"] == "On" and not LeaLockList["ManageTimer"] then
+		if RGXQoLLC["ManageTimer"] == "On" and not RGXQoLLockList["ManageTimer"] then
 
 			-- Allow timer frame to be moved
 			MirrorTimer1:SetMovable(true)
@@ -4093,8 +4093,8 @@
 
 			-- Set timer frame position at startup
 			MirrorTimer1:ClearAllPoints()
-			MirrorTimer1:SetPoint(LeaPlusLC["TimerA"], UIParent, LeaPlusLC["TimerR"], LeaPlusLC["TimerX"], LeaPlusLC["TimerY"])
-			MirrorTimer1:SetScale(LeaPlusLC["TimerScale"])
+			MirrorTimer1:SetPoint(RGXQoLLC["TimerA"], UIParent, RGXQoLLC["TimerR"], RGXQoLLC["TimerX"], RGXQoLLC["TimerY"])
+			MirrorTimer1:SetScale(RGXQoLLC["TimerScale"])
 
 			-- Create drag frame
 			local dragframe = CreateFrame("FRAME", nil, nil, "BackdropTemplate")
@@ -4103,7 +4103,7 @@
 			dragframe:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", tile = false, tileSize = 0, edgeSize = 16, insets = { left = 0, right = 0, top = 0, bottom = 0 }})
 			dragframe:SetToplevel(true)
 			dragframe:Hide()
-			dragframe:SetScale(LeaPlusLC["TimerScale"])
+			dragframe:SetScale(RGXQoLLC["TimerScale"])
 
 			dragframe.t = dragframe:CreateTexture()
 			dragframe.t:SetAllPoints()
@@ -4125,10 +4125,10 @@
 			dragframe:SetScript("OnMouseUp", function()
 				-- Save frame positions
 				MirrorTimer1:StopMovingOrSizing()
-				LeaPlusLC["TimerA"], void, LeaPlusLC["TimerR"], LeaPlusLC["TimerX"], LeaPlusLC["TimerY"] = MirrorTimer1:GetPoint()
+				RGXQoLLC["TimerA"], void, RGXQoLLC["TimerR"], RGXQoLLC["TimerX"], RGXQoLLC["TimerY"] = MirrorTimer1:GetPoint()
 				MirrorTimer1:SetMovable(true)
 				MirrorTimer1:ClearAllPoints()
-				MirrorTimer1:SetPoint(LeaPlusLC["TimerA"], UIParent, LeaPlusLC["TimerR"], LeaPlusLC["TimerX"], LeaPlusLC["TimerY"])
+				MirrorTimer1:SetPoint(RGXQoLLC["TimerA"], UIParent, RGXQoLLC["TimerR"], RGXQoLLC["TimerX"], RGXQoLLC["TimerY"])
 			end)
 
 			-- Snap-to-grid
@@ -4154,33 +4154,33 @@
 			end
 
 			-- Create configuration panel
-			local TimerPanel = LeaPlusLC:CreatePanel("Manage timer", "TimerPanel")
+			local TimerPanel = RGXQoLLC:CreatePanel("Manage timer", "TimerPanel")
 
-			LeaPlusLC:MakeTx(TimerPanel, "Scale", 16, -72)
-			LeaPlusLC:MakeSL(TimerPanel, "TimerScale", "Drag to set the timer bar scale.", 0.5, 2, 0.05, 16, -92, "%.2f")
+			RGXQoLLC:MakeTx(TimerPanel, "Scale", 16, -72)
+			RGXQoLLC:MakeSL(TimerPanel, "TimerScale", "Drag to set the timer bar scale.", 0.5, 2, 0.05, 16, -92, "%.2f")
 
 			-- Set scale when slider is changed
-			LeaPlusCB["TimerScale"]:HookScript("OnValueChanged", function()
-				MirrorTimer1:SetScale(LeaPlusLC["TimerScale"])
-				dragframe:SetScale(LeaPlusLC["TimerScale"])
+			RGXQoLCB["TimerScale"]:HookScript("OnValueChanged", function()
+				MirrorTimer1:SetScale(RGXQoLLC["TimerScale"])
+				dragframe:SetScale(RGXQoLLC["TimerScale"])
 				-- Show formatted slider value
-				LeaPlusCB["TimerScale"].f:SetFormattedText("%.0f%%", LeaPlusLC["TimerScale"] * 100)
+				RGXQoLCB["TimerScale"].f:SetFormattedText("%.0f%%", RGXQoLLC["TimerScale"] * 100)
 			end)
 
 			-- Hide frame alignment grid with panel
 			TimerPanel:HookScript("OnHide", function()
-				LeaPlusLC.grid:Hide()
+				RGXQoLLC.grid:Hide()
 			end)
 
 			-- Toggle grid button
-			local TimerToggleGridButton = LeaPlusLC:CreateButton("TimerToggleGridButton", TimerPanel, "Toggle Grid", "TOPLEFT", 16, -72, 0, 25, true, "Click to toggle the frame alignment grid.")
-			LeaPlusCB["TimerToggleGridButton"]:ClearAllPoints()
-			LeaPlusCB["TimerToggleGridButton"]:SetPoint("LEFT", TimerPanel.h, "RIGHT", 10, 0)
-			LeaPlusCB["TimerToggleGridButton"]:SetScript("OnClick", function()
-				if LeaPlusLC.grid:IsShown() then LeaPlusLC.grid:Hide() else LeaPlusLC.grid:Show() end
+			local TimerToggleGridButton = RGXQoLLC:CreateButton("TimerToggleGridButton", TimerPanel, "Toggle Grid", "TOPLEFT", 16, -72, 0, 25, true, "Click to toggle the frame alignment grid.")
+			RGXQoLCB["TimerToggleGridButton"]:ClearAllPoints()
+			RGXQoLCB["TimerToggleGridButton"]:SetPoint("LEFT", TimerPanel.h, "RIGHT", 10, 0)
+			RGXQoLCB["TimerToggleGridButton"]:SetScript("OnClick", function()
+				if RGXQoLLC.grid:IsShown() then RGXQoLLC.grid:Hide() else RGXQoLLC.grid:Show() end
 			end)
 			TimerPanel:HookScript("OnHide", function()
-				if LeaPlusLC.grid then LeaPlusLC.grid:Hide() end
+				if RGXQoLLC.grid then RGXQoLLC.grid:Hide() end
 			end)
 
 			-- Help button tooltip
@@ -4188,7 +4188,7 @@
 
 			-- Back button handler
 			TimerPanel.b:SetScript("OnClick", function()
-				TimerPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page6"]:Show()
+				TimerPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page6"]:Show()
 				return
 			end)
 
@@ -4196,55 +4196,55 @@
 			TimerPanel.r:SetScript("OnClick", function()
 
 				-- Reset position and scale
-				LeaPlusLC["TimerA"] = "TOP"
-				LeaPlusLC["TimerR"] = "TOP"
-				LeaPlusLC["TimerX"] = -5
-				LeaPlusLC["TimerY"] = -96
-				LeaPlusLC["TimerScale"] = 1
+				RGXQoLLC["TimerA"] = "TOP"
+				RGXQoLLC["TimerR"] = "TOP"
+				RGXQoLLC["TimerX"] = -5
+				RGXQoLLC["TimerY"] = -96
+				RGXQoLLC["TimerScale"] = 1
 				MirrorTimer1:ClearAllPoints()
-				MirrorTimer1:SetPoint(LeaPlusLC["TimerA"], UIParent, LeaPlusLC["TimerR"], LeaPlusLC["TimerX"], LeaPlusLC["TimerY"])
+				MirrorTimer1:SetPoint(RGXQoLLC["TimerA"], UIParent, RGXQoLLC["TimerR"], RGXQoLLC["TimerX"], RGXQoLLC["TimerY"])
 
 				-- Refresh configuration panel
 				TimerPanel:Hide(); TimerPanel:Show()
 				dragframe:Show()
 
 				-- Show frame alignment grid
-				LeaPlusLC.grid:Show()
+				RGXQoLLC.grid:Show()
 
 			end)
 
 			-- Show configuration panel when options panel button is clicked
-			LeaPlusCB["ManageTimerButton"]:SetScript("OnClick", function()
+			RGXQoLCB["ManageTimerButton"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["TimerA"] = "TOP"
-					LeaPlusLC["TimerR"] = "TOP"
-					LeaPlusLC["TimerX"] = 0
-					LeaPlusLC["TimerY"] = -120
-					LeaPlusLC["TimerScale"] = 1
+					RGXQoLLC["TimerA"] = "TOP"
+					RGXQoLLC["TimerR"] = "TOP"
+					RGXQoLLC["TimerX"] = 0
+					RGXQoLLC["TimerY"] = -120
+					RGXQoLLC["TimerScale"] = 1
 					MirrorTimer1:ClearAllPoints()
-					MirrorTimer1:SetPoint(LeaPlusLC["TimerA"], UIParent, LeaPlusLC["TimerR"], LeaPlusLC["TimerX"], LeaPlusLC["TimerY"])
-					MirrorTimer1:SetScale(LeaPlusLC["TimerScale"])
+					MirrorTimer1:SetPoint(RGXQoLLC["TimerA"], UIParent, RGXQoLLC["TimerR"], RGXQoLLC["TimerX"], RGXQoLLC["TimerY"])
+					MirrorTimer1:SetScale(RGXQoLLC["TimerScale"])
 				else
 					-- Find out if the UI has a non-standard scale
 					if GetCVar("useuiscale") == "1" then
-						LeaPlusLC["gscale"] = GetCVar("uiscale")
+						RGXQoLLC["gscale"] = GetCVar("uiscale")
 					else
-						LeaPlusLC["gscale"] = 1
+						RGXQoLLC["gscale"] = 1
 					end
 
 					-- Set drag frame size according to UI scale
-					dragframe:SetWidth(206 * LeaPlusLC["gscale"])
-					dragframe:SetHeight(20 * LeaPlusLC["gscale"])
+					dragframe:SetWidth(206 * RGXQoLLC["gscale"])
+					dragframe:SetHeight(20 * RGXQoLLC["gscale"])
 					dragframe:SetFrameStrata("HIGH") -- MirrorTimer is medium
 
 					-- Show configuration panel
 					TimerPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 					dragframe:Show()
 
 					-- Show frame alignment grid
-					LeaPlusLC.grid:Show()
+					RGXQoLLC.grid:Show()
 				end
 			end)
 
@@ -4257,7 +4257,7 @@
 		-- Show ready timer
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowReadyTimer"] == "On" then
+		if RGXQoLLC["ShowReadyTimer"] == "On" then
 
 			-- Player vs Player
 			do
@@ -4318,15 +4318,15 @@
 		-- Show flight times
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowFlightTimes"] == "On" then
+		if RGXQoLLC["ShowFlightTimes"] == "On" then
 
 			-- Load flight data
-			Leatrix_Plus["FlightData"] = {}
+			RGXQoLAddon["FlightData"] = {}
 			local faction = UnitFactionGroup("player")
 			if faction == "Alliance" then
-				Leatrix_Plus:LoadFlightDataAlliance()
+				RGXQoLAddon:LoadFlightDataAlliance()
 			elseif faction == "Horde" then
-				Leatrix_Plus:LoadFlightDataHorde()
+				RGXQoLAddon:LoadFlightDataHorde()
 			end
 
 			-- Minimum time difference (in seconds) to flight data entry before flight report window is shown
@@ -4422,14 +4422,14 @@
 			-- editBox:SetText(introMsg .. "Flight details (Classic Era): Nesingwary Base Camp (0.18:0.40) to Conquest Hold (0.70:0.55) (Horde) took 690 seconds (5 hop)." .. "|n|n" .. "[" .. '"' .. "0.18:0.40:0.24:0.40:0.52:0.38:0.54:0.52:0.59:0.55:0.70:0.55" .. '"' .. "] = 690, -- Nesingwary Base Camp, River's Heart, Dalaran, Wyrmrest Temple, Venomspite, Conquest Hold|n|nThis flight does not exist in the database."); editFrame:Show()
 
 			-- Load LibCandyBar
-			Leatrix_Plus:LeaPlusCandyBar()
+			RGXQoLAddon:RGXQoLCandyBar()
 
 			-- Variables
-			local data = Leatrix_Plus["FlightData"]
+			local data = RGXQoLAddon["FlightData"]
 			local candy = LibStub("LibCandyBar-3.0")
 			local texture = "Interface\\TargetingFrame\\UI-StatusBar"
 			local flightFrame = CreateFrame("FRAME")
-			LeaPlusLC.flightFrame = flightFrame
+			RGXQoLLC.flightFrame = flightFrame
 
 			-- Set game title as shown in incorrect flight details window
 			local gameTitle = L["Classic Era"]
@@ -4478,7 +4478,7 @@
 						local barName = GetNodeName(node)
 
 						-- Assign file level scope to destination (it's used for removing bar name)
-						LeaPlusLC.FlightDestination = barName
+						RGXQoLLC.FlightDestination = barName
 
 						-- Build route string and debug string
 						local numHops = GetNumRoutes(node)
@@ -4519,9 +4519,9 @@
 							else
 								-- Player is not on a taxi so delete the flight progress bar
 								flightFrame:UnregisterEvent("PLAYER_CONTROL_GAINED")
-								if LeaPlusLC.FlightProgressBar then
-									LeaPlusLC.FlightProgressBar:Stop()
-									LeaPlusLC.FlightProgressBar = nil
+								if RGXQoLLC.FlightProgressBar then
+									RGXQoLLC.FlightProgressBar:Stop()
+									RGXQoLLC.FlightProgressBar = nil
 								end
 							end
 						end)
@@ -4535,22 +4535,22 @@
 								if savedDuration then
 									if timeTaken > (savedDuration + timeBuffer) or timeTaken < (savedDuration - timeBuffer) then
 										local editMsg = introMsg .. flightMsg .. L["This flight's actual time of"] .. " " .. string.format("%0.0f", timeTaken) .. " " .. L["seconds does not match the saved flight time of"] .. " " .. savedDuration .. " " .. L["seconds"] .. "."
-										editBox:SetText(editMsg); if LeaPlusLC["FlightBarContribute"] == "On2" then editFrame:Show() end -- LeaPlusLC.NewPatch: Currently disabled, change to On to enable again
+										editBox:SetText(editMsg); if RGXQoLLC["FlightBarContribute"] == "On2" then editFrame:Show() end -- RGXQoLLC.NewPatch: Currently disabled, change to On to enable again
 									end
 								else
 									local editMsg = introMsg .. flightMsg .. L["This flight does not have a saved duration in the database."]
-									editBox:SetText(editMsg); if LeaPlusLC["FlightBarContribute"] == "On2" then editFrame:Show() end -- LeaPlusLC.NewPatch: Currently disabled, change to On to enable again
+									editBox:SetText(editMsg); if RGXQoLLC["FlightBarContribute"] == "On2" then editFrame:Show() end -- RGXQoLLC.NewPatch: Currently disabled, change to On to enable again
 								end
 							else
 								local editMsg = introMsg .. flightMsg .. L["This flight does not exist in the database."]
-								editBox:SetText(editMsg); if LeaPlusLC["FlightBarContribute"] == "On2" then editFrame:Show() end -- LeaPlusLC.NewPatch: Currently disabled, change to On to enable again
+								editBox:SetText(editMsg); if RGXQoLLC["FlightBarContribute"] == "On2" then editFrame:Show() end -- RGXQoLLC.NewPatch: Currently disabled, change to On to enable again
 							end
 							flightFrame:UnregisterEvent("PLAYER_CONTROL_GAINED")
 
 							-- Delete the progress bar since we have landed
-							if LeaPlusLC.FlightProgressBar then
-								LeaPlusLC.FlightProgressBar:Stop()
-								LeaPlusLC.FlightProgressBar = nil
+							if RGXQoLLC.FlightProgressBar then
+								RGXQoLLC.FlightProgressBar:Stop()
+								RGXQoLLC.FlightProgressBar = nil
 							end
 						end)
 
@@ -4561,16 +4561,16 @@
 							if duration then
 
 								-- Delete an existing progress bar if one exists
-								if LeaPlusLC.FlightProgressBar then
-									LeaPlusLC.FlightProgressBar:Stop()
-									LeaPlusLC.FlightProgressBar = nil
+								if RGXQoLLC.FlightProgressBar then
+									RGXQoLLC.FlightProgressBar:Stop()
+									RGXQoLLC.FlightProgressBar = nil
 								end
 
 								-- Create progress bar
 								local mybar = candy:New(texture, 230, 16)
-								mybar:SetPoint(LeaPlusLC["FlightBarA"], UIParent, LeaPlusLC["FlightBarR"], LeaPlusLC["FlightBarX"], LeaPlusLC["FlightBarY"])
-								mybar:SetScale(LeaPlusLC["FlightBarScale"])
-								mybar:SetWidth(LeaPlusLC["FlightBarWidth"])
+								mybar:SetPoint(RGXQoLLC["FlightBarA"], UIParent, RGXQoLLC["FlightBarR"], RGXQoLLC["FlightBarX"], RGXQoLLC["FlightBarY"])
+								mybar:SetScale(RGXQoLLC["FlightBarScale"])
+								mybar:SetWidth(RGXQoLLC["FlightBarWidth"])
 
 								-- Setup sound files
 								local mt
@@ -4579,7 +4579,7 @@
 								local Seconds030, Seconds020, Seconds010
 								local speed = -2
 
-								if LeaPlusLC["FlightBarSpeech"] == "On" then
+								if RGXQoLLC["FlightBarSpeech"] == "On" then
 									C_Timer.After(1, function()
 										C_VoiceChat.SpeakText(0, L["Flight commenced."], speed, GetCVar("Sound_MasterVolume") * 100)
 									end)
@@ -4612,7 +4612,7 @@
 								mybar:SetScript("OnMouseDown", function(self, btn)
 									if btn == "RightButton" then
 										mybar:Stop()
-										LeaPlusLC.FlightProgressBar = nil
+										RGXQoLLC.FlightProgressBar = nil
 									end
 								end)
 
@@ -4623,13 +4623,13 @@
 								mybar.candyBarLabel:SetPoint("BOTTOMRIGHT", mybar.candyBarBackground, "BOTTOMRIGHT", -40, 0)
 
 								-- Set flight bar background
-								if LeaPlusLC["FlightBarBackground"] == "On" then
-									if LeaPlusLC.ElvUI then
+								if RGXQoLLC["FlightBarBackground"] == "On" then
+									if RGXQoLLC.ElvUI then
 										_G.LeaPlusGlobalFlightBar = mybar.candyBarBar
 										if faction == "Alliance" then
-											LeaPlusLC.ElvUI:GetModule("Skins"):HandleStatusBar(_G.LeaPlusGlobalFlightBar, {0, 0.5, 1, 0.5})
+											RGXQoLLC.ElvUI:GetModule("Skins"):HandleStatusBar(_G.LeaPlusGlobalFlightBar, {0, 0.5, 1, 0.5})
 										else
-											LeaPlusLC.ElvUI:GetModule("Skins"):HandleStatusBar(_G.LeaPlusGlobalFlightBar, {1, 0.0, 0, 0.5})
+											RGXQoLLC.ElvUI:GetModule("Skins"):HandleStatusBar(_G.LeaPlusGlobalFlightBar, {1, 0.0, 0, 0.5})
 										end
 									else
 										mybar:SetTexture(texture)
@@ -4639,12 +4639,12 @@
 								end
 
 								-- Set flight bar destination
-								if LeaPlusLC["FlightBarDestination"] == "On" then
+								if RGXQoLLC["FlightBarDestination"] == "On" then
 									mybar:SetLabel(barName)
 								end
 
 								-- Set flight bar fill mode
-								if LeaPlusLC["FlightBarFillBar"] == "On" then
+								if RGXQoLLC["FlightBarFillBar"] == "On" then
 									mybar:SetFill(true)
 								else
 									mybar:SetFill(false)
@@ -4655,12 +4655,12 @@
 								mybar:Start()
 
 								-- Unlock close bar button
-								if LeaPlusCB["CloseFlightBarButton"] then
-									LeaPlusLC:LockItem(LeaPlusCB["CloseFlightBarButton"], false)
+								if RGXQoLCB["CloseFlightBarButton"] then
+									RGXQoLLC:LockItem(RGXQoLCB["CloseFlightBarButton"], false)
 								end
 
 								-- Assign file level scope to the bar so it can be cancelled later
-								LeaPlusLC.FlightProgressBar = mybar
+								RGXQoLLC.FlightProgressBar = mybar
 
 							end
 
@@ -4672,9 +4672,9 @@
 
 			-- Function to stop the progress bar
 			local function CeaseProgress()
-				if LeaPlusLC.FlightProgressBar then
-					LeaPlusLC.FlightProgressBar:Stop()
-					LeaPlusLC.FlightProgressBar = nil
+				if RGXQoLLC.FlightProgressBar then
+					RGXQoLLC.FlightProgressBar:Stop()
+					RGXQoLLC.FlightProgressBar = nil
 				end
 			end
 
@@ -4754,7 +4754,7 @@
 
 			-- Unregister landing event for various reasons that stop taxi early
 			local function StopLandingEvent()
-				LeaPlusLC.flightFrame:UnregisterEvent("PLAYER_CONTROL_GAINED")
+				RGXQoLLC.flightFrame:UnregisterEvent("PLAYER_CONTROL_GAINED")
 			end
 
 			hooksecurefunc("TaxiNodeOnButtonEnter", StopLandingEvent)
@@ -4772,7 +4772,7 @@
 			tempFrame:SetHeight(16)
 			tempFrame:SetScale(2)
 			tempFrame:ClearAllPoints()
-			tempFrame:SetPoint(LeaPlusLC["FlightBarA"], UIParent, LeaPlusLC["FlightBarR"], LeaPlusLC["FlightBarX"], LeaPlusLC["FlightBarY"])
+			tempFrame:SetPoint(RGXQoLLC["FlightBarA"], UIParent, RGXQoLLC["FlightBarR"], RGXQoLLC["FlightBarX"], RGXQoLLC["FlightBarY"])
 			tempFrame:Hide()
 			tempFrame:SetFrameStrata("FULLSCREEN_DIALOG")
 			tempFrame:SetFrameLevel(5000)
@@ -4792,11 +4792,11 @@
 			end)
 			tempFrame:SetScript("OnMouseUp", function()
 				tempFrame:StopMovingOrSizing()
-				LeaPlusLC["FlightBarA"], void, LeaPlusLC["FlightBarR"], LeaPlusLC["FlightBarX"], LeaPlusLC["FlightBarY"] = tempFrame:GetPoint()
+				RGXQoLLC["FlightBarA"], void, RGXQoLLC["FlightBarR"], RGXQoLLC["FlightBarX"], RGXQoLLC["FlightBarY"] = tempFrame:GetPoint()
 				-- Position actual flight progress bar if one exists
-				if LeaPlusLC.FlightProgressBar then
-					LeaPlusLC.FlightProgressBar:ClearAllPoints()
-					LeaPlusLC.FlightProgressBar:SetPoint(LeaPlusLC["FlightBarA"], UIParent, LeaPlusLC["FlightBarR"], LeaPlusLC["FlightBarX"], LeaPlusLC["FlightBarY"])
+				if RGXQoLLC.FlightProgressBar then
+					RGXQoLLC.FlightProgressBar:ClearAllPoints()
+					RGXQoLLC.FlightProgressBar:SetPoint(RGXQoLLC["FlightBarA"], UIParent, RGXQoLLC["FlightBarR"], RGXQoLLC["FlightBarX"], RGXQoLLC["FlightBarY"])
 				end
 			end)
 
@@ -4805,138 +4805,138 @@
 			----------------------------------------------------------------------
 
 			-- Create configuration panel
-			local FlightPanel = LeaPlusLC:CreatePanel("Show flight times", "FlightPanel")
+			local FlightPanel = RGXQoLLC:CreatePanel("Show flight times", "FlightPanel")
 
-			LeaPlusLC:MakeTx(FlightPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(FlightPanel, "FlightBarBackground", "Show background", 16, -92, false, "If checked, the flight progress bar background texture will be shown.")
-			LeaPlusLC:MakeCB(FlightPanel, "FlightBarDestination", "Show destination", 16, -112, false, "If checked, the flight progress bar destination will be shown.")
-			LeaPlusLC:MakeCB(FlightPanel, "FlightBarFillBar", "Fill instead of drain", 16, -132, false, "If checked, the flight progress bar background will fill instead of drain.")
-			LeaPlusLC:MakeCB(FlightPanel, "FlightBarSpeech", "Speak the remaining time", 16, -152, false, "If checked, the remaining flight time will be spoken using text to speech.|n|nChanges to this setting will take effect on the next flight you take.")
+			RGXQoLLC:MakeTx(FlightPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(FlightPanel, "FlightBarBackground", "Show background", 16, -92, false, "If checked, the flight progress bar background texture will be shown.")
+			RGXQoLLC:MakeCB(FlightPanel, "FlightBarDestination", "Show destination", 16, -112, false, "If checked, the flight progress bar destination will be shown.")
+			RGXQoLLC:MakeCB(FlightPanel, "FlightBarFillBar", "Fill instead of drain", 16, -132, false, "If checked, the flight progress bar background will fill instead of drain.")
+			RGXQoLLC:MakeCB(FlightPanel, "FlightBarSpeech", "Speak the remaining time", 16, -152, false, "If checked, the remaining flight time will be spoken using text to speech.|n|nChanges to this setting will take effect on the next flight you take.")
 
-			LeaPlusLC:MakeTx(FlightPanel, "Contribute", 16, -192)
-			LeaPlusLC:MakeCB(FlightPanel, "FlightBarContribute", "Help contribute flight times", 16, -212, false, "If checked, you will be prompted to submit missing flight times.")
+			RGXQoLLC:MakeTx(FlightPanel, "Contribute", 16, -192)
+			RGXQoLLC:MakeCB(FlightPanel, "FlightBarContribute", "Help contribute flight times", 16, -212, false, "If checked, you will be prompted to submit missing flight times.")
 
-			LeaPlusLC:MakeTx(FlightPanel, "Scale", 356, -72)
-			LeaPlusLC:MakeSL(FlightPanel, "FlightBarScale", "Drag to set the flight progress bar scale.", 1, 5, 0.1, 356, -92, "%.2f")
+			RGXQoLLC:MakeTx(FlightPanel, "Scale", 356, -72)
+			RGXQoLLC:MakeSL(FlightPanel, "FlightBarScale", "Drag to set the flight progress bar scale.", 1, 5, 0.1, 356, -92, "%.2f")
 
-			LeaPlusLC:MakeTx(FlightPanel, "Width", 356, -132)
-			LeaPlusLC:MakeSL(FlightPanel, "FlightBarWidth", "Drag to set the flight progress bar width.", 40, 460, 10, 356, -152, "%.0f")
+			RGXQoLLC:MakeTx(FlightPanel, "Width", 356, -132)
+			RGXQoLLC:MakeSL(FlightPanel, "FlightBarWidth", "Drag to set the flight progress bar width.", 40, 460, 10, 356, -152, "%.0f")
 
 			-- Function to lock an option and add a note to the tooltip
 			local function LockDF(option, reason)
-				LeaPlusLC:LockItem(LeaPlusCB[option], true)
+				RGXQoLLC:LockItem(RGXQoLCB[option], true)
 				if reason then
-					LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. "|n|n|cff00AAFF" .. L[reason]
+					RGXQoLCB[option].tiptext = RGXQoLCB[option].tiptext .. "|n|n|cff00AAFF" .. L[reason]
 				end
 			end
 
-			-- LeaPlusLC.NewPatch
+			-- RGXQoLLC.NewPatch
 			LockDF("FlightBarContribute", L["This option is not currently available."])
 
 			-- Add close bar button
-			local CloseFlightBarButton = LeaPlusLC:CreateButton("CloseFlightBarButton", FlightPanel, "Close Bar", "TOPLEFT", 16, -72, 0, 25, true, "Click to close the currently active flight progress bar.")
-			LeaPlusCB["CloseFlightBarButton"]:ClearAllPoints()
-			LeaPlusCB["CloseFlightBarButton"]:SetPoint("LEFT", FlightPanel.h, "RIGHT", 10, 0)
-			LeaPlusCB["CloseFlightBarButton"]:SetScript("OnClick", function()
-				if LeaPlusLC.FlightProgressBar then
-					LeaPlusLC.FlightProgressBar:Stop()
-					LeaPlusLC.FlightProgressBar = nil
+			local CloseFlightBarButton = RGXQoLLC:CreateButton("CloseFlightBarButton", FlightPanel, "Close Bar", "TOPLEFT", 16, -72, 0, 25, true, "Click to close the currently active flight progress bar.")
+			RGXQoLCB["CloseFlightBarButton"]:ClearAllPoints()
+			RGXQoLCB["CloseFlightBarButton"]:SetPoint("LEFT", FlightPanel.h, "RIGHT", 10, 0)
+			RGXQoLCB["CloseFlightBarButton"]:SetScript("OnClick", function()
+				if RGXQoLLC.FlightProgressBar then
+					RGXQoLLC.FlightProgressBar:Stop()
+					RGXQoLLC.FlightProgressBar = nil
 				end
 			end)
 
 			-- Lock close bar button at startup and when flight progress bar stops
-			LeaPlusLC:LockItem(LeaPlusCB["CloseFlightBarButton"], true)
-			candy.RegisterCallback(LeaPlusLC, "LibCandyBar_Stop", function()
-				if LeaPlusCB["CloseFlightBarButton"] then
-					LeaPlusLC:LockItem(LeaPlusCB["CloseFlightBarButton"], true)
+			RGXQoLLC:LockItem(RGXQoLCB["CloseFlightBarButton"], true)
+			candy.RegisterCallback(RGXQoLLC, "LibCandyBar_Stop", function()
+				if RGXQoLCB["CloseFlightBarButton"] then
+					RGXQoLLC:LockItem(RGXQoLCB["CloseFlightBarButton"], true)
 				end
 			end)
 
 			-- Set progress bar background
-			if LeaPlusLC.ElvUI then
+			if RGXQoLLC.ElvUI then
 
 				-- Progress bar background is always enabled and cannot be disabled with ElvUI
-				LeaPlusLC:LockItem(LeaPlusCB["FlightBarBackground"], true)
-				LeaPlusLC["FlightBarBackground"] = "On"
-				LeaPlusCB["FlightBarBackground"].tiptext = LeaPlusCB["FlightBarBackground"].tiptext .. "|n|n|cff00AAFF" .. L["The background is always shown with ElvUI."]
+				RGXQoLLC:LockItem(RGXQoLCB["FlightBarBackground"], true)
+				RGXQoLLC["FlightBarBackground"] = "On"
+				RGXQoLCB["FlightBarBackground"].tiptext = RGXQoLCB["FlightBarBackground"].tiptext .. "|n|n|cff00AAFF" .. L["The background is always shown with ElvUI."]
 
 			else
 
 				-- Set progress bar background
 				local function SetProgressBarBackground()
-					if LeaPlusLC.FlightProgressBar then
-						if LeaPlusLC["FlightBarBackground"] == "On" then
-							LeaPlusLC.FlightProgressBar:SetTexture(texture)
+					if RGXQoLLC.FlightProgressBar then
+						if RGXQoLLC["FlightBarBackground"] == "On" then
+							RGXQoLLC.FlightProgressBar:SetTexture(texture)
 						else
-							LeaPlusLC.FlightProgressBar:SetTexture("")
+							RGXQoLLC.FlightProgressBar:SetTexture("")
 						end
 					end
 				end
 
 				-- Set progress bar background when option is clicked and on startup
-				LeaPlusCB["FlightBarBackground"]:HookScript("OnClick", SetProgressBarBackground)
+				RGXQoLCB["FlightBarBackground"]:HookScript("OnClick", SetProgressBarBackground)
 				SetProgressBarBackground()
 
 			end
 
 			-- Set progress bar fill mode
 			local function SetProgressBarFillMode()
-				if LeaPlusLC.FlightProgressBar then
-					if LeaPlusLC["FlightBarFillBar"] == "On" then
-						LeaPlusLC.FlightProgressBar:SetFill(true)
+				if RGXQoLLC.FlightProgressBar then
+					if RGXQoLLC["FlightBarFillBar"] == "On" then
+						RGXQoLLC.FlightProgressBar:SetFill(true)
 					else
-						LeaPlusLC.FlightProgressBar:SetFill(false)
+						RGXQoLLC.FlightProgressBar:SetFill(false)
 					end
 				end
 			end
 
 			-- Set progress bar fill mode when option is clicked and on startup
-			LeaPlusCB["FlightBarFillBar"]:HookScript("OnClick", SetProgressBarFillMode)
+			RGXQoLCB["FlightBarFillBar"]:HookScript("OnClick", SetProgressBarFillMode)
 			SetProgressBarFillMode()
 
 			-- Set progress bar destination
 			local function SetProgressBarDestination()
-				if LeaPlusLC.FlightProgressBar then
-					if LeaPlusLC["FlightBarDestination"] == "On" then
-						if LeaPlusLC.FlightDestination then
-							LeaPlusLC.FlightProgressBar:SetLabel(LeaPlusLC.FlightDestination)
+				if RGXQoLLC.FlightProgressBar then
+					if RGXQoLLC["FlightBarDestination"] == "On" then
+						if RGXQoLLC.FlightDestination then
+							RGXQoLLC.FlightProgressBar:SetLabel(RGXQoLLC.FlightDestination)
 						end
 					else
-						LeaPlusLC.FlightProgressBar:SetLabel("")
+						RGXQoLLC.FlightProgressBar:SetLabel("")
 					end
 				end
 			end
 
 			-- Set flight bar destination when option is clicked and on startup
-			LeaPlusCB["FlightBarDestination"]:HookScript("OnClick", SetProgressBarDestination)
+			RGXQoLCB["FlightBarDestination"]:HookScript("OnClick", SetProgressBarDestination)
 			SetProgressBarDestination()
 
 			-- Flight progress bar scale
 			local function SetFlightBarScale()
-				tempFrame:SetScale(LeaPlusLC["FlightBarScale"])
-				if LeaPlusLC.FlightProgressBar then
-					LeaPlusLC.FlightProgressBar:SetScale(LeaPlusLC["FlightBarScale"])
+				tempFrame:SetScale(RGXQoLLC["FlightBarScale"])
+				if RGXQoLLC.FlightProgressBar then
+					RGXQoLLC.FlightProgressBar:SetScale(RGXQoLLC["FlightBarScale"])
 				end
 				-- Set slider formatted text
-				LeaPlusCB["FlightBarScale"].f:SetFormattedText("%.0f%%", (LeaPlusLC["FlightBarScale"] / 2) * 100)
+				RGXQoLCB["FlightBarScale"].f:SetFormattedText("%.0f%%", (RGXQoLLC["FlightBarScale"] / 2) * 100)
 			end
 
 			-- Set flight bar scale when slider is changed and on startup
-			LeaPlusCB["FlightBarScale"]:HookScript("OnValueChanged", SetFlightBarScale)
+			RGXQoLCB["FlightBarScale"]:HookScript("OnValueChanged", SetFlightBarScale)
 			SetFlightBarScale()
 
 			-- Flight progress bar width
 			local function SetFlightBarWidth()
-				tempFrame:SetWidth(LeaPlusLC["FlightBarWidth"])
-				if LeaPlusLC.FlightProgressBar then
-					LeaPlusLC.FlightProgressBar:SetWidth(LeaPlusLC["FlightBarWidth"])
+				tempFrame:SetWidth(RGXQoLLC["FlightBarWidth"])
+				if RGXQoLLC.FlightProgressBar then
+					RGXQoLLC.FlightProgressBar:SetWidth(RGXQoLLC["FlightBarWidth"])
 				end
 				-- Set slider formatted text
-				LeaPlusCB["FlightBarWidth"].f:SetFormattedText("%.0f%%", (LeaPlusLC["FlightBarWidth"] / 230) * 100)
+				RGXQoLCB["FlightBarWidth"].f:SetFormattedText("%.0f%%", (RGXQoLLC["FlightBarWidth"] / 230) * 100)
 			end
 
 			-- Set flight bar width when slider is changed and on startup
-			LeaPlusCB["FlightBarWidth"]:HookScript("OnValueChanged", SetFlightBarWidth)
+			RGXQoLCB["FlightBarWidth"]:HookScript("OnValueChanged", SetFlightBarWidth)
 			SetFlightBarWidth()
 
 			-- Help button tooltip
@@ -4944,7 +4944,7 @@
 
 			-- Back button handler
 			FlightPanel.b:SetScript("OnClick", function()
-				FlightPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page7"]:Show()
+				FlightPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page7"]:Show()
 				return
 			end)
 
@@ -4952,34 +4952,34 @@
 			FlightPanel.r:SetScript("OnClick", function()
 
 				-- Reset controls
-				LeaPlusLC["FlightBarA"], LeaPlusLC["FlightBarR"], LeaPlusLC["FlightBarX"], LeaPlusLC["FlightBarY"] = "TOP", "TOP", 0, -66
+				RGXQoLLC["FlightBarA"], RGXQoLLC["FlightBarR"], RGXQoLLC["FlightBarX"], RGXQoLLC["FlightBarY"] = "TOP", "TOP", 0, -66
 				tempFrame:ClearAllPoints()
-				tempFrame:SetPoint(LeaPlusLC["FlightBarA"], UIParent, LeaPlusLC["FlightBarR"], LeaPlusLC["FlightBarX"], LeaPlusLC["FlightBarY"])
+				tempFrame:SetPoint(RGXQoLLC["FlightBarA"], UIParent, RGXQoLLC["FlightBarR"], RGXQoLLC["FlightBarX"], RGXQoLLC["FlightBarY"])
 				-- Reset scale
-				LeaPlusLC["FlightBarScale"] = 2
-				tempFrame:SetScale(LeaPlusLC["FlightBarScale"])
+				RGXQoLLC["FlightBarScale"] = 2
+				tempFrame:SetScale(RGXQoLLC["FlightBarScale"])
 				-- Reset width
-				LeaPlusLC["FlightBarWidth"] = 230
-				tempFrame:SetWidth(LeaPlusLC["FlightBarWidth"])
+				RGXQoLLC["FlightBarWidth"] = 230
+				tempFrame:SetWidth(RGXQoLLC["FlightBarWidth"])
 				-- Reset checkboxes
-				LeaPlusLC["FlightBarBackground"] = "On"
-				LeaPlusLC["FlightBarDestination"] = "On"
-				LeaPlusLC["FlightBarFillBar"] = "Off"; SetProgressBarFillMode()
-				LeaPlusLC["FlightBarSpeech"] = "Off"
-				LeaPlusLC["FlightBarContribute"] = "On"
+				RGXQoLLC["FlightBarBackground"] = "On"
+				RGXQoLLC["FlightBarDestination"] = "On"
+				RGXQoLLC["FlightBarFillBar"] = "Off"; SetProgressBarFillMode()
+				RGXQoLLC["FlightBarSpeech"] = "Off"
+				RGXQoLLC["FlightBarContribute"] = "On"
 				-- Reset live progress bar
-				if LeaPlusLC.FlightProgressBar then
+				if RGXQoLLC.FlightProgressBar then
 					-- Reset position
-					LeaPlusLC.FlightProgressBar:ClearAllPoints()
-					LeaPlusLC.FlightProgressBar:SetPoint(LeaPlusLC["FlightBarA"], UIParent, LeaPlusLC["FlightBarR"], LeaPlusLC["FlightBarX"], LeaPlusLC["FlightBarY"])
-					LeaPlusLC.FlightProgressBar:SetScale(LeaPlusLC["FlightBarScale"])
+					RGXQoLLC.FlightProgressBar:ClearAllPoints()
+					RGXQoLLC.FlightProgressBar:SetPoint(RGXQoLLC["FlightBarA"], UIParent, RGXQoLLC["FlightBarR"], RGXQoLLC["FlightBarX"], RGXQoLLC["FlightBarY"])
+					RGXQoLLC.FlightProgressBar:SetScale(RGXQoLLC["FlightBarScale"])
 					-- Reset width
-					LeaPlusLC.FlightProgressBar:SetWidth(LeaPlusLC["FlightBarWidth"])
+					RGXQoLLC.FlightProgressBar:SetWidth(RGXQoLLC["FlightBarWidth"])
 					-- Reset background
-					LeaPlusLC.FlightProgressBar:SetTexture(texture)
+					RGXQoLLC.FlightProgressBar:SetTexture(texture)
 					-- Reset destination
-					if LeaPlusLC.FlightDestination then
-						LeaPlusLC.FlightProgressBar:SetLabel(LeaPlusLC.FlightDestination)
+					if RGXQoLLC.FlightDestination then
+						RGXQoLLC.FlightProgressBar:SetLabel(RGXQoLLC.FlightDestination)
 					end
 				end
 
@@ -4989,13 +4989,13 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["ShowFlightTimesBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["ShowFlightTimesBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["FlightBarContribute"] = "On"
+					RGXQoLLC["FlightBarContribute"] = "On"
 				else
 					FlightPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -5014,7 +5014,7 @@
 		-- Enhance minimap
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MinimapModder"] == "On" and not LeaLockList["MinimapModder"] then
+		if RGXQoLLC["MinimapModder"] == "On" and not RGXQoLLockList["MinimapModder"] then
 
 			local miniFrame = CreateFrame("FRAME")
 			local LibDBIconStub = LibStub("LibDBIcon-1.0")
@@ -5023,8 +5023,8 @@
 
 			-- Function to set button radius
 			local function SetButtonRad()
-				if LeaPlusLC["SquareMinimap"] == "On" then
-					LibDBIconStub:SetButtonRadius(26 + ((LeaPlusLC["MinimapSize"] - 140) * 0.165))
+				if RGXQoLLC["SquareMinimap"] == "On" then
+					LibDBIconStub:SetButtonRadius(26 + ((RGXQoLLC["MinimapSize"] - 140) * 0.165))
 				else
 					LibDBIconStub:SetButtonRadius(1)
 				end
@@ -5053,9 +5053,9 @@
 					miniTable[i] = LibStub("LibDataBroker-1.1"):NewDataObject("RGXQoL" .. i, {
 						type = "data source",
 						text = "Test Addon " .. i,
-						icon = "Interface\\HELPFRAME\\ReportLagIcon-Movement",
+						icon = "Interface\\AddOns\\RGX-Framework\\media\\logo.tga",
 						OnClick = function(self, btn)
-							LeaPlusGlobalMiniBtnClickFunc(btn)
+							RGXQoLMiniBtnClickFunc(btn)
 						end,
 						OnTooltipShow = function(tooltip)
 							if not tooltip or not tooltip.AddLine then return end
@@ -5074,7 +5074,7 @@
 			----------------------------------------------------------------------
 
 			-- Create configuration panel
-			local SideMinimap = LeaPlusLC:CreatePanel("Enhance minimap", "SideMinimap", true)
+			local SideMinimap = RGXQoLLC:CreatePanel("Enhance minimap", "SideMinimap", true)
 
 			-- Hide panel during combat
 			SideMinimap:SetScript("OnUpdate", function()
@@ -5084,39 +5084,39 @@
 			end)
 
 			-- Add checkboxes
-			LeaPlusLC:MakeTx(SideMinimap.scrollChild, "Settings", 16, 0)
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "HideMiniZoomBtns", "Hide the zoom buttons", 16, -20, false, "If checked, the zoom buttons will be hidden.  You can use the mousewheel to zoom regardless of this setting.")
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "HideMiniClock", "Hide the clock", 16, -40, false, "If checked, the clock will be hidden.")
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "HideMiniDayNight", "Hide the day and night indicator", 16, -60, true, "If checked, the day and night indicator will be hidden.")
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "HideMiniZoneText", "Hide the zone text bar", 16, -80, true, "If checked, the zone text bar will be hidden.")
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "HideMiniTracking", "Hide the tracking button", 16, -100, true, "If checked, the tracking button will be hidden while the pointer is not over the minimap.")
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "HideMiniLFG", "Hide the Looking for Group button", 16, -120, true, "If checked, the Looking for Group button will be hidden while you are not queued.|n|nThis only applies to game realms with a Looking for Group feature.")
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "HideMiniAddonButtons", "Hide addon buttons", 16, -140, false, "If checked, addon buttons will be hidden while the pointer is not over the minimap.")
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "MinimapButtonBag", "Minimap button bag", 16, -160, true, "If checked, minimap buttons for addons will be collected and placed in a bag which you can toggle by right-clicking the minimap.|n|nThis setting will help you declutter the minimap without the need to install a separate addon to do that.")
-			LeaPlusLC:MakeCB(SideMinimap.scrollChild, "SquareMinimap", "Square minimap", 16, -180, true, "If checked, the minimap shape will be square.")
+			RGXQoLLC:MakeTx(SideMinimap.scrollChild, "Settings", 16, 0)
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "HideMiniZoomBtns", "Hide the zoom buttons", 16, -20, false, "If checked, the zoom buttons will be hidden.  You can use the mousewheel to zoom regardless of this setting.")
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "HideMiniClock", "Hide the clock", 16, -40, false, "If checked, the clock will be hidden.")
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "HideMiniDayNight", "Hide the day and night indicator", 16, -60, true, "If checked, the day and night indicator will be hidden.")
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "HideMiniZoneText", "Hide the zone text bar", 16, -80, true, "If checked, the zone text bar will be hidden.")
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "HideMiniTracking", "Hide the tracking button", 16, -100, true, "If checked, the tracking button will be hidden while the pointer is not over the minimap.")
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "HideMiniLFG", "Hide the Looking for Group button", 16, -120, true, "If checked, the Looking for Group button will be hidden while you are not queued.|n|nThis only applies to game realms with a Looking for Group feature.")
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "HideMiniAddonButtons", "Hide addon buttons", 16, -140, false, "If checked, addon buttons will be hidden while the pointer is not over the minimap.")
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "MinimapButtonBag", "Minimap button bag", 16, -160, true, "If checked, minimap buttons for addons will be collected and placed in a bag which you can toggle by right-clicking the minimap.|n|nThis setting will help you declutter the minimap without the need to install a separate addon to do that.")
+			RGXQoLLC:MakeCB(SideMinimap.scrollChild, "SquareMinimap", "Square minimap", 16, -180, true, "If checked, the minimap shape will be square.")
 
 			-- Add excluded button
-			local MiniExcludedButton = LeaPlusLC:CreateButton("MiniExcludedButton", SideMinimap, "Buttons", "TOPLEFT", 16, -72, 0, 25, true, "Click to toggle the addon buttons editor.")
-			LeaPlusCB["MiniExcludedButton"]:ClearAllPoints()
-			LeaPlusCB["MiniExcludedButton"]:SetPoint("LEFT", SideMinimap.r, "RIGHT", 10, 0)
+			local MiniExcludedButton = RGXQoLLC:CreateButton("MiniExcludedButton", SideMinimap, "Buttons", "TOPLEFT", 16, -72, 0, 25, true, "Click to toggle the addon buttons editor.")
+			RGXQoLCB["MiniExcludedButton"]:ClearAllPoints()
+			RGXQoLCB["MiniExcludedButton"]:SetPoint("LEFT", SideMinimap.r, "RIGHT", 10, 0)
 
 			-- Set exclude button visibility
 			local function SetExcludeButtonsFunc()
-				if LeaPlusLC["HideMiniAddonButtons"] == "On" or LeaPlusLC["MinimapButtonBag"] == "On" then
-					LeaPlusLC:LockItem(LeaPlusCB["MiniExcludedButton"], false)
+				if RGXQoLLC["HideMiniAddonButtons"] == "On" or RGXQoLLC["MinimapButtonBag"] == "On" then
+					RGXQoLLC:LockItem(RGXQoLCB["MiniExcludedButton"], false)
 				else
-					LeaPlusLC:LockItem(LeaPlusCB["MiniExcludedButton"], true)
+					RGXQoLLC:LockItem(RGXQoLCB["MiniExcludedButton"], true)
 				end
 			end
-			LeaPlusCB["HideMiniAddonButtons"]:HookScript("OnClick", SetExcludeButtonsFunc)
+			RGXQoLCB["HideMiniAddonButtons"]:HookScript("OnClick", SetExcludeButtonsFunc)
 			SetExcludeButtonsFunc()
 
 			-- Add slider controls
-			LeaPlusLC:MakeTx(SideMinimap.scrollChild, "Square size", 356, 0)
-			LeaPlusLC:MakeSL(SideMinimap.scrollChild, "MinimapSize", "Drag to set the square minimap size.|n|nAdjusting this slider makes the minimap bigger but keeps the elements the same size.", 140, 560, 1, 356, -10, "%.0f")
+			RGXQoLLC:MakeTx(SideMinimap.scrollChild, "Square size", 356, 0)
+			RGXQoLLC:MakeSL(SideMinimap.scrollChild, "MinimapSize", "Drag to set the square minimap size.|n|nAdjusting this slider makes the minimap bigger but keeps the elements the same size.", 140, 560, 1, 356, -10, "%.0f")
 
-			LeaPlusLC:MakeTx(SideMinimap.scrollChild, "Border width", 356, -50)
-			LeaPlusLC:MakeSL(SideMinimap.scrollChild, "MinimapBorderWidth", "Drag to set the square minimap border width.", 1, 10, 1, 356, -60, "%.0f")
+			RGXQoLLC:MakeTx(SideMinimap.scrollChild, "Border width", 356, -50)
+			RGXQoLLC:MakeSL(SideMinimap.scrollChild, "MinimapBorderWidth", "Drag to set the square minimap border width.", 1, 10, 1, 356, -60, "%.0f")
 
 			----------------------------------------------------------------------
 			-- Addon buttons editor
@@ -5125,29 +5125,29 @@
 			do
 
 				-- Create configuration panel
-				local ExcludedButtonsPanel = LeaPlusLC:CreatePanel("Enhance minimap", "ExcludedButtonsPanel")
+				local ExcludedButtonsPanel = RGXQoLLC:CreatePanel("Enhance minimap", "ExcludedButtonsPanel")
 				local boxWidth = 272
 
 				-- Add second excluded button
-				local MiniExcludedButton2 = LeaPlusLC:CreateButton("MiniExcludedButton2", ExcludedButtonsPanel, "Buttons", "TOPLEFT", 16, -72, 0, 25, true, "Click to toggle the addon buttons editor.")
-				LeaPlusCB["MiniExcludedButton2"]:ClearAllPoints()
-				LeaPlusCB["MiniExcludedButton2"]:SetPoint("LEFT", ExcludedButtonsPanel.r, "RIGHT", 10, 0)
-				LeaPlusCB["MiniExcludedButton2"]:SetScript("OnClick", function()
+				local MiniExcludedButton2 = RGXQoLLC:CreateButton("MiniExcludedButton2", ExcludedButtonsPanel, "Buttons", "TOPLEFT", 16, -72, 0, 25, true, "Click to toggle the addon buttons editor.")
+				RGXQoLCB["MiniExcludedButton2"]:ClearAllPoints()
+				RGXQoLCB["MiniExcludedButton2"]:SetPoint("LEFT", ExcludedButtonsPanel.r, "RIGHT", 10, 0)
+				RGXQoLCB["MiniExcludedButton2"]:SetScript("OnClick", function()
 					ExcludedButtonsPanel:Hide(); SideMinimap:Show()
 					return
 				end)
 
 				-- Add large editbox
-				local titleTX = LeaPlusLC:MakeTx(ExcludedButtonsPanel, "Editor", 16, -72)
+				local titleTX = RGXQoLLC:MakeTx(ExcludedButtonsPanel, "Editor", 16, -72)
 				titleTX:SetWidth(boxWidth - 14) -- 534
 				titleTX:SetWordWrap(false)
 				titleTX:SetJustifyH("LEFT")
 
 				-- Add help button
-				LeaPlusLC:CreateHelpButton("MinimapButtonsAvailableHelpButton", ExcludedButtonsPanel, titleTX, "If you use the 'Hide addon buttons' or 'Minimap button bag' settings but you want some addon buttons to remain visible around the minimap, enter the button names into the editbox below separated by commas.|n|nChanges will require a UI reload to take effect.")
+				RGXQoLLC:CreateHelpButton("MinimapButtonsAvailableHelpButton", ExcludedButtonsPanel, titleTX, "If you use the 'Hide addon buttons' or 'Minimap button bag' settings but you want some addon buttons to remain visible around the minimap, enter the button names into the editbox below separated by commas.|n|nChanges will require a UI reload to take effect.")
 
 				local eb = CreateFrame("Frame", nil, ExcludedButtonsPanel, "BackdropTemplate")
-				eb:SetSize(boxWidth, LeaPlusLC.MainPanelHeight - 180) -- 548
+				eb:SetSize(boxWidth, RGXQoLLC.MainPanelHeight - 180) -- 548
 				eb:SetPoint("TOPLEFT", 10, -92)
 				eb:SetBackdrop({
 					bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -5183,37 +5183,37 @@
 				end)
 
 				-- Debug
-				-- eb.Text:SetText("Leatrix_Plus\nLeatrix_Maps\nBugSack\nLeatrix_Plus\nLeatrix_Maps\nBugSack\nLeatrix_Plus\nLeatrix_Maps\nBugSack\nLeatrix_Plus\nLeatrix_Maps\nBugSack\nLeatrix_Plus\nLeatrix_Maps\nBugSack")
+				-- eb.Text:SetText("RGXQoL\nLeatrix_Maps\nBugSack\nRGXQoL\nLeatrix_Maps\nBugSack\nRGXQoL\nLeatrix_Maps\nBugSack\nRGXQoL\nLeatrix_Maps\nBugSack\nRGXQoL\nLeatrix_Maps\nBugSack")
 
 				-- Function to save the excluded list
 				local function SaveString(self, userInput)
 					local keytext = eb.Text:GetText()
 					if keytext and keytext ~= "" then
-						LeaPlusLC["MiniExcludeList"] = strtrim(eb.Text:GetText())
+						RGXQoLLC["MiniExcludeList"] = strtrim(eb.Text:GetText())
 					else
-						LeaPlusLC["MiniExcludeList"] = ""
+						RGXQoLLC["MiniExcludeList"] = ""
 					end
 					if userInput then
-						LeaPlusLC:ReloadCheck()
+						RGXQoLLC:ReloadCheck()
 					end
 				end
 
 				-- Save the excluded list when it changes and at startup
 				eb.Text:SetScript("OnTextChanged", SaveString)
-				eb.Text:SetText(LeaPlusLC["MiniExcludeList"])
+				eb.Text:SetText(RGXQoLLC["MiniExcludeList"])
 				SaveString()
 
 				-- Add large editbox for available addons
-				local titleAbTX = LeaPlusLC:MakeTx(ExcludedButtonsPanel, "Available button names", boxWidth + 20, -72)
+				local titleAbTX = RGXQoLLC:MakeTx(ExcludedButtonsPanel, "Available button names", boxWidth + 20, -72)
 				titleAbTX:SetWidth(boxWidth - 14)
 				titleAbTX:SetWordWrap(false)
 				titleAbTX:SetJustifyH("LEFT")
 
 				-- Add help button
-				LeaPlusLC:CreateHelpButton("MinimapButtonsAvailableHelpButton", ExcludedButtonsPanel, titleAbTX, "This is a list of available addon button names.  You can use this list to copy and paste button names that you want into the editor.|n|nThis listing is automatically generated and cannot be edited.")
+				RGXQoLLC:CreateHelpButton("MinimapButtonsAvailableHelpButton", ExcludedButtonsPanel, titleAbTX, "This is a list of available addon button names.  You can use this list to copy and paste button names that you want into the editor.|n|nThis listing is automatically generated and cannot be edited.")
 
 				local ab = CreateFrame("Frame", nil, ExcludedButtonsPanel, "BackdropTemplate")
-				ab:SetSize(boxWidth, LeaPlusLC.MainPanelHeight - 180) -- 548
+				ab:SetSize(boxWidth, RGXQoLLC.MainPanelHeight - 180) -- 548
 				ab:SetPoint("TOPLEFT", 286, -92)
 				ab:SetBackdrop({
 					bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -5277,7 +5277,7 @@
 
 				-- Back button handler
 				ExcludedButtonsPanel.b:SetScript("OnClick", function()
-					ExcludedButtonsPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show()
+					ExcludedButtonsPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show()
 					return
 				end)
 
@@ -5285,21 +5285,21 @@
 				ExcludedButtonsPanel.r:SetScript("OnClick", function()
 
 					-- Reset controls
-					LeaPlusLC["MiniExcludeList"] = ""
-					eb.Text:SetText(LeaPlusLC["MiniExcludeList"])
+					RGXQoLLC["MiniExcludeList"] = ""
+					eb.Text:SetText(RGXQoLLC["MiniExcludeList"])
 
 					-- Refresh configuration panel
 					ExcludedButtonsPanel:Hide(); ExcludedButtonsPanel:Show()
-					LeaPlusLC:ReloadCheck()
+					RGXQoLLC:ReloadCheck()
 
 				end)
 
 				-- Show configuration panal when options panel button is clicked
-				LeaPlusCB["MiniExcludedButton"]:SetScript("OnClick", function()
+				RGXQoLCB["MiniExcludedButton"]:SetScript("OnClick", function()
 					if IsShiftKeyDown() and IsControlKeyDown() then
 						-- Preset profile
-						LeaPlusLC["MiniExcludeList"] = "BugSack, Leatrix_Plus"
-						LeaPlusLC:ReloadCheck()
+						RGXQoLLC["MiniExcludeList"] = "BugSack, RGXQoL"
+						RGXQoLLC:ReloadCheck()
 					else
 						ExcludedButtonsPanel:Show()
 						LeaPlusGlobalPanel_SideMinimap:Hide()
@@ -5312,12 +5312,12 @@
 			-- Minimap size
 			----------------------------------------------------------------------
 
-			if LeaPlusLC["SquareMinimap"] == "On" then
+			if RGXQoLLC["SquareMinimap"] == "On" then
 
 				-- Function to set minimap size
 				local function SetMinimapSize()
 					-- Set minimap size
-					Minimap:SetSize(LeaPlusLC["MinimapSize"], LeaPlusLC["MinimapSize"])
+					Minimap:SetSize(RGXQoLLC["MinimapSize"], RGXQoLLC["MinimapSize"])
 					-- Refresh minimap
 					if Minimap:GetZoom() ~= 5 then
 						Minimap:SetZoom(Minimap:GetZoom() + 1)
@@ -5329,21 +5329,21 @@
 					-- Refresh addon button radius
 					SetButtonRad()
 					-- Update slider text
-					LeaPlusCB["MinimapSize"].f:SetFormattedText("%.0f%%", (LeaPlusLC["MinimapSize"] / 140) * 100)
+					RGXQoLCB["MinimapSize"].f:SetFormattedText("%.0f%%", (RGXQoLLC["MinimapSize"] / 140) * 100)
 				end
 
 				-- Set minimap size when slider is changed and on startup
-				LeaPlusCB["MinimapSize"]:HookScript("OnValueChanged", SetMinimapSize)
+				RGXQoLCB["MinimapSize"]:HookScript("OnValueChanged", SetMinimapSize)
 				SetMinimapSize()
 
 				-- Assign file level scope (for reset and preset)
-				LeaPlusLC.SetMinimapSize = SetMinimapSize
+				RGXQoLLC.SetMinimapSize = SetMinimapSize
 
 			else
 
 				-- Square minimap is disabled so lock the size slider
-				LeaPlusLC:LockItem(LeaPlusCB["MinimapSize"], true)
-				LeaPlusCB["MinimapSize"].tiptext = LeaPlusCB["MinimapSize"].tiptext .. "|cff00AAFF|n|n" .. L["This slider requires 'Square minimap' to be enabled."] .. "|r"
+				RGXQoLLC:LockItem(RGXQoLCB["MinimapSize"], true)
+				RGXQoLCB["MinimapSize"].tiptext = RGXQoLCB["MinimapSize"].tiptext .. "|cff00AAFF|n|n" .. L["This slider requires 'Square minimap' to be enabled."] .. "|r"
 
 			end
 
@@ -5351,11 +5351,11 @@
 			-- Minimap button bag
 			----------------------------------------------------------------------
 
-			if LeaPlusLC["MinimapButtonBag"] == "On" then
+			if RGXQoLLC["MinimapButtonBag"] == "On" then
 
 				-- Lock out hide minimap buttons
-				LeaPlusLC:LockItem(LeaPlusCB["HideMiniAddonButtons"], true)
-				LeaPlusCB["HideMiniAddonButtons"].tiptext = LeaPlusCB["HideMiniAddonButtons"].tiptext .. "|n|n|cff00AAFF" .. L["Cannot be used with Minimap button bag."]
+				RGXQoLLC:LockItem(RGXQoLCB["HideMiniAddonButtons"], true)
+				RGXQoLCB["HideMiniAddonButtons"].tiptext = RGXQoLCB["HideMiniAddonButtons"].tiptext .. "|n|n|cff00AAFF" .. L["Cannot be used with Minimap button bag."]
 
 				-- Create button frame (parenting to cluster ensures bFrame scales correctly)
 				local bFrame = CreateFrame("FRAME", nil, MinimapCluster, "BackdropTemplate")
@@ -5365,7 +5365,7 @@
 				bFrame:SetClampedToScreen(true)
 				bFrame:SetFrameLevel(8)
 
-				LeaPlusLC.bFrame = bFrame -- Used in LibDBIcon callback
+				RGXQoLLC.bFrame = bFrame -- Used in LibDBIcon callback
 				_G["LeaPlusGlobalMinimapCombinedButtonFrame"] = bFrame -- For third party addons
 
 				-- Hide button frame automatically
@@ -5382,7 +5382,7 @@
 				end)
 
 				-- Match scale with minimap
-				if LeaPlusLC["SquareMinimap"] == "On" then
+				if RGXQoLLC["SquareMinimap"] == "On" then
 					bFrame:SetScale(MinimapCluster.BorderTop:GetScale() * 0.75)
 				else
 					bFrame:SetScale(MinimapCluster.BorderTop:GetScale())
@@ -5390,7 +5390,7 @@
 
 				-- Function to set button frame scale
 				local function SetButtonFrameScale()
-					if LeaPlusLC["SquareMinimap"] == "On" then
+					if RGXQoLLC["SquareMinimap"] == "On" then
 						bFrame:SetScale(MinimapCluster.BorderTop:GetScale() * 0.75)
 					else
 						bFrame:SetScale(MinimapCluster.BorderTop:GetScale())
@@ -5420,7 +5420,7 @@
 					end
 				end
 
-				LeaPlusLC.SetButtonTooltip = SetButtonTooltip -- Used in LibDBIcon callback
+				RGXQoLLC.SetButtonTooltip = SetButtonTooltip -- Used in LibDBIcon callback
 
 				-- Hide existing LibDBIcon icons
 				local buttons = LibDBIconStub:GetButtonList()
@@ -5436,7 +5436,7 @@
 						bFrameBg:SetPoint("CENTER")
 						bFrameBg:SetSize(30, 30)
 						bFrameBg:SetVertexColor(0, 0, 0, 0.5)
-					elseif strfind(strlower(RGXQoLDB["MiniExcludeList"]), buttonName) and LeaPlusLC["SquareMinimap"] == "On" then
+					elseif strfind(strlower(RGXQoLDB["MiniExcludeList"]), buttonName) and RGXQoLLC["SquareMinimap"] == "On" then
 						button:SetScale(0.75)
 					end
 					-- Move GameTooltip to below the minimap in case the button uses it
@@ -5476,11 +5476,11 @@
 							local buttons = LibDBIconStub:GetButtonList()
 							-- Sort the button table
 							table.sort(buttons, function(a, b)
-								if string.find(a, "LeaPlusCustomIcon_") then
-									a = string.gsub(a, "LeaPlusCustomIcon_", "")
+								if string.find(a, "RGXQoLCustomIcon_") then
+									a = string.gsub(a, "RGXQoLCustomIcon_", "")
 								end
-								if string.find(b, "LeaPlusCustomIcon_") then
-									b = string.gsub(b, "LeaPlusCustomIcon_", "")
+								if string.find(b, "RGXQoLCustomIcon_") then
+									b = string.gsub(b, "RGXQoLCustomIcon_", "")
 								end
 								return a:lower() < b:lower()
 							end)
@@ -5542,7 +5542,7 @@
 			-- Square minimap
 			----------------------------------------------------------------------
 
-			if LeaPlusLC["SquareMinimap"] == "On" then
+			if RGXQoLLC["SquareMinimap"] == "On" then
 
 				-- Set minimap shape
 				_G.GetMinimapShape = function() return "SQUARE" end
@@ -5554,16 +5554,16 @@
 				-- Adjust border width using slider control
 				local function SetMinimapBorderWidth()
 					miniBorder:ClearAllPoints()
-					miniBorder:SetPoint("TOPLEFT", -LeaPlusLC["MinimapBorderWidth"], LeaPlusLC["MinimapBorderWidth"])
-					miniBorder:SetPoint("BOTTOMRIGHT", LeaPlusLC["MinimapBorderWidth"], -LeaPlusLC["MinimapBorderWidth"])
+					miniBorder:SetPoint("TOPLEFT", -RGXQoLLC["MinimapBorderWidth"], RGXQoLLC["MinimapBorderWidth"])
+					miniBorder:SetPoint("BOTTOMRIGHT", RGXQoLLC["MinimapBorderWidth"], -RGXQoLLC["MinimapBorderWidth"])
 					miniBorder:SetBackdrop({
 						edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-						edgeSize = LeaPlusLC["MinimapBorderWidth"],
+						edgeSize = RGXQoLLC["MinimapBorderWidth"],
 					})
 				end
 
 				-- Set border width when slider is changed and on startup
-				LeaPlusCB["MinimapBorderWidth"]:HookScript("OnValueChanged", SetMinimapBorderWidth)
+				RGXQoLCB["MinimapBorderWidth"]:HookScript("OnValueChanged", SetMinimapBorderWidth)
 				SetMinimapBorderWidth()
 
 				-- Hide the default border
@@ -5634,7 +5634,7 @@
 				end
 
 				-- Rescale addon buttons if minimap button bag is disabled
-				if LeaPlusLC["MinimapButtonBag"] == "Off" then
+				if RGXQoLLC["MinimapButtonBag"] == "Off" then
 					-- Scale existing buttons
 					local buttons = LibDBIconStub:GetButtonList()
 					for i = 1, #buttons do
@@ -5655,8 +5655,8 @@
 				Minimap:SetMaskTexture([[Interface\CharacterFrame\TempPortraitAlphaMask]])
 
 				-- Square minimap is disabled so disable border width slider
-				LeaPlusLC:LockItem(LeaPlusCB["MinimapBorderWidth"], true)
-				LeaPlusCB["MinimapBorderWidth"].tiptext = LeaPlusCB["MinimapBorderWidth"].tiptext .. "|cff00AAFF|n|n" .. L["This slider requires 'Square minimap' to be enabled."] .. "|r"
+				RGXQoLLC:LockItem(RGXQoLCB["MinimapBorderWidth"], true)
+				RGXQoLCB["MinimapBorderWidth"].tiptext = RGXQoLCB["MinimapBorderWidth"].tiptext .. "|cff00AAFF|n|n" .. L["This slider requires 'Square minimap' to be enabled."] .. "|r"
 
 			end
 
@@ -5664,7 +5664,7 @@
 			-- Hide day and night indicator
 			----------------------------------------------------------------------
 
-			if LeaPlusLC["HideMiniDayNight"] == "On" then
+			if RGXQoLLC["HideMiniDayNight"] == "On" then
 				GameTimeFrame:Hide()
 			end
 
@@ -5709,8 +5709,8 @@
 					-- Function to anchor the tooltip to the custom button or the minimap
 					local function ReanchorTooltip(tip, myButton)
 						tip:ClearAllPoints()
-						if LeaPlusLC["MinimapButtonBag"] == "On" then
-							if LeaPlusLC.bFrame and LeaPlusLC.bFrame:GetPoint() == "BOTTOMLEFT" then
+						if RGXQoLLC["MinimapButtonBag"] == "On" then
+							if RGXQoLLC.bFrame and RGXQoLLC.bFrame:GetPoint() == "BOTTOMLEFT" then
 								tip:SetPoint("TOPLEFT", Minimap, "BOTTOMLEFT", 0, -6)
 							else
 								tip:SetPoint("TOPRIGHT", Minimap, "BOTTOMRIGHT", 0, -6)
@@ -5724,7 +5724,7 @@
 						end
 					end
 
-					local zeroButton = LibStub("LibDataBroker-1.1"):NewDataObject("LeaPlusCustomIcon_" .. name, {
+					local zeroButton = LibStub("LibDataBroker-1.1"):NewDataObject("RGXQoLCustomIcon_" .. name, {
 						type = "data source",
 						text = name,
 						icon = finalTex,
@@ -5750,11 +5750,11 @@
 					RGXQoLDB["CustomAddonButtons"][name].hide = false
 					CustomAddonTable[name] = name
 					local icon = LibStub("LibDBIcon-1.0", true)
-					icon:Register("LeaPlusCustomIcon_" .. name, zeroButton, RGXQoLDB["CustomAddonButtons"][name])
+					icon:Register("RGXQoLCustomIcon_" .. name, zeroButton, RGXQoLDB["CustomAddonButtons"][name])
 					-- Custom buttons
 					if name == "AllTheThings-Minimap" then
 						-- AllTheThings
-						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("LeaPlusCustomIcon_" .. name)
+						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("RGXQoLCustomIcon_" .. name)
 						myButton.icon:SetTexture("Interface\\AddOns\\AllTheThings\\assets\\logo_tiny")
 						myButton:HookScript("OnEnter", function()
 							_G[name]:GetScript("OnEnter")(_G[name], true)
@@ -5765,7 +5765,7 @@
 						end)
 					elseif name == "AltoholicMinimapButton" then
 						-- Altoholic
-						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("LeaPlusCustomIcon_" .. name)
+						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("RGXQoLCustomIcon_" .. name)
 						myButton.icon:SetTexture("Interface\\Icons\\INV_Drink_13")
 						myButton:HookScript("OnEnter", function()
 							_G[name]:GetScript("OnEnter")(_G[name], true)
@@ -5776,7 +5776,7 @@
 						end)
 					elseif name == "Narci_MinimapButton" then
 						-- Narcissus
-						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("LeaPlusCustomIcon_" .. name)
+						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("RGXQoLCustomIcon_" .. name)
 						myButton.icon:SetTexture("Interface\\AddOns\\Narcissus\\Art\\Minimap\\LOGO-Dragonflight")
 						myButton:HookScript("OnEnter", function()
 							_G[name]:GetScript("OnEnter")(_G[name], true)
@@ -5787,7 +5787,7 @@
 						myButton.icon:SetTexCoord(0, 0.25, 0.75, 1)
 					elseif name == "WIM3MinimapButton" then
 						-- WIM
-						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("LeaPlusCustomIcon_" .. name)
+						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("RGXQoLCustomIcon_" .. name)
 						myButton:HookScript("OnEnter", function()
 							_G[name]:GetScript("OnEnter")(_G[name], true)
 							GameTooltip:SetOwner(myButton, "ANCHOR_TOP")
@@ -5800,8 +5800,8 @@
 							GameTooltip:Hide()
 						end)
 					elseif name == "ZygorGuidesViewerMapIcon" then
-						-- Zygor (uses LibDBIcon10_LeaPlusCustomIcon_ZygorGuidesViewerMapIcon)
-						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("LeaPlusCustomIcon_" .. name)
+						-- Zygor (uses LibDBIcon10_RGXQoLCustomIcon_ZygorGuidesViewerMapIcon)
+						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("RGXQoLCustomIcon_" .. name)
 						myButton.icon:SetTexture("Interface\\AddOns\\ZygorGuidesViewerClassic\\Skins\\minimap-icon.tga")
 						hooksecurefunc(myButton.icon, "UpdateCoord", function()
 							myButton.icon:SetTexCoord(0, 0.5, 0, 0.25)
@@ -5834,7 +5834,7 @@
 						or name == "Lib_GPI_Minimap_LFGBulletinBoard"	-- LFG Bulletin Board
 						or name == "wlMinimapButton"					-- Wowhead Looter (part of Wowhead client)
 						then
-						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("LeaPlusCustomIcon_" .. name)
+						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("RGXQoLCustomIcon_" .. name)
 						myButton:HookScript("OnEnter", function()
 							_G[name]:GetScript("OnEnter")(_G[name], true)
 							ReanchorTooltip(GameTooltip, myButton)
@@ -5844,7 +5844,7 @@
 						end)
 					else
 						-- Unknown custom buttons
-						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("LeaPlusCustomIcon_" .. name)
+						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("RGXQoLCustomIcon_" .. name)
 						myButton:HookScript("OnEnter", function()
 							GameTooltip:SetOwner(myButton, "ANCHOR_TOP")
 							GameTooltip:AddLine(name)
@@ -5904,11 +5904,11 @@
 			-- Hide addon buttons
 			----------------------------------------------------------------------
 
-			if LeaPlusLC["MinimapButtonBag"] == "Off" then
+			if RGXQoLLC["MinimapButtonBag"] == "Off" then
 
 				-- Function to set button state
 				local function SetHideButtons()
-					if LeaPlusLC["HideMiniAddonButtons"] == "On" then
+					if RGXQoLLC["HideMiniAddonButtons"] == "On" then
 						-- Hide existing buttons
 						local buttons = LibDBIconStub:GetButtonList()
 						for i = 1, #buttons do
@@ -5934,10 +5934,10 @@
 				end
 
 				-- Assign file level scope (it's used in reset and preset)
-				LeaPlusLC.SetHideButtons = SetHideButtons
+				RGXQoLLC.SetHideButtons = SetHideButtons
 
 				-- Set buttons when option is clicked and on startup
-				LeaPlusCB["HideMiniAddonButtons"]:HookScript("OnClick", SetHideButtons)
+				RGXQoLCB["HideMiniAddonButtons"]:HookScript("OnClick", SetHideButtons)
 				SetHideButtons()
 
 			end
@@ -5948,7 +5948,7 @@
 
 			MinimapCluster:SetClampedToScreen(false)
 
-			if LeaPlusLC["SquareMinimap"] == "On" then
+			if RGXQoLLC["SquareMinimap"] == "On" then
 				Minimap:SetClampRectInsets(-3, 3, 3, -3)
 			else
 				Minimap:SetClampRectInsets(-2, 0, 2, -2)
@@ -5965,7 +5965,7 @@
 				MinimapToggleButton:SetPushedTexture(0)
 				MinimapToggleButton:SetHighlightTexture(0)
 				MinimapToggleButton:EnableMouse(false)
-				if LeaPlusLC["HideMiniZoneText"] == "On" then
+				if RGXQoLLC["HideMiniZoneText"] == "On" then
 					MinimapZoneTextButton:Hide()
 				else
 					MinimapZoneTextButton:ClearAllPoints()
@@ -5974,7 +5974,7 @@
 					MinimapZoneTextButton:SetFrameLevel(100)
 				end
 			else
-				if LeaPlusLC["HideMiniZoneText"] == "On" then
+				if RGXQoLLC["HideMiniZoneText"] == "On" then
 					MinimapCluster.BorderTop:SetTexture("")
 					MinimapToggleButton:SetNormalTexture(0)
 					MinimapToggleButton:SetPushedTexture(0)
@@ -5990,7 +5990,7 @@
 
 			-- Function to toggle the zoom buttons
 			local function ToggleZoomButtons()
-				if LeaPlusLC["HideMiniZoomBtns"] == "On" then
+				if RGXQoLLC["HideMiniZoomBtns"] == "On" then
 					MinimapZoomIn:Hide()
 					MinimapZoomOut:Hide()
 				else
@@ -6000,7 +6000,7 @@
 			end
 
 			-- Set the zoom buttons when the option is clicked and on startup
-			LeaPlusCB["HideMiniZoomBtns"]:HookScript("OnClick", ToggleZoomButtons)
+			RGXQoLCB["HideMiniZoomBtns"]:HookScript("OnClick", ToggleZoomButtons)
 			ToggleZoomButtons()
 
 			----------------------------------------------------------------------
@@ -6009,7 +6009,7 @@
 
 			-- Function to show or hide the clock
 			EventUtil.ContinueOnAddOnLoaded("Blizzard_TimeManager",function()
-				if LeaPlusLC["SquareMinimap"] == "On" then
+				if RGXQoLLC["SquareMinimap"] == "On" then
 					local regions = {TimeManagerClockButton:GetRegions()}
 					regions[1]:Hide()
 					TimeManagerClockButton:ClearAllPoints()
@@ -6024,7 +6024,7 @@
 				end
 				-- Hide clock (intentionally not using cvar)
 				local function SetTimeClockButtonFunc()
-					if LeaPlusLC["HideMiniClock"] == "On" then
+					if RGXQoLLC["HideMiniClock"] == "On" then
 						TimeManagerClockButton:Hide()
 					else
 						TimeManagerClockButton:Show()
@@ -6036,7 +6036,7 @@
 
 			-- Function to toggle clock
 			local function SetMiniClock()
-				if LeaPlusLC["HideMiniClock"] == "On" then
+				if RGXQoLLC["HideMiniClock"] == "On" then
 					TimeManagerClockButton:Hide()
 				else
 					TimeManagerClockButton:Show()
@@ -6044,7 +6044,7 @@
 			end
 
 			-- Update the clock when the checkbox is clicked
-			LeaPlusCB["HideMiniClock"]:HookScript("OnClick", SetMiniClock)
+			RGXQoLCB["HideMiniClock"]:HookScript("OnClick", SetMiniClock)
 
 			----------------------------------------------------------------------
 			-- Enable mousewheel zoom
@@ -6082,46 +6082,46 @@
 
 			-- Back button handler
 			SideMinimap.b:SetScript("OnClick", function()
-				SideMinimap:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show()
+				SideMinimap:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
 			-- Reset button handler
 			SideMinimap.r.tiptext = SideMinimap.r.tiptext .. "|n|n" .. L["Note that this will not reset settings that require a UI reload."]
 			SideMinimap.r:HookScript("OnClick", function()
-				LeaPlusLC["HideMiniZoomBtns"] = "Off"; ToggleZoomButtons()
-				LeaPlusLC["HideMiniClock"] = "Off"; SetMiniClock()
-				LeaPlusLC["HideMiniAddonButtons"] = "On"; if LeaPlusLC.SetHideButtons then LeaPlusLC.SetHideButtons() end
-				LeaPlusLC["MinimapSize"] = 140; if LeaPlusLC.SetMinimapSize then LeaPlusLC:SetMinimapSize() end
-				LeaPlusLC["MinimapBorderWidth"] = 3
+				RGXQoLLC["HideMiniZoomBtns"] = "Off"; ToggleZoomButtons()
+				RGXQoLLC["HideMiniClock"] = "Off"; SetMiniClock()
+				RGXQoLLC["HideMiniAddonButtons"] = "On"; if RGXQoLLC.SetHideButtons then RGXQoLLC.SetHideButtons() end
+				RGXQoLLC["MinimapSize"] = 140; if RGXQoLLC.SetMinimapSize then RGXQoLLC:SetMinimapSize() end
+				RGXQoLLC["MinimapBorderWidth"] = 3
 				-- Refresh panel
 				SideMinimap:Hide(); SideMinimap:Show()
 			end)
 
 			-- Configuration button handler
-			LeaPlusCB["ModMinimapBtn"]:HookScript("OnClick", function()
-				if LeaPlusLC:PlayerInCombat() then
+			RGXQoLCB["ModMinimapBtn"]:HookScript("OnClick", function()
+				if RGXQoLLC:PlayerInCombat() then
 					return
 				else
 					if IsShiftKeyDown() and IsControlKeyDown() then
 						-- Preset profile
-						LeaPlusLC["HideMiniZoomBtns"] = "Off"; ToggleZoomButtons()
-						LeaPlusLC["HideMiniClock"] = "Off"; SetMiniClock()
-						LeaPlusLC["HideMiniAddonButtons"] = "On"; if LeaPlusLC.SetHideButtons then LeaPlusLC.SetHideButtons() end
-						LeaPlusLC["MinimapSize"] = 180; if LeaPlusLC.SetMinimapSize then LeaPlusLC:SetMinimapSize() end
-						LeaPlusLC["MinimapBorderWidth"] = 3
+						RGXQoLLC["HideMiniZoomBtns"] = "Off"; ToggleZoomButtons()
+						RGXQoLLC["HideMiniClock"] = "Off"; SetMiniClock()
+						RGXQoLLC["HideMiniAddonButtons"] = "On"; if RGXQoLLC.SetHideButtons then RGXQoLLC.SetHideButtons() end
+						RGXQoLLC["MinimapSize"] = 180; if RGXQoLLC.SetMinimapSize then RGXQoLLC:SetMinimapSize() end
+						RGXQoLLC["MinimapBorderWidth"] = 3
 						-- Map position
-						LeaPlusLC:ReloadCheck() -- Special reload check
+						RGXQoLLC:ReloadCheck() -- Special reload check
 					else
 						-- Show configuration panel
 						SideMinimap:Show()
-						LeaPlusLC:HideFrames()
+						RGXQoLLC:HideFrames()
 					end
 				end
 			end)
 
 			-- Hide the Looking for Group button (SoD and Anniversary realms)
-			if LeaPlusLC["HideMiniLFG"] == "On" then
+			if RGXQoLLC["HideMiniLFG"] == "On" then
 
 				EventUtil.ContinueOnAddOnLoaded("Blizzard_GroupFinder_VanillaStyle", function()
 
@@ -6141,7 +6141,7 @@
 			end
 
 			-- Hide tracking button
-			if LeaPlusLC["HideMiniTracking"] == "On" then
+			if RGXQoLLC["HideMiniTracking"] == "On" then
 
 				-- Hide tracking button initially
 				MiniMapTracking:SetAlpha(0)
@@ -6211,7 +6211,7 @@
 			LibDBIconStub.RegisterCallback(miniFrame, "LibDBIcon_IconCreated", function(self, button, name)
 
 				-- Minimap button bag: Hide new LibDBIcon icons
-				if LeaPlusLC["MinimapButtonBag"] == "On" then
+				if RGXQoLLC["MinimapButtonBag"] == "On" then
 					--C_Timer.After(0.1, function() -- Removed for now
 						local buttonName = strlower(name)
 
@@ -6224,7 +6224,7 @@
 						if not strfind(strlower(RGXQoLDB["MiniExcludeList"]), buttonName) then
 							if button.db and not button.db.hide then
 								button:Hide()
-								button:SetScript("OnShow", function() if not LeaPlusLC.bFrame:IsShown() then button:Hide() end end)
+								button:SetScript("OnShow", function() if not RGXQoLLC.bFrame:IsShown() then button:Hide() end end)
 							end
 							-- Create background texture
 							local bFrameBg = button:CreateTexture(nil, "BACKGROUND")
@@ -6232,23 +6232,23 @@
 							bFrameBg:SetPoint("CENTER")
 							bFrameBg:SetSize(30, 30)
 							bFrameBg:SetVertexColor(0, 0, 0, 0.5)
-						elseif strfind(strlower(RGXQoLDB["MiniExcludeList"]), buttonName) and LeaPlusLC["SquareMinimap"] == "On" then
+						elseif strfind(strlower(RGXQoLDB["MiniExcludeList"]), buttonName) and RGXQoLLC["SquareMinimap"] == "On" then
 							button:SetScale(0.75)
 						end
 						-- Move GameTooltip to below the minimap in case the button uses it
-						button:HookScript("OnEnter", LeaPlusLC.SetButtonTooltip)
+						button:HookScript("OnEnter", RGXQoLLC.SetButtonTooltip)
 					--end)
 				end
 
 				-- Square minimap: Set scale of new LibDBIcon icons
-				if LeaPlusLC["SquareMinimap"] == "On" and LeaPlusLC["MinimapButtonBag"] == "Off" then
+				if RGXQoLLC["SquareMinimap"] == "On" and RGXQoLLC["MinimapButtonBag"] == "Off" then
 					button:SetScale(0.75)
 				end
 
 				-- Hide addon buttons: Hide new LibDBIcon icons
-				if LeaPlusLC["MinimapButtonBag"] == "Off" then
+				if RGXQoLLC["MinimapButtonBag"] == "Off" then
 					local buttonName = strlower(name)
-					if LeaPlusLC["HideMiniAddonButtons"] == "On" then
+					if RGXQoLLC["HideMiniAddonButtons"] == "On" then
 						-- Hide addon buttons is enabled
 						if not strfind(strlower(RGXQoLDB["MiniExcludeList"]), buttonName) then
 							LibDBIconStub:ShowOnEnter(name, true)
@@ -6262,7 +6262,7 @@
 				end
 
 				-- Hide tracking button
-				if LeaPlusLC["HideMiniTracking"] == "On" then
+				if RGXQoLLC["HideMiniTracking"] == "On" then
 					button:HookScript("OnEnter", function()
 						-- Show tracking button when entering LibDBIcon button
 						MiniMapTracking.fadeOut:Stop()
@@ -6282,24 +6282,24 @@
 		-- Filter chat messages
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["FilterChatMessages"] == "On" and not LeaLockList["FilterChatMessages"] then
+		if RGXQoLLC["FilterChatMessages"] == "On" and not RGXQoLLockList["FilterChatMessages"] then
 
 			-- Load LibChatAnims
-			Leatrix_Plus:LeaPlusLCA()
+			RGXQoLAddon:RGXQoLLCA()
 
 			-- Create configuration panel
-			local ChatFilterPanel = LeaPlusLC:CreatePanel("Filter chat messages", "ChatFilterPanel")
+			local ChatFilterPanel = RGXQoLLC:CreatePanel("Filter chat messages", "ChatFilterPanel")
 
-			LeaPlusLC:MakeTx(ChatFilterPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockDrunkenSpam", "Block drunken spam", 16, -92, false, "If checked, drunken messages will be blocked unless they apply to your character.|n|nThis applies to the system channel.")
-			LeaPlusLC:MakeCB(ChatFilterPanel, "BlockDuelSpam", "Block duel spam", 16, -112, false, "If checked, duel victory and retreat messages will be blocked unless your character took part in the duel.|n|nThis applies to the system channel.")
+			RGXQoLLC:MakeTx(ChatFilterPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(ChatFilterPanel, "BlockDrunkenSpam", "Block drunken spam", 16, -92, false, "If checked, drunken messages will be blocked unless they apply to your character.|n|nThis applies to the system channel.")
+			RGXQoLLC:MakeCB(ChatFilterPanel, "BlockDuelSpam", "Block duel spam", 16, -112, false, "If checked, duel victory and retreat messages will be blocked unless your character took part in the duel.|n|nThis applies to the system channel.")
 
 			-- Lock block drunken spam option for zhTW
 			if GameLocale == "zhTW" then
-				LeaPlusLC:LockItem(LeaPlusCB["BlockDrunkenSpam"], true)
-				LeaPlusLC["BlockDrunkenSpam"] = "Off"
+				RGXQoLLC:LockItem(RGXQoLCB["BlockDrunkenSpam"], true)
+				RGXQoLLC["BlockDrunkenSpam"] = "Off"
 				RGXQoLDB["BlockDrunkenSpam"] = "Off"
-				LeaPlusCB["BlockDrunkenSpam"].tiptext = LeaPlusCB["BlockDrunkenSpam"].tiptext .. "|n|n|cff00AAFF" .. L["Cannot use this with your locale."]
+				RGXQoLCB["BlockDrunkenSpam"].tiptext = RGXQoLCB["BlockDrunkenSpam"].tiptext .. "|n|n|cff00AAFF" .. L["Cannot use this with your locale."]
 			end
 
 			-- Help button hidden
@@ -6307,7 +6307,7 @@
 
 			-- Back button handler
 			ChatFilterPanel.b:SetScript("OnClick", function()
-				ChatFilterPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page3"]:Show()
+				ChatFilterPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page3"]:Show()
 				return
 			end)
 
@@ -6318,7 +6318,7 @@
 			-- Chat filter
 			local function ChatFilterFunc(self, event, msg)
 				-- Block duel spam
-				if LeaPlusLC["BlockDuelSpam"] == "On" then
+				if RGXQoLLC["BlockDuelSpam"] == "On" then
 					-- Block duel messages unless you are part of the duel
 					if msg:match(DUEL_WINNER_KNOCKOUT:gsub("%%1$s", "%.+"):gsub("%%2$s", "%.+")) or msg:match(DUEL_WINNER_RETREAT:gsub("%%1$s", "%.+"):gsub("%%2$s", "%.+")) then
 						-- Player has defeated player in a duel.
@@ -6336,7 +6336,7 @@
 					end
 				end
 				-- Block drunken spam
-				if LeaPlusLC["BlockDrunkenSpam"] == "On" then
+				if RGXQoLLC["BlockDrunkenSpam"] == "On" then
 					for i = 1, 4 do
 						local drunk1 = _G["DRUNK_MESSAGE_ITEM_OTHER"..i]:gsub("%%s", "%s-")
 						local drunk2 = _G["DRUNK_MESSAGE_OTHER"..i]:gsub("%%s", "%s-")
@@ -6349,7 +6349,7 @@
 
 			-- Enable or disable chat filter settings
 			local function SetChatFilter()
-				if LeaPlusLC["BlockDrunkenSpam"] == "On" or LeaPlusLC["BlockDuelSpam"] == "On" then
+				if RGXQoLLC["BlockDrunkenSpam"] == "On" or RGXQoLLC["BlockDuelSpam"] == "On" then
 					ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterFunc)
 				else
 					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterFunc)
@@ -6357,16 +6357,16 @@
 			end
 
 			-- Set chat filter when settings are clicked and on startup
-			LeaPlusCB["BlockDrunkenSpam"]:HookScript("OnClick", SetChatFilter)
-			LeaPlusCB["BlockDuelSpam"]:HookScript("OnClick", SetChatFilter)
+			RGXQoLCB["BlockDrunkenSpam"]:HookScript("OnClick", SetChatFilter)
+			RGXQoLCB["BlockDuelSpam"]:HookScript("OnClick", SetChatFilter)
 			SetChatFilter()
 
 			-- Reset button handler
 			ChatFilterPanel.r:SetScript("OnClick", function()
 
 				-- Reset controls
-				LeaPlusLC["BlockDrunkenSpam"] = "Off"
-				LeaPlusLC["BlockDuelSpam"] = "Off"
+				RGXQoLLC["BlockDrunkenSpam"] = "Off"
+				RGXQoLLC["BlockDuelSpam"] = "Off"
 				SetChatFilter()
 
 				-- Refresh configuration panel
@@ -6375,15 +6375,15 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["FilterChatMessagesBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["FilterChatMessagesBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["BlockDrunkenSpam"] = "On"
-					LeaPlusLC["BlockDuelSpam"] = "On"
+					RGXQoLLC["BlockDrunkenSpam"] = "On"
+					RGXQoLLC["BlockDuelSpam"] = "On"
 					SetChatFilter()
 				else
 					ChatFilterPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -6396,17 +6396,17 @@
 		do
 
 			-- Create configuration panel
-			local AcceptResPanel = LeaPlusLC:CreatePanel("Accept resurrection", "AcceptResPanel")
+			local AcceptResPanel = RGXQoLLC:CreatePanel("Accept resurrection", "AcceptResPanel")
 
-			LeaPlusLC:MakeTx(AcceptResPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(AcceptResPanel, "AutoResNoCombat", "Exclude combat resurrection", 16, -92, false, "If checked, resurrection requests will not be automatically accepted if the player resurrecting you is in combat.")
+			RGXQoLLC:MakeTx(AcceptResPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(AcceptResPanel, "AutoResNoCombat", "Exclude combat resurrection", 16, -92, false, "If checked, resurrection requests will not be automatically accepted if the player resurrecting you is in combat.")
 
 			-- Help button hidden
 			AcceptResPanel.h:Hide()
 
 			-- Back button handler
 			AcceptResPanel.b:SetScript("OnClick", function()
-				AcceptResPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page1"]:Show();
+				AcceptResPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
 				return
 			end)
 
@@ -6414,7 +6414,7 @@
 			AcceptResPanel.r:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["AutoResNoCombat"] = "On"
+				RGXQoLLC["AutoResNoCombat"] = "On"
 
 				-- Refresh panel
 				AcceptResPanel:Hide(); AcceptResPanel:Show()
@@ -6422,19 +6422,19 @@
 			end)
 
 			-- Show panal when options panel button is clicked
-			LeaPlusCB["AutoAcceptResBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["AutoAcceptResBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["AutoResNoCombat"] = "On"
+					RGXQoLLC["AutoResNoCombat"] = "On"
 				else
 					AcceptResPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
 			-- Function to set resurrect event
 			local function SetResEvent()
-				if LeaPlusLC["AutoAcceptRes"] == "On" then
+				if RGXQoLLC["AutoAcceptRes"] == "On" then
 					AcceptResPanel:RegisterEvent("RESURRECT_REQUEST")
 				else
 					AcceptResPanel:UnregisterEvent("RESURRECT_REQUEST")
@@ -6442,8 +6442,8 @@
 			end
 
 			-- Run function when option is clicked and on startup if option is enabled
-			LeaPlusCB["AutoAcceptRes"]:HookScript("OnClick", SetResEvent)
-			if LeaPlusLC["AutoAcceptRes"] == "On" then SetResEvent() end
+			RGXQoLCB["AutoAcceptRes"]:HookScript("OnClick", SetResEvent)
+			if RGXQoLLC["AutoAcceptRes"] == "On" then SetResEvent() end
 
 			-- Handle event
 			AcceptResPanel:SetScript("OnEvent", function(self, event, arg1)
@@ -6472,8 +6472,8 @@
 					if resTimer and resTimer > 0 then
 						-- Resurrect has a delay so wait before resurrecting
 						C_Timer.After(resTimer + 1, function()
-							if not UnitAffectingCombat(arg1) or LeaPlusLC["AutoResNoCombat"] == "Off" then
-								if LeaPlusLC["AutoAcceptRes"] == "On" then
+							if not UnitAffectingCombat(arg1) or RGXQoLLC["AutoResNoCombat"] == "Off" then
+								if RGXQoLLC["AutoAcceptRes"] == "On" then
 									AcceptResurrect()
 									StaticPopup_Hide("RESURRECT_NO_TIMER")
 								end
@@ -6481,7 +6481,7 @@
 						end)
 					else
 						-- Resurrect has no delay so resurrect now
-						if not UnitAffectingCombat(arg1) or LeaPlusLC["AutoResNoCombat"] == "Off" then
+						if not UnitAffectingCombat(arg1) or RGXQoLLC["AutoResNoCombat"] == "Off" then
 							AcceptResurrect()
 							StaticPopup_Hide("RESURRECT_NO_TIMER")
 						end
@@ -6498,7 +6498,7 @@
 		-- Hide keybind text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["HideKeybindText"] == "On" and not LeaLockList["HideKeybindText"] then
+		if RGXQoLLC["HideKeybindText"] == "On" and not RGXQoLLockList["HideKeybindText"] then
 
 			-- Hide bind text
 			for i = 1, 12 do
@@ -6515,7 +6515,7 @@
 		-- Hide macro text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["HideMacroText"] == "On" and not LeaLockList["HideMacroText"] then
+		if RGXQoLLC["HideMacroText"] == "On" and not RGXQoLLockList["HideMacroText"] then
 
 			-- Hide marco text
 			for i = 1, 12 do
@@ -6532,7 +6532,7 @@
 		-- More font sizes
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MoreFontSizes"] == "On" and not LeaLockList["MoreFontSizes"] then
+		if RGXQoLLC["MoreFontSizes"] == "On" and not RGXQoLLockList["MoreFontSizes"] then
 			RunScript('CHAT_FONT_HEIGHTS = {[1] = 10, [2] = 12, [3] = 14, [4] = 16, [5] = 18, [6] = 20, [7] = 22, [8] = 24, [9] = 26, [10] = 28}')
 		end
 
@@ -6540,21 +6540,21 @@
 		--	Show druid power bar
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowDruidPowerBar"] == "On" and not LeaLockList["ShowDruidPowerBar"] then
+		if RGXQoLLC["ShowDruidPowerBar"] == "On" and not RGXQoLLockList["ShowDruidPowerBar"] then
 
 			-- Create configuration panel
-			local DruidBarPanel = LeaPlusLC:CreatePanel("Show druid power bar", "DruidBarPanel")
+			local DruidBarPanel = RGXQoLLC:CreatePanel("Show druid power bar", "DruidBarPanel")
 
 			-- Add checkboxes
-			LeaPlusLC:MakeTx(DruidBarPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(DruidBarPanel, "ShowDruidStatusText", "Show druid power bar status text", 16, -92, true, "If checked, status text will be shown in the druid power bar as long as status text is enabled in the game settings interface display panel.")
+			RGXQoLLC:MakeTx(DruidBarPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(DruidBarPanel, "ShowDruidStatusText", "Show druid power bar status text", 16, -92, true, "If checked, status text will be shown in the druid power bar as long as status text is enabled in the game settings interface display panel.")
 
 			-- Hide help button
 			DruidBarPanel.h:Hide()
 
 			-- Back button handler
 			DruidBarPanel.b:SetScript("OnClick", function()
-				DruidBarPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show()
+				DruidBarPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
@@ -6568,13 +6568,13 @@
 			end)
 
 			-- Show configuration panel when options panel button is clicked
-			LeaPlusCB["ShowDruidPowerBarBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["ShowDruidPowerBarBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
 				else
 					-- Show configuration panel
 					DruidBarPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -6656,7 +6656,7 @@
 				bar:SetPoint("BOTTOMLEFT", 98, 20)
 
 				-- Show bar above player chain if it's enabled
-				if LeaPlusLC["ShowPlayerChain"] == "On" then
+				if RGXQoLLC["ShowPlayerChain"] == "On" then
 					bar:SetFrameLevel(3)
 				end
 
@@ -6673,7 +6673,7 @@
 				bar.DefaultBorder:SetHeight(16)
 				bar.DefaultBorder:SetPoint("TOPLEFT", 4, 0)
 				bar.DefaultBorder:SetPoint("TOPRIGHT", -4, 0)
-				if LeaPlusLC["ShowPlayerChain"] == "On" then
+				if RGXQoLLC["ShowPlayerChain"] == "On" then
 					bar.DefaultBorder:SetVertexColor(chainR, chainG, chainB)
 				end
 
@@ -6682,7 +6682,7 @@
 				bar.DefaultBorderLeft:SetTexCoord(0, 0.125, 1, 0)
 				bar.DefaultBorderLeft:SetSize(16, 16)
 				bar.DefaultBorderLeft:SetPoint("TOPLEFT", -12, 0)
-				if LeaPlusLC["ShowPlayerChain"] == "On" then
+				if RGXQoLLC["ShowPlayerChain"] == "On" then
 					bar.DefaultBorderLeft:SetVertexColor(chainR, chainG, chainB)
 				end
 
@@ -6691,11 +6691,11 @@
 				bar.DefaultBorderRight:SetTexCoord(0.125, 0, 1, 0)
 				bar.DefaultBorderRight:SetSize(16, 16)
 				bar.DefaultBorderRight:SetPoint("TOPRIGHT", 12, 0)
-				if LeaPlusLC["ShowPlayerChain"] == "On" then
+				if RGXQoLLC["ShowPlayerChain"] == "On" then
 					bar.DefaultBorderRight:SetVertexColor(chainR, chainG, chainB)
 				end
 
-				if LeaPlusLC["ShowDruidStatusText"] == "On" then
+				if RGXQoLLC["ShowDruidStatusText"] == "On" then
 					bar.TextString = bar:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
 					bar.TextString:SetPoint("CENTER")
 
@@ -6718,68 +6718,68 @@
 		--	Show vanity controls (must be before Enhance dressup)
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowVanityControls"] == "On" then
+		if RGXQoLLC["ShowVanityControls"] == "On" then
 
 			-- Create checkboxes
-			LeaPlusLC:MakeCB(PaperDollFrame, "ShowHelm", L["Helm"], 2, -192, false, "")
-			LeaPlusLC:MakeCB(PaperDollFrame, "ShowCloak", L["Cloak"], 281, -192, false, "")
-			LeaPlusCB["ShowHelm"]:SetFrameStrata("HIGH")
-			LeaPlusCB["ShowCloak"]:SetFrameStrata("HIGH")
+			RGXQoLLC:MakeCB(PaperDollFrame, "ShowHelm", L["Helm"], 2, -192, false, "")
+			RGXQoLLC:MakeCB(PaperDollFrame, "ShowCloak", L["Cloak"], 281, -192, false, "")
+			RGXQoLCB["ShowHelm"]:SetFrameStrata("HIGH")
+			RGXQoLCB["ShowCloak"]:SetFrameStrata("HIGH")
 
 			-- Function to set vanity controls layout
 			local function SetVanityControlsLayout()
-				if LeaPlusLC["VanityAltLayout"] == "On" then
+				if RGXQoLLC["VanityAltLayout"] == "On" then
 					-- Alternative layout
-					LeaPlusCB["ShowHelm"].f:SetText(L["H"])
-					LeaPlusCB["ShowHelm"]:ClearAllPoints()
-					LeaPlusCB["ShowHelm"]:SetPoint("TOPLEFT", 275, -224)
-					LeaPlusCB["ShowHelm"]:SetHitRectInsets(-LeaPlusCB["ShowHelm"].f:GetStringWidth() + 4, 3, 0, 0)
-					LeaPlusCB["ShowHelm"].f:ClearAllPoints()
-					LeaPlusCB["ShowHelm"].f:SetPoint("RIGHT", LeaPlusCB["ShowHelm"], "LEFT", 4, 0)
+					RGXQoLCB["ShowHelm"].f:SetText(L["H"])
+					RGXQoLCB["ShowHelm"]:ClearAllPoints()
+					RGXQoLCB["ShowHelm"]:SetPoint("TOPLEFT", 275, -224)
+					RGXQoLCB["ShowHelm"]:SetHitRectInsets(-RGXQoLCB["ShowHelm"].f:GetStringWidth() + 4, 3, 0, 0)
+					RGXQoLCB["ShowHelm"].f:ClearAllPoints()
+					RGXQoLCB["ShowHelm"].f:SetPoint("RIGHT", RGXQoLCB["ShowHelm"], "LEFT", 4, 0)
 
-					LeaPlusCB["ShowCloak"].f:SetText(L["C"])
-					LeaPlusCB["ShowCloak"]:ClearAllPoints()
-					LeaPlusCB["ShowCloak"]:SetPoint("TOP", LeaPlusCB["ShowHelm"], "BOTTOM", 0, 6)
-					LeaPlusCB["ShowCloak"].f:ClearAllPoints()
-					LeaPlusCB["ShowCloak"].f:SetPoint("RIGHT", LeaPlusCB["ShowCloak"], "LEFT", 4, 0)
-					LeaPlusCB["ShowCloak"]:SetHitRectInsets(-LeaPlusCB["ShowCloak"].f:GetStringWidth() + 4, 3, 0, 0)
+					RGXQoLCB["ShowCloak"].f:SetText(L["C"])
+					RGXQoLCB["ShowCloak"]:ClearAllPoints()
+					RGXQoLCB["ShowCloak"]:SetPoint("TOP", RGXQoLCB["ShowHelm"], "BOTTOM", 0, 6)
+					RGXQoLCB["ShowCloak"].f:ClearAllPoints()
+					RGXQoLCB["ShowCloak"].f:SetPoint("RIGHT", RGXQoLCB["ShowCloak"], "LEFT", 4, 0)
+					RGXQoLCB["ShowCloak"]:SetHitRectInsets(-RGXQoLCB["ShowCloak"].f:GetStringWidth() + 4, 3, 0, 0)
 				else
 					-- Default layout
-					LeaPlusCB["ShowHelm"].f:SetText(L["Helm"])
-					LeaPlusCB["ShowHelm"]:ClearAllPoints()
+					RGXQoLCB["ShowHelm"].f:SetText(L["Helm"])
+					RGXQoLCB["ShowHelm"]:ClearAllPoints()
 					if C_AddOns.IsAddOnLoaded("CharacterStatsClassic") then
-						LeaPlusCB["ShowHelm"]:SetPoint("TOPLEFT", 65, -258)
+						RGXQoLCB["ShowHelm"]:SetPoint("TOPLEFT", 65, -258)
 					else
-						LeaPlusCB["ShowHelm"]:SetPoint("TOPLEFT", 65, -270)
+						RGXQoLCB["ShowHelm"]:SetPoint("TOPLEFT", 65, -270)
 					end
-					LeaPlusCB["ShowHelm"]:SetHitRectInsets(3, -LeaPlusCB["ShowHelm"].f:GetStringWidth(), 0, 0)
-					LeaPlusCB["ShowHelm"].f:ClearAllPoints()
-					LeaPlusCB["ShowHelm"].f:SetPoint("LEFT", LeaPlusCB["ShowHelm"], "RIGHT", 0, 0)
+					RGXQoLCB["ShowHelm"]:SetHitRectInsets(3, -RGXQoLCB["ShowHelm"].f:GetStringWidth(), 0, 0)
+					RGXQoLCB["ShowHelm"].f:ClearAllPoints()
+					RGXQoLCB["ShowHelm"].f:SetPoint("LEFT", RGXQoLCB["ShowHelm"], "RIGHT", 0, 0)
 
-					LeaPlusCB["ShowCloak"].f:SetText(L["Cloak"])
-					LeaPlusCB["ShowCloak"]:ClearAllPoints()
+					RGXQoLCB["ShowCloak"].f:SetText(L["Cloak"])
+					RGXQoLCB["ShowCloak"]:ClearAllPoints()
 					if C_AddOns.IsAddOnLoaded("CharacterStatsClassic") then
-						LeaPlusCB["ShowCloak"]:SetPoint("TOPLEFT", 275, -258)
+						RGXQoLCB["ShowCloak"]:SetPoint("TOPLEFT", 275, -258)
 					else
-						LeaPlusCB["ShowCloak"]:SetPoint("TOPLEFT", 275, -270)
+						RGXQoLCB["ShowCloak"]:SetPoint("TOPLEFT", 275, -270)
 					end
-					LeaPlusCB["ShowCloak"]:SetHitRectInsets(-LeaPlusCB["ShowCloak"].f:GetStringWidth(), 3, 0, 0)
-					LeaPlusCB["ShowCloak"].f:ClearAllPoints()
-					LeaPlusCB["ShowCloak"].f:SetPoint("RIGHT", LeaPlusCB["ShowCloak"], "LEFT", 0, 0)
+					RGXQoLCB["ShowCloak"]:SetHitRectInsets(-RGXQoLCB["ShowCloak"].f:GetStringWidth(), 3, 0, 0)
+					RGXQoLCB["ShowCloak"].f:ClearAllPoints()
+					RGXQoLCB["ShowCloak"].f:SetPoint("RIGHT", RGXQoLCB["ShowCloak"], "LEFT", 0, 0)
 				end
 			end
 
 			-- Set position when controls are shift/right-clicked
-			LeaPlusCB["ShowHelm"]:SetScript('OnMouseDown', function(self, btn)
+			RGXQoLCB["ShowHelm"]:SetScript('OnMouseDown', function(self, btn)
 				if btn == "RightButton" and IsShiftKeyDown() then
-					if LeaPlusLC["VanityAltLayout"] == "On" then LeaPlusLC["VanityAltLayout"] = "Off" else LeaPlusLC["VanityAltLayout"] = "On" end
+					if RGXQoLLC["VanityAltLayout"] == "On" then RGXQoLLC["VanityAltLayout"] = "Off" else RGXQoLLC["VanityAltLayout"] = "On" end
 					SetVanityControlsLayout()
 				end
 			end)
 
-			LeaPlusCB["ShowCloak"]:SetScript('OnMouseDown', function(self, btn)
+			RGXQoLCB["ShowCloak"]:SetScript('OnMouseDown', function(self, btn)
 				if btn == "RightButton" and IsShiftKeyDown() then
-					if LeaPlusLC["VanityAltLayout"] == "On" then LeaPlusLC["VanityAltLayout"] = "Off" else LeaPlusLC["VanityAltLayout"] = "On" end
+					if RGXQoLLC["VanityAltLayout"] == "On" then RGXQoLLC["VanityAltLayout"] = "Off" else RGXQoLLC["VanityAltLayout"] = "On" end
 					SetVanityControlsLayout()
 				end
 			end)
@@ -6788,58 +6788,58 @@
 			SetVanityControlsLayout()
 
 			-- Manage alpha
-			LeaPlusCB["ShowHelm"]:SetAlpha(0.3)
-			LeaPlusCB["ShowCloak"]:SetAlpha(0.3)
-			LeaPlusCB["ShowHelm"]:HookScript("OnEnter", function() LeaPlusCB["ShowHelm"]:SetAlpha(1.0) end)
-			LeaPlusCB["ShowHelm"]:HookScript("OnLeave", function() LeaPlusCB["ShowHelm"]:SetAlpha(0.3) end)
-			LeaPlusCB["ShowCloak"]:HookScript("OnEnter", function()	LeaPlusCB["ShowCloak"]:SetAlpha(1.0) end)
-			LeaPlusCB["ShowCloak"]:HookScript("OnLeave", function()	LeaPlusCB["ShowCloak"]:SetAlpha(0.3) end)
+			RGXQoLCB["ShowHelm"]:SetAlpha(0.3)
+			RGXQoLCB["ShowCloak"]:SetAlpha(0.3)
+			RGXQoLCB["ShowHelm"]:HookScript("OnEnter", function() RGXQoLCB["ShowHelm"]:SetAlpha(1.0) end)
+			RGXQoLCB["ShowHelm"]:HookScript("OnLeave", function() RGXQoLCB["ShowHelm"]:SetAlpha(0.3) end)
+			RGXQoLCB["ShowCloak"]:HookScript("OnEnter", function()	RGXQoLCB["ShowCloak"]:SetAlpha(1.0) end)
+			RGXQoLCB["ShowCloak"]:HookScript("OnLeave", function()	RGXQoLCB["ShowCloak"]:SetAlpha(0.3) end)
 
 			-- Toggle helm with click
-			LeaPlusCB["ShowHelm"]:HookScript("OnClick", function()
-				LeaPlusCB["ShowHelm"]:Disable()
-				LeaPlusCB["ShowHelm"]:SetAlpha(1.0)
+			RGXQoLCB["ShowHelm"]:HookScript("OnClick", function()
+				RGXQoLCB["ShowHelm"]:Disable()
+				RGXQoLCB["ShowHelm"]:SetAlpha(1.0)
 				C_Timer.After(0.5, function()
 					if ShowingHelm() then
 						ShowHelm(false)
 					else
 						ShowHelm(true)
 					end
-					LeaPlusCB["ShowHelm"]:Enable()
-					if not LeaPlusCB["ShowHelm"]:IsMouseOver() then
-						LeaPlusCB["ShowHelm"]:SetAlpha(0.3)
+					RGXQoLCB["ShowHelm"]:Enable()
+					if not RGXQoLCB["ShowHelm"]:IsMouseOver() then
+						RGXQoLCB["ShowHelm"]:SetAlpha(0.3)
 					end
 				end)
 			end)
 
 			-- Toggle cloak with click
-			LeaPlusCB["ShowCloak"]:HookScript("OnClick", function()
-				LeaPlusCB["ShowCloak"]:Disable()
-				LeaPlusCB["ShowCloak"]:SetAlpha(1.0)
+			RGXQoLCB["ShowCloak"]:HookScript("OnClick", function()
+				RGXQoLCB["ShowCloak"]:Disable()
+				RGXQoLCB["ShowCloak"]:SetAlpha(1.0)
 				C_Timer.After(0.5, function()
 					if ShowingCloak() then
 						ShowCloak(false)
 					else
 						ShowCloak(true)
 					end
-					LeaPlusCB["ShowCloak"]:Enable()
-					if not LeaPlusCB["ShowCloak"]:IsMouseOver() then
-						LeaPlusCB["ShowCloak"]:SetAlpha(0.3)
+					RGXQoLCB["ShowCloak"]:Enable()
+					if not RGXQoLCB["ShowCloak"]:IsMouseOver() then
+						RGXQoLCB["ShowCloak"]:SetAlpha(0.3)
 					end
 				end)
 			end)
 
 			-- Set checkbox state when checkboxes are shown
-			LeaPlusCB["ShowCloak"]:HookScript("OnShow", function()
+			RGXQoLCB["ShowCloak"]:HookScript("OnShow", function()
 				if ShowingHelm() then
-					LeaPlusCB["ShowHelm"]:SetChecked(true)
+					RGXQoLCB["ShowHelm"]:SetChecked(true)
 				else
-					LeaPlusCB["ShowHelm"]:SetChecked(false)
+					RGXQoLCB["ShowHelm"]:SetChecked(false)
 				end
 				if ShowingCloak() then
-					LeaPlusCB["ShowCloak"]:SetChecked(true)
+					RGXQoLCB["ShowCloak"]:SetChecked(true)
 				else
-					LeaPlusCB["ShowCloak"]:SetChecked(false)
+					RGXQoLCB["ShowCloak"]:SetChecked(false)
 				end
 			end)
 
@@ -6849,21 +6849,21 @@
 		-- Enhance dressup
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["EnhanceDressup"] == "On" then
+		if RGXQoLLC["EnhanceDressup"] == "On" then
 
 			-- Create configuration panel
-			local DressupPanel = LeaPlusLC:CreatePanel("Enhance dressup", "DressupPanel")
+			local DressupPanel = RGXQoLLC:CreatePanel("Enhance dressup", "DressupPanel")
 
-			LeaPlusLC:MakeTx(DressupPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(DressupPanel, "DressupItemButtons", "Show item buttons", 16, -92, false, "If checked, item buttons will be shown in the dressing room.  You can click the item buttons to remove individual items from the model.")
-			LeaPlusLC:MakeCB(DressupPanel, "DressupAnimControl", "Show animation slider", 16, -112, false, "If checked, an animation slider will be shown in the dressing room.")
+			RGXQoLLC:MakeTx(DressupPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(DressupPanel, "DressupItemButtons", "Show item buttons", 16, -92, false, "If checked, item buttons will be shown in the dressing room.  You can click the item buttons to remove individual items from the model.")
+			RGXQoLLC:MakeCB(DressupPanel, "DressupAnimControl", "Show animation slider", 16, -112, false, "If checked, an animation slider will be shown in the dressing room.")
 
 			-- Help button hidden
 			DressupPanel.h:Hide()
 
 			-- Back button handler
 			DressupPanel.b:SetScript("OnClick", function()
-				DressupPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show()
+				DressupPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
@@ -6876,12 +6876,12 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["EnhanceDressupBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["EnhanceDressupBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
 				else
 					DressupPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -6959,25 +6959,25 @@
 
 				-- Function to set item buttons
 				local function ToggleItemButtons()
-					if LeaPlusLC["DressupItemButtons"] == "On" then
+					if RGXQoLLC["DressupItemButtons"] == "On" then
 						for i = 1, #buttons do buttons[i]:Show() end
 					else
 						for i = 1, #buttons do buttons[i]:Hide() end
 					end
 				end
-				LeaPlusLC.ToggleItemButtons = ToggleItemButtons
+				RGXQoLLC.ToggleItemButtons = ToggleItemButtons
 
 				-- Set item buttons for option click, startup, reset click and preset click
-				LeaPlusCB["DressupItemButtons"]:HookScript("OnClick", ToggleItemButtons)
+				RGXQoLCB["DressupItemButtons"]:HookScript("OnClick", ToggleItemButtons)
 				ToggleItemButtons()
 				DressupPanel.r:HookScript("OnClick", function()
-					LeaPlusLC["DressupItemButtons"] = "On"
+					RGXQoLLC["DressupItemButtons"] = "On"
 					ToggleItemButtons()
 					DressupPanel:Hide(); DressupPanel:Show()
 				end)
-				LeaPlusCB["EnhanceDressupBtn"]:HookScript("OnClick", function()
+				RGXQoLCB["EnhanceDressupBtn"]:HookScript("OnClick", function()
 					if IsShiftKeyDown() and IsControlKeyDown() then
-						LeaPlusLC["DressupItemButtons"] = "On"
+						RGXQoLLC["DressupItemButtons"] = "On"
 						ToggleItemButtons()
 					end
 				end)
@@ -6991,13 +6991,13 @@
 			local animTable = {0, 4, 5, 143, 119, 26, 25, 27, 28, 108, 120, 51, 124, 52, 125, 126, 62, 63, 41, 42, 43, 44, 132, 38, 14, 115, 193, 48, 110, 109, 134, 197, 0}
 			local lastSetting
 
-			LeaPlusLC["DressupAnim"] = 0 -- Defined here since the setting is not saved
-			LeaPlusLC:MakeSL(DressUpFrame, "DressupAnim", "", 1, #animTable - 1, 1, 356, -92, "%.0f")
-			LeaPlusCB["DressupAnim"]:ClearAllPoints()
-			LeaPlusCB["DressupAnim"]:SetPoint("BOTTOM", -12, 34)
-			LeaPlusCB["DressupAnim"]:SetWidth(226)
-			LeaPlusCB["DressupAnim"]:SetFrameLevel(5)
-			LeaPlusCB["DressupAnim"]:HookScript("OnValueChanged", function(self, setting)
+			RGXQoLLC["DressupAnim"] = 0 -- Defined here since the setting is not saved
+			RGXQoLLC:MakeSL(DressUpFrame, "DressupAnim", "", 1, #animTable - 1, 1, 356, -92, "%.0f")
+			RGXQoLCB["DressupAnim"]:ClearAllPoints()
+			RGXQoLCB["DressupAnim"]:SetPoint("BOTTOM", -12, 34)
+			RGXQoLCB["DressupAnim"]:SetWidth(226)
+			RGXQoLCB["DressupAnim"]:SetFrameLevel(5)
+			RGXQoLCB["DressupAnim"]:HookScript("OnValueChanged", function(self, setting)
 				local playerActor = DressUpFrame.DressUpModel
 				setting = math.floor(setting + 0.5)
 				if playerActor and setting ~= lastSetting then
@@ -7009,25 +7009,25 @@
 
 			-- Function to show animation control
 			local function SetAnimationSlider()
-				if LeaPlusLC["DressupAnimControl"] == "On" then
-					LeaPlusCB["DressupAnim"]:Show()
+				if RGXQoLLC["DressupAnimControl"] == "On" then
+					RGXQoLCB["DressupAnim"]:Show()
 				else
-					LeaPlusCB["DressupAnim"]:Hide()
+					RGXQoLCB["DressupAnim"]:Hide()
 				end
-				LeaPlusCB["DressupAnim"]:SetValue(1)
+				RGXQoLCB["DressupAnim"]:SetValue(1)
 			end
 
 			-- Set animation control with option, startup, preset and reset
-			LeaPlusCB["DressupAnimControl"]:HookScript("OnClick", SetAnimationSlider)
+			RGXQoLCB["DressupAnimControl"]:HookScript("OnClick", SetAnimationSlider)
 			SetAnimationSlider()
-			LeaPlusCB["EnhanceDressupBtn"]:HookScript("OnClick", function()
+			RGXQoLCB["EnhanceDressupBtn"]:HookScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
-					LeaPlusLC["DressupAnimControl"] = "On"
+					RGXQoLLC["DressupAnimControl"] = "On"
 					SetAnimationSlider()
 				end
 			end)
 			DressupPanel.r:HookScript("OnClick", function()
-				LeaPlusLC["DressupAnimControl"] = "On"
+				RGXQoLLC["DressupAnimControl"] = "On"
 				SetAnimationSlider()
 				DressupPanel:Hide(); DressupPanel:Show()
 			end)
@@ -7037,9 +7037,9 @@
 			DressUpFrameResetButton:HookScript("OnClick", SetAnimationSlider)
 
 			-- Skin slider for ElvUI
-			if LeaPlusLC.ElvUI then
-				_G.LeaPlusGlobalDressupAnim = LeaPlusCB["DressupAnim"]
-				LeaPlusLC.ElvUI:GetModule("Skins"):HandleSliderFrame(_G.LeaPlusGlobalDressupAnim, false)
+			if RGXQoLLC.ElvUI then
+				_G.LeaPlusGlobalDressupAnim = RGXQoLCB["DressupAnim"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleSliderFrame(_G.LeaPlusGlobalDressupAnim, false)
 			end
 
 			----------------------------------------------------------------------
@@ -7069,36 +7069,36 @@
 			SetButton(DressUpFrameResetButton, "R", "Reset")
 
 			-- Nude
-			LeaPlusLC:CreateButton("DressUpNudeBtn", DressUpFrameResetButton, "N", "BOTTOMLEFT", 106, 79, 80, 22, false, "")
-			LeaPlusCB["DressUpNudeBtn"]:SetFrameLevel(3)
-			LeaPlusCB["DressUpNudeBtn"]:ClearAllPoints()
-			LeaPlusCB["DressUpNudeBtn"]:SetPoint("RIGHT", DressUpFrameResetButton, "LEFT", 0, 0)
-			SetButton(LeaPlusCB["DressUpNudeBtn"], "N", "Remove all items")
-			LeaPlusCB["DressUpNudeBtn"]:SetScript("OnClick", function()
+			RGXQoLLC:CreateButton("DressUpNudeBtn", DressUpFrameResetButton, "N", "BOTTOMLEFT", 106, 79, 80, 22, false, "")
+			RGXQoLCB["DressUpNudeBtn"]:SetFrameLevel(3)
+			RGXQoLCB["DressUpNudeBtn"]:ClearAllPoints()
+			RGXQoLCB["DressUpNudeBtn"]:SetPoint("RIGHT", DressUpFrameResetButton, "LEFT", 0, 0)
+			SetButton(RGXQoLCB["DressUpNudeBtn"], "N", "Remove all items")
+			RGXQoLCB["DressUpNudeBtn"]:SetScript("OnClick", function()
 				DressUpFrame.DressUpModel:Undress()
 			end)
 
 			-- Show me
-			LeaPlusLC:CreateButton("DressUpShowMeBtn", DressUpFrameResetButton, "M", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
-			LeaPlusCB["DressUpShowMeBtn"]:ClearAllPoints()
-			LeaPlusCB["DressUpShowMeBtn"]:SetPoint("RIGHT", LeaPlusCB["DressUpNudeBtn"], "LEFT", 0, 0)
-			SetButton(LeaPlusCB["DressUpShowMeBtn"], "M", "Show me")
-			LeaPlusCB["DressUpShowMeBtn"]:SetScript("OnClick", function()
+			RGXQoLLC:CreateButton("DressUpShowMeBtn", DressUpFrameResetButton, "M", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
+			RGXQoLCB["DressUpShowMeBtn"]:ClearAllPoints()
+			RGXQoLCB["DressUpShowMeBtn"]:SetPoint("RIGHT", RGXQoLCB["DressUpNudeBtn"], "LEFT", 0, 0)
+			SetButton(RGXQoLCB["DressUpShowMeBtn"], "M", "Show me")
+			RGXQoLCB["DressUpShowMeBtn"]:SetScript("OnClick", function()
 				local playerActor = DressUpFrame.DressUpModel
 				playerActor:SetUnit("player")
 				-- Set animation
 				playerActor:SetAnimation(0)
 				C_Timer.After(0.1,function()
-					playerActor:SetAnimation(animTable[math.floor(LeaPlusCB["DressupAnim"]:GetValue() + 0.5)], 0, 1, 1)
+					playerActor:SetAnimation(animTable[math.floor(RGXQoLCB["DressupAnim"]:GetValue() + 0.5)], 0, 1, 1)
 				end)
 			end)
 
 			-- Show my outfit on target
-			--[[LeaPlusLC:CreateButton("DressUpOutfitOnTargetBtn", DressUpFrameResetButton, "O", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
-			LeaPlusCB["DressUpOutfitOnTargetBtn"]:ClearAllPoints()
-			LeaPlusCB["DressUpOutfitOnTargetBtn"]:SetPoint("RIGHT", LeaPlusCB["DressUpNudeBtn"], "LEFT", 0, 0)
-			SetButton(LeaPlusCB["DressUpOutfitOnTargetBtn"], "O", "Show my outfit on target")
-			LeaPlusCB["DressUpOutfitOnTargetBtn"]:SetScript("OnClick", function()
+			--[[RGXQoLLC:CreateButton("DressUpOutfitOnTargetBtn", DressUpFrameResetButton, "O", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
+			RGXQoLCB["DressUpOutfitOnTargetBtn"]:ClearAllPoints()
+			RGXQoLCB["DressUpOutfitOnTargetBtn"]:SetPoint("RIGHT", RGXQoLCB["DressUpNudeBtn"], "LEFT", 0, 0)
+			SetButton(RGXQoLCB["DressUpOutfitOnTargetBtn"], "O", "Show my outfit on target")
+			RGXQoLCB["DressUpOutfitOnTargetBtn"]:SetScript("OnClick", function()
 				if UnitIsPlayer("target") then
 					DressUpFrame.DressUpModel:SetUnit("target")
 					DressUpFrame.DressUpModel:Undress()
@@ -7114,11 +7114,11 @@
 			end)]]
 
 			-- Target
-			LeaPlusLC:CreateButton("DressUpTargetBtn", DressUpFrameResetButton, "T", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
-			LeaPlusCB["DressUpTargetBtn"]:ClearAllPoints()
-			LeaPlusCB["DressUpTargetBtn"]:SetPoint("RIGHT", LeaPlusCB["DressUpShowMeBtn"], "LEFT", 0, 0)
-			SetButton(LeaPlusCB["DressUpTargetBtn"], "T", "Show target model")
-			LeaPlusCB["DressUpTargetBtn"]:SetScript("OnClick", function()
+			RGXQoLLC:CreateButton("DressUpTargetBtn", DressUpFrameResetButton, "T", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
+			RGXQoLCB["DressUpTargetBtn"]:ClearAllPoints()
+			RGXQoLCB["DressUpTargetBtn"]:SetPoint("RIGHT", RGXQoLCB["DressUpShowMeBtn"], "LEFT", 0, 0)
+			SetButton(RGXQoLCB["DressUpTargetBtn"], "T", "Show target model")
+			RGXQoLCB["DressUpTargetBtn"]:SetScript("OnClick", function()
 				if UnitIsPlayer("target") then
 					local playerActor = DressUpFrame.DressUpModel
 					if playerActor then
@@ -7126,37 +7126,37 @@
 						-- Set animation
 						playerActor:SetAnimation(0)
 						C_Timer.After(0.1,function()
-							playerActor:SetAnimation(animTable[math.floor(LeaPlusCB["DressupAnim"]:GetValue() + 0.5)], 0, 1, 1)
+							playerActor:SetAnimation(animTable[math.floor(RGXQoLCB["DressupAnim"]:GetValue() + 0.5)], 0, 1, 1)
 						end)
 					end
 				end
 			end)
 
 			-- Toggle buttons
-			LeaPlusLC:CreateButton("DressUpButonsBtn", DressUpFrameResetButton, "B", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
-			LeaPlusCB["DressUpButonsBtn"]:ClearAllPoints()
-			LeaPlusCB["DressUpButonsBtn"]:SetPoint("RIGHT", LeaPlusCB["DressUpTargetBtn"], "LEFT", 0, 0)
-			SetButton(LeaPlusCB["DressUpButonsBtn"], "B", "Toggle buttons")
-			LeaPlusCB["DressUpButonsBtn"]:SetScript("OnClick", function()
-				if LeaPlusLC["DressupItemButtons"] == "On" then LeaPlusLC["DressupItemButtons"] = "Off" else LeaPlusLC["DressupItemButtons"] = "On" end
-				LeaPlusLC:ToggleItemButtons()
+			RGXQoLLC:CreateButton("DressUpButonsBtn", DressUpFrameResetButton, "B", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
+			RGXQoLCB["DressUpButonsBtn"]:ClearAllPoints()
+			RGXQoLCB["DressUpButonsBtn"]:SetPoint("RIGHT", RGXQoLCB["DressUpTargetBtn"], "LEFT", 0, 0)
+			SetButton(RGXQoLCB["DressUpButonsBtn"], "B", "Toggle buttons")
+			RGXQoLCB["DressUpButonsBtn"]:SetScript("OnClick", function()
+				if RGXQoLLC["DressupItemButtons"] == "On" then RGXQoLLC["DressupItemButtons"] = "Off" else RGXQoLLC["DressupItemButtons"] = "On" end
+				RGXQoLLC:ToggleItemButtons()
 				if DressupPanel:IsShown() then DressupPanel:Hide(); DressupPanel:Show() end
 			end)
 
 			-- Show nearby target outfit on me button
-			--[[LeaPlusLC:CreateButton("DressUpTargetSelfBtn", DressUpFrameResetButton, "S", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
-			LeaPlusCB["DressUpTargetSelfBtn"]:ClearAllPoints()
-			LeaPlusCB["DressUpTargetSelfBtn"]:SetPoint("RIGHT", LeaPlusCB["DressUpTargetBtn"], "LEFT", 0, 0)
-			SetButton(LeaPlusCB["DressUpTargetSelfBtn"], "S", "Show nearby target outfit on me")
-			LeaPlusCB["DressUpTargetSelfBtn"]:SetScript("OnClick", function()
+			--[[RGXQoLLC:CreateButton("DressUpTargetSelfBtn", DressUpFrameResetButton, "S", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
+			RGXQoLCB["DressUpTargetSelfBtn"]:ClearAllPoints()
+			RGXQoLCB["DressUpTargetSelfBtn"]:SetPoint("RIGHT", RGXQoLCB["DressUpTargetBtn"], "LEFT", 0, 0)
+			SetButton(RGXQoLCB["DressUpTargetSelfBtn"], "S", "Show nearby target outfit on me")
+			RGXQoLCB["DressUpTargetSelfBtn"]:SetScript("OnClick", function()
 				if UnitIsPlayer("target") then
 					if not CanInspect("target") then
 						ActionStatus_DisplayMessage(L["Target out of range."], true)
 						return
 					end
 					NotifyInspect("target")
-					LeaPlusCB["DressUpTargetSelfBtn"]:RegisterEvent("INSPECT_READY")
-					LeaPlusCB["DressUpTargetSelfBtn"]:SetScript("OnEvent", function()
+					RGXQoLCB["DressUpTargetSelfBtn"]:RegisterEvent("INSPECT_READY")
+					RGXQoLCB["DressUpTargetSelfBtn"]:SetScript("OnEvent", function()
 						DressUpFrame.DressUpModel:SetUnit("player")
 						DressUpFrame.DressUpModel:Undress()
 						C_Timer.After(0.01, function()
@@ -7169,7 +7169,7 @@
 								end)
 							end
 						end)
-						LeaPlusCB["DressUpTargetSelfBtn"]:UnregisterEvent("INSPECT_READY")
+						RGXQoLCB["DressUpTargetSelfBtn"]:UnregisterEvent("INSPECT_READY")
 					end)
 				end
 			end)]]
@@ -7183,33 +7183,33 @@
 			local BtnStrata, BtnLevel = SideDressUpModelResetButton:GetFrameStrata(), SideDressUpModelResetButton:GetFrameLevel()
 
 			-- Add buttons to auction house dressup frame
-			LeaPlusLC:CreateButton("DressUpSideBtn", SideDressUpModelResetButton, "Tabard", "BOTTOMLEFT", -36, -31, 60, 22, false, "")
-			LeaPlusCB["DressUpSideBtn"]:SetFrameStrata(BtnStrata)
-			LeaPlusCB["DressUpSideBtn"]:SetFrameLevel(BtnLevel)
-			LeaPlusCB["DressUpSideBtn"]:SetScript("OnClick", function()
+			RGXQoLLC:CreateButton("DressUpSideBtn", SideDressUpModelResetButton, "Tabard", "BOTTOMLEFT", -36, -31, 60, 22, false, "")
+			RGXQoLCB["DressUpSideBtn"]:SetFrameStrata(BtnStrata)
+			RGXQoLCB["DressUpSideBtn"]:SetFrameLevel(BtnLevel)
+			RGXQoLCB["DressUpSideBtn"]:SetScript("OnClick", function()
 				SideDressUpModel:UndressSlot(19)
 			end)
 
-			LeaPlusLC:CreateButton("DressUpSideNudeBtn", SideDressUpModelResetButton, "Nude", "BOTTOMRIGHT", 39, -31, 60, 22, false, "")
-			LeaPlusCB["DressUpSideNudeBtn"]:SetFrameStrata(BtnStrata)
-			LeaPlusCB["DressUpSideNudeBtn"]:SetFrameLevel(BtnLevel)
-			LeaPlusCB["DressUpSideNudeBtn"]:SetScript("OnClick", function()
+			RGXQoLLC:CreateButton("DressUpSideNudeBtn", SideDressUpModelResetButton, "Nude", "BOTTOMRIGHT", 39, -31, 60, 22, false, "")
+			RGXQoLCB["DressUpSideNudeBtn"]:SetFrameStrata(BtnStrata)
+			RGXQoLCB["DressUpSideNudeBtn"]:SetFrameLevel(BtnLevel)
+			RGXQoLCB["DressUpSideNudeBtn"]:SetScript("OnClick", function()
 				SideDressUpModel:Undress()
 			end)
 
 			-- Skin buttons for ElvUI
-			if LeaPlusLC.ElvUI then
-				_G.LeaPlusGlobalDressUpButtonsButton = LeaPlusCB["DressUpButonsBtn"]
-				LeaPlusLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpButtonsButton)
+			if RGXQoLLC.ElvUI then
+				_G.LeaPlusGlobalDressUpButtonsButton = RGXQoLCB["DressUpButonsBtn"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpButtonsButton)
 
-				_G.LeaPlusGlobalDressUpShowMeButton = LeaPlusCB["DressUpShowMeBtn"]
-				LeaPlusLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpShowMeButton)
+				_G.LeaPlusGlobalDressUpShowMeButton = RGXQoLCB["DressUpShowMeBtn"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpShowMeButton)
 
-				_G.LeaPlusGlobalDressUpTargetButton = LeaPlusCB["DressUpTargetBtn"]
-				LeaPlusLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpTargetButton)
+				_G.LeaPlusGlobalDressUpTargetButton = RGXQoLCB["DressUpTargetBtn"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpTargetButton)
 
-				_G.LeaPlusGlobalDressUpNudeButton = LeaPlusCB["DressUpNudeBtn"]
-				LeaPlusLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpNudeButton)
+				_G.LeaPlusGlobalDressUpNudeButton = RGXQoLCB["DressUpNudeBtn"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpNudeButton)
 			end
 
 			----------------------------------------------------------------------
@@ -7228,7 +7228,7 @@
 			----------------------------------------------------------------------
 
 			local function ToggleStats()
-				if LeaPlusLC["HideDressupStats"] == "On" then
+				if RGXQoLLC["HideDressupStats"] == "On" then
 					CharacterResistanceFrame:Hide()
 					if CSC_HideStatsPanel then
 						-- CharacterStatsClassic is installed
@@ -7240,9 +7240,9 @@
 					CharacterModelFrame:ClearAllPoints()
 					CharacterModelFrame:SetPoint("TOPLEFT", PaperDollFrame, 66, -76)
 					CharacterModelFrame:SetPoint("BOTTOMRIGHT", PaperDollFrame, -86, 134)
-					if LeaPlusLC["ShowVanityControls"] == "On" then
-						LeaPlusCB["ShowHelm"]:Hide()
-						LeaPlusCB["ShowCloak"]:Hide()
+					if RGXQoLLC["ShowVanityControls"] == "On" then
+						RGXQoLCB["ShowHelm"]:Hide()
+						RGXQoLCB["ShowCloak"]:Hide()
 					end
 				else
 					CharacterResistanceFrame:Show()
@@ -7256,9 +7256,9 @@
 					CharacterModelFrame:ClearAllPoints()
 					CharacterModelFrame:SetPoint("TOPLEFT", PaperDollFrame, 66, -76)
 					CharacterModelFrame:SetPoint("BOTTOMRIGHT", PaperDollFrame, -86, 220)
-					if LeaPlusLC["ShowVanityControls"] == "On" then
-						LeaPlusCB["ShowHelm"]:Show()
-						LeaPlusCB["ShowCloak"]:Show()
+					if RGXQoLLC["ShowVanityControls"] == "On" then
+						RGXQoLCB["ShowHelm"]:Show()
+						RGXQoLCB["ShowCloak"]:Show()
 					end
 				end
 			end
@@ -7266,7 +7266,7 @@
 			-- Toggle stats with middle mouse button
 			CharacterModelFrame:HookScript("OnMouseDown", function(self, btn)
 				if btn == "MiddleButton" then
-					if LeaPlusLC["HideDressupStats"] == "On" then LeaPlusLC["HideDressupStats"] = "Off" else LeaPlusLC["HideDressupStats"] = "On" end
+					if RGXQoLLC["HideDressupStats"] == "On" then RGXQoLLC["HideDressupStats"] = "Off" else RGXQoLLC["HideDressupStats"] = "On" end
 					ToggleStats()
 				end
 			end)
@@ -7287,7 +7287,7 @@
 			end)
 			toggleButton:SetScript("OnLeave", GameTooltip_Hide)
 			toggleButton:SetScript("OnClick", function()
-				if LeaPlusLC["HideDressupStats"] == "On" then LeaPlusLC["HideDressupStats"] = "Off" else LeaPlusLC["HideDressupStats"] = "On" end
+				if RGXQoLLC["HideDressupStats"] == "On" then RGXQoLLC["HideDressupStats"] = "Off" else RGXQoLLC["HideDressupStats"] = "On" end
 				ToggleStats()
 			end)
 
@@ -7384,20 +7384,20 @@
 		do
 
 			-- Create configuration panel
-			local ReleasePanel = LeaPlusLC:CreatePanel("Release in PvP", "ReleasePanel")
+			local ReleasePanel = RGXQoLLC:CreatePanel("Release in PvP", "ReleasePanel")
 
-			LeaPlusLC:MakeTx(ReleasePanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(ReleasePanel, "AutoReleaseNoAlterac", "Exclude Alterac Valley", 16, -92, false, "If checked, you will not release automatically in Alterac Valley.")
+			RGXQoLLC:MakeTx(ReleasePanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(ReleasePanel, "AutoReleaseNoAlterac", "Exclude Alterac Valley", 16, -92, false, "If checked, you will not release automatically in Alterac Valley.")
 
-			LeaPlusLC:MakeTx(ReleasePanel, "Delay", 356, -72)
-			LeaPlusLC:MakeSL(ReleasePanel, "AutoReleaseDelay", "Drag to set the number of milliseconds before you are automatically released.|n|nYou can hold down shift as the timer is ending to cancel the automatic release.", 200, 3000, 100, 356, -92, "%.0f")
+			RGXQoLLC:MakeTx(ReleasePanel, "Delay", 356, -72)
+			RGXQoLLC:MakeSL(ReleasePanel, "AutoReleaseDelay", "Drag to set the number of milliseconds before you are automatically released.|n|nYou can hold down shift as the timer is ending to cancel the automatic release.", 200, 3000, 100, 356, -92, "%.0f")
 
 			-- Help button hidden
 			ReleasePanel.h:Hide()
 
 			-- Back button handler
 			ReleasePanel.b:SetScript("OnClick", function()
-				ReleasePanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page1"]:Show();
+				ReleasePanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
 				return
 			end)
 
@@ -7405,8 +7405,8 @@
 			ReleasePanel.r:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["AutoReleaseNoAlterac"] = "Off"
-				LeaPlusLC["AutoReleaseDelay"] = 200
+				RGXQoLLC["AutoReleaseNoAlterac"] = "Off"
+				RGXQoLLC["AutoReleaseDelay"] = 200
 
 				-- Refresh panel
 				ReleasePanel:Hide(); ReleasePanel:Show()
@@ -7414,30 +7414,30 @@
 			end)
 
 			-- Show panal when options panel button is clicked
-			LeaPlusCB["AutoReleasePvPBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["AutoReleasePvPBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["AutoReleaseNoAlterac"] = "Off"
-					LeaPlusLC["AutoReleaseDelay"] = 200
+					RGXQoLLC["AutoReleaseNoAlterac"] = "Off"
+					RGXQoLLC["AutoReleaseDelay"] = 200
 				else
 					ReleasePanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
 			-- Release in battlegrounds
 			hooksecurefunc("StaticPopup_Show", function(sType)
-				if sType and sType == "DEATH" and LeaPlusLC["AutoReleasePvP"] == "On" then
+				if sType and sType == "DEATH" and RGXQoLLC["AutoReleasePvP"] == "On" then
 					if C_DeathInfo.GetSelfResurrectOptions() and #C_DeathInfo.GetSelfResurrectOptions() > 0 then return end
 					local InstStat, InstType = IsInInstance()
 					if InstStat and InstType == "pvp" then
 						-- Exclude specific maps
 						local mapID = C_Map.GetBestMapForUnit("player") or nil
 						if mapID then
-							if mapID == 1459 and LeaPlusLC["AutoReleaseNoAlterac"] == "On" then return end -- Alterac Valley
+							if mapID == 1459 and RGXQoLLC["AutoReleaseNoAlterac"] == "On" then return end -- Alterac Valley
 						end
 						-- Release automatically
-						local delay = LeaPlusLC["AutoReleaseDelay"] / 1000
+						local delay = RGXQoLLC["AutoReleaseDelay"] / 1000
 						C_Timer.After(delay, function()
 							local dialog = StaticPopup_Visible("DEATH")
 							if dialog then
@@ -7458,20 +7458,20 @@
 		--	Enhance trainers
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["EnhanceTrainers"] == "On" then
+		if RGXQoLLC["EnhanceTrainers"] == "On" then
 
 			-- Create configuration panel
-			local TrainerPanel = LeaPlusLC:CreatePanel("Enhance trainers", "TrainerPanel")
+			local TrainerPanel = RGXQoLLC:CreatePanel("Enhance trainers", "TrainerPanel")
 
-			LeaPlusLC:MakeTx(TrainerPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(TrainerPanel, "ShowTrainAllBtn", "Show train all skills button", 16, -92, false, "If checked, a train all skills button will be shown in the skill trainer frame allowing you to train all available skills instantly.")
+			RGXQoLLC:MakeTx(TrainerPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(TrainerPanel, "ShowTrainAllBtn", "Show train all skills button", 16, -92, false, "If checked, a train all skills button will be shown in the skill trainer frame allowing you to train all available skills instantly.")
 
 			-- Help button hidden
 			TrainerPanel.h:Hide()
 
 			-- Back button handler
 			TrainerPanel.b:SetScript("OnClick", function()
-				TrainerPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show()
+				TrainerPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
@@ -7479,7 +7479,7 @@
 			TrainerPanel.r:SetScript("OnClick", function()
 
 				-- Reset controls
-				LeaPlusLC["ShowTrainAllBtn"] = "On"
+				RGXQoLLC["ShowTrainAllBtn"] = "On"
 
 				-- Refresh configuration panel
 				TrainerPanel:Hide(); TrainerPanel:Show()
@@ -7487,13 +7487,13 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["EnhanceTrainersBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["EnhanceTrainersBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["ShowTrainAllBtn"] = "On"
+					RGXQoLLC["ShowTrainAllBtn"] = "On"
 				else
 					TrainerPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -7579,14 +7579,14 @@
 
 				-- Set top left texture
 				regions[2]:SetSize(512, 512)
-				regions[2]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus")
+				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
 				regions[2]:SetTexCoord(0.25, 0.75, 0, 0.5)
 
 				-- Set top right texture
 				regions[3]:ClearAllPoints()
 				regions[3]:SetPoint("TOPLEFT", regions[2], "TOPRIGHT", 0, 0)
 				regions[3]:SetSize(256, 512)
-				regions[3]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus")
+				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
 				regions[3]:SetTexCoord(0.75, 1, 0, 0.5)
 
 				-- Hide bottom left and bottom right textures
@@ -7637,13 +7637,13 @@
 				----------------------------------------------------------------------
 
 				-- Create train all button
-				LeaPlusLC:CreateButton("TrainAllButton", ClassTrainerFrame, "Train All", "BOTTOMLEFT", 344, 54, 0, 22, false, "")
+				RGXQoLLC:CreateButton("TrainAllButton", ClassTrainerFrame, "Train All", "BOTTOMLEFT", 344, 54, 0, 22, false, "")
 
 				-- Give button global scope (useful for compatibility with other addons and essential for ElvUI)
-				_G.LeaPlusGlobalTrainAllButton = LeaPlusCB["TrainAllButton"]
+				_G.LeaPlusGlobalTrainAllButton = RGXQoLCB["TrainAllButton"]
 
 				-- Button tooltip
-				LeaPlusCB["TrainAllButton"]:SetScript("OnEnter", function(self)
+				RGXQoLCB["TrainAllButton"]:SetScript("OnEnter", function(self)
 					-- Get number of available skills and total cost
 					local count, cost = 0, 0
 					for i = 1, GetNumTrainerServices() do
@@ -7667,7 +7667,7 @@
 				end)
 
 				-- Button click handler
-				LeaPlusCB["TrainAllButton"]:SetScript("OnClick",function(self)
+				RGXQoLCB["TrainAllButton"]:SetScript("OnClick",function(self)
 					for i = 1, GetNumTrainerServices() do
 						local void, void, isAvail = GetTrainerServiceInfo(i)
 						if isAvail and isAvail == "available" then
@@ -7686,29 +7686,29 @@
 							skillsAvailable = true
 						end
 					end
-					LeaPlusCB["TrainAllButton"]:SetEnabled(skillsAvailable)
+					RGXQoLCB["TrainAllButton"]:SetEnabled(skillsAvailable)
 					-- Refresh tooltip
-					if LeaPlusCB["TrainAllButton"]:IsMouseOver() and skillsAvailable then
-						LeaPlusCB["TrainAllButton"]:GetScript("OnEnter")(LeaPlusCB["TrainAllButton"])
+					if RGXQoLCB["TrainAllButton"]:IsMouseOver() and skillsAvailable then
+						RGXQoLCB["TrainAllButton"]:GetScript("OnEnter")(RGXQoLCB["TrainAllButton"])
 					end
 				end)
 
 				-- Function to set train all button
 				local function SetTrainAllFunc()
-					if LeaPlusLC["ShowTrainAllBtn"] == "On" then
-						LeaPlusCB["TrainAllButton"]:Show()
+					if RGXQoLLC["ShowTrainAllBtn"] == "On" then
+						RGXQoLCB["TrainAllButton"]:Show()
 					else
-						LeaPlusCB["TrainAllButton"]:Hide()
+						RGXQoLCB["TrainAllButton"]:Hide()
 					end
 				end
 
 				-- Run function when option is clicked, reset or preset button is clicked and on startup
-				LeaPlusCB["ShowTrainAllBtn"]:HookScript("OnClick", SetTrainAllFunc)
+				RGXQoLCB["ShowTrainAllBtn"]:HookScript("OnClick", SetTrainAllFunc)
 				TrainerPanel.r:HookScript("OnClick", SetTrainAllFunc)
-				LeaPlusCB["EnhanceTrainersBtn"]:HookScript("OnClick", function()
+				RGXQoLCB["EnhanceTrainersBtn"]:HookScript("OnClick", function()
 					if IsShiftKeyDown() and IsControlKeyDown() then
 						-- Preset profile
-						LeaPlusLC["ShowTrainAllBtn"] = "On"
+						RGXQoLLC["ShowTrainAllBtn"] = "On"
 						SetTrainAllFunc()
 					end
 				end)
@@ -7719,8 +7719,8 @@
 				----------------------------------------------------------------------
 
 				-- ElvUI fixes
-				if LeaPlusLC.ElvUI then
-					local E = LeaPlusLC.ElvUI
+				if RGXQoLLC.ElvUI then
+					local E = RGXQoLLC.ElvUI
 					if E.private.skins.blizzard.enable and E.private.skins.blizzard.trainer then
 						regions[2]:Hide()
 						regions[3]:Hide()
@@ -7729,8 +7729,8 @@
 						_G["ClassTrainerFrame"]:SetHeight(512 + tall)
 						_G["ClassTrainerTrainButton"]:ClearAllPoints()
 						_G["ClassTrainerTrainButton"]:SetPoint("BOTTOMRIGHT", _G["ClassTrainerFrame"], "BOTTOMRIGHT", -42, 78)
-						LeaPlusCB["TrainAllButton"]:ClearAllPoints()
-						LeaPlusCB["TrainAllButton"]:SetPoint("BOTTOMLEFT", _G["ClassTrainerFrame"], "BOTTOMLEFT", 344, 78)
+						RGXQoLCB["TrainAllButton"]:ClearAllPoints()
+						RGXQoLCB["TrainAllButton"]:SetPoint("BOTTOMLEFT", _G["ClassTrainerFrame"], "BOTTOMLEFT", 344, 78)
 						E:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalTrainAllButton)
 					end
 				end
@@ -7746,18 +7746,18 @@
 		do
 
 			-- Create configuration panel
-			local weatherPanel = LeaPlusLC:CreatePanel("Set weather density", "weatherPanel")
-			LeaPlusLC:MakeTx(weatherPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeSL(weatherPanel, "WeatherLevel", "Drag to set the density of weather effects.", 0, 3, 1, 16, -92, "%.0f")
+			local weatherPanel = RGXQoLLC:CreatePanel("Set weather density", "weatherPanel")
+			RGXQoLLC:MakeTx(weatherPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeSL(weatherPanel, "WeatherLevel", "Drag to set the density of weather effects.", 0, 3, 1, 16, -92, "%.0f")
 
 			local weatherSliderTable = {L["Very Low"], L["Low"], L["Medium"], L["High"]}
 
 			-- Function to set the weather density
 			local function SetWeatherFunc()
-				LeaPlusCB["WeatherLevel"].f:SetText(LeaPlusLC["WeatherLevel"] .. "  (" .. weatherSliderTable[LeaPlusLC["WeatherLevel"] + 1] .. ")")
-				if LeaPlusLC["SetWeatherDensity"] == "On" then
-					SetCVar("WeatherDensity", LeaPlusLC["WeatherLevel"])
-					SetCVar("RAIDweatherDensity", LeaPlusLC["WeatherLevel"])
+				RGXQoLCB["WeatherLevel"].f:SetText(RGXQoLLC["WeatherLevel"] .. "  (" .. weatherSliderTable[RGXQoLLC["WeatherLevel"] + 1] .. ")")
+				if RGXQoLLC["SetWeatherDensity"] == "On" then
+					SetCVar("WeatherDensity", RGXQoLLC["WeatherLevel"])
+					SetCVar("RAIDweatherDensity", RGXQoLLC["WeatherLevel"])
 				else
 					SetCVar("WeatherDensity", "3")
 					SetCVar("RAIDweatherDensity", "3")
@@ -7765,23 +7765,23 @@
 			end
 
 			-- Set weather density when options are clicked and on startup if option is enabled
-			LeaPlusCB["SetWeatherDensity"]:HookScript("OnClick", SetWeatherFunc)
-			LeaPlusCB["WeatherLevel"]:HookScript("OnValueChanged", SetWeatherFunc)
-			if LeaPlusLC["SetWeatherDensity"] == "On" then SetWeatherFunc() end
+			RGXQoLCB["SetWeatherDensity"]:HookScript("OnClick", SetWeatherFunc)
+			RGXQoLCB["WeatherLevel"]:HookScript("OnValueChanged", SetWeatherFunc)
+			if RGXQoLLC["SetWeatherDensity"] == "On" then SetWeatherFunc() end
 
 			-- Prevent weather density from being changed when particle density is changed
 			hooksecurefunc("SetCVar", function(setting, value)
-				if setting and LeaPlusLC["SetWeatherDensity"] == "On" then
+				if setting and RGXQoLLC["SetWeatherDensity"] == "On" then
 					if setting == "graphicsParticleDensity" then
-						if GetCVar("WeatherDensity") ~= LeaPlusLC["WeatherLevel"] then
+						if GetCVar("WeatherDensity") ~= RGXQoLLC["WeatherLevel"] then
 							C_Timer.After(0.1, function()
-								SetCVar("WeatherDensity", LeaPlusLC["WeatherLevel"])
+								SetCVar("WeatherDensity", RGXQoLLC["WeatherLevel"])
 							end)
 						end
 					elseif setting == "raidGraphicsParticleDensity" then
-						if GetCVar("RAIDweatherDensity") ~= LeaPlusLC["WeatherLevel"] then
+						if GetCVar("RAIDweatherDensity") ~= RGXQoLLC["WeatherLevel"] then
 							C_Timer.After(0.1, function()
-								SetCVar("RAIDweatherDensity", LeaPlusLC["WeatherLevel"])
+								SetCVar("RAIDweatherDensity", RGXQoLLC["WeatherLevel"])
 							end)
 						end
 					end
@@ -7793,7 +7793,7 @@
 
 			-- Back button handler
 			weatherPanel.b:SetScript("OnClick", function()
-				weatherPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page7"]:Show()
+				weatherPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page7"]:Show()
 				return
 			end)
 
@@ -7801,7 +7801,7 @@
 			weatherPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				LeaPlusLC["WeatherLevel"] = 3
+				RGXQoLLC["WeatherLevel"] = 3
 
 				-- Refresh side panel
 				weatherPanel:Hide(); weatherPanel:Show()
@@ -7809,14 +7809,14 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["SetWeatherDensityBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["SetWeatherDensityBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["WeatherLevel"] = 0
+					RGXQoLLC["WeatherLevel"] = 0
 					SetWeatherFunc()
 				else
 					weatherPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -7826,7 +7826,7 @@
 		--	Enhance professions
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["EnhanceProfessions"] == "On" and not LeaLockList["EnhanceProfessions"] then
+		if RGXQoLLC["EnhanceProfessions"] == "On" and not RGXQoLLockList["EnhanceProfessions"] then
 
 			-- Set increased height of professions frame and maximum number of recipes listed
 			local tall, numTallProfs = 73, 19
@@ -7907,14 +7907,14 @@
 
 				-- Set top left texture
 				regions[2]:SetSize(512, 512)
-				regions[2]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus")
+				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
 				regions[2]:SetTexCoord(0.25, 0.75, 0, 0.5)
 
 				-- Set top right texture
 				regions[3]:ClearAllPoints()
 				regions[3]:SetPoint("TOPLEFT", regions[2], "TOPRIGHT", 0, 0)
 				regions[3]:SetSize(256, 512)
-				regions[3]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus")
+				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
 				regions[3]:SetTexCoord(0.75, 1, 0, 0.5)
 
 				-- Hide bottom left and bottom right textures
@@ -7946,8 +7946,8 @@
 				TradeSkillSubClassDropdown:SetPoint("RIGHT", TradeSkillInvSlotDropdown, "LEFT", -10, 0)
 
 				-- ElvUI fixes
-				if LeaPlusLC.ElvUI then
-					local E = LeaPlusLC.ElvUI
+				if RGXQoLLC.ElvUI then
+					local E = RGXQoLLC.ElvUI
 					if E.private.skins.blizzard.enable and E.private.skins.blizzard.tradeskill then
 						regions[2]:Hide()
 						regions[3]:Hide()
@@ -8091,14 +8091,14 @@
 
 				-- Set top left texture
 				regions[2]:SetSize(512, 512)
-				regions[2]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus")
+				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
 				regions[2]:SetTexCoord(0.25, 0.75, 0, 0.5)
 
 				-- Set top right texture
 				regions[3]:ClearAllPoints()
 				regions[3]:SetPoint("TOPLEFT", regions[2], "TOPRIGHT", 0, 0)
 				regions[3]:SetSize(256, 512)
-				regions[3]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus")
+				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
 				regions[3]:SetTexCoord(0.75, 1, 0, 0.5)
 
 				-- Hide bottom left and bottom right textures
@@ -8124,8 +8124,8 @@
 				_G["CraftFrameCloseButton"]:SetPoint("TOPRIGHT", _G["CraftFrame"], "TOPRIGHT", -30, -8)
 
 				-- ElvUI fixes
-				if LeaPlusLC.ElvUI then
-					local E = LeaPlusLC.ElvUI
+				if RGXQoLLC.ElvUI then
+					local E = RGXQoLLC.ElvUI
 					if E.private.skins.blizzard.enable and E.private.skins.blizzard.craft then
 						regions[2]:Hide()
 						regions[3]:Hide()
@@ -8181,7 +8181,7 @@
 		--	Show free bag slots
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowFreeBagSlots"] == "On" and not LeaLockList["ShowFreeBagSlots"] then
+		if RGXQoLLC["ShowFreeBagSlots"] == "On" and not RGXQoLLockList["ShowFreeBagSlots"] then
 
 			-- Set the CVAR and show the count
 			SetCVar("displayFreeBagSlots", "1")
@@ -8209,9 +8209,9 @@
 		--	Enhance quest log
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["EnhanceQuestLog"] == "On" then
+		if RGXQoLLC["EnhanceQuestLog"] == "On" then
 
-			if LeaPlusLC["EnhanceQuestTaller"] == "On" then
+			if RGXQoLLC["EnhanceQuestTaller"] == "On" then
 
 				-- Set increased height of quest log frame and maximum number of quests listed
 				local tall, numTallQuests = 73, 21
@@ -8251,14 +8251,14 @@
 
 				-- Set top left texture
 				regions[3]:SetSize(512, 512)
-				regions[3]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus.blp")
+				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
 				regions[3]:SetTexCoord(0.25, 0.75, 0, 0.5)
 
 				-- Set top right texture
 				regions[4]:ClearAllPoints()
 				regions[4]:SetPoint("TOPLEFT", regions[3], "TOPRIGHT", 0, 0)
 				regions[4]:SetSize(256, 512)
-				regions[4]:SetTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus.blp")
+				regions[4]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
 				regions[4]:SetTexCoord(0.75, 1, 0, 0.5)
 
 				-- Hide bottom left and bottom right textures
@@ -8313,8 +8313,8 @@
 				mapButton:Hide()
 
 				-- ElvUI fixes
-				if LeaPlusLC.ElvUI then
-					local E = LeaPlusLC.ElvUI
+				if RGXQoLLC.ElvUI then
+					local E = RGXQoLLC.ElvUI
 					if E.private.skins.blizzard.enable and E.private.skins.blizzard.quest then
 						-- Skin map button
 						_G.LeaPlusGlobalMapButton = logMapButton
@@ -8332,7 +8332,7 @@
 
 			-- Show quest level in quest log detail frame (but not in quest accept or turn-in frame)
 			hooksecurefunc("QuestLog_UpdateQuestDetails", function()
-				if LeaPlusLC["EnhanceQuestLevels"] == "On" then
+				if RGXQoLLC["EnhanceQuestLevels"] == "On" then
 					local quest = GetQuestLogSelection()
 					if quest then
 						local title, level, suggestedGroup = GetQuestLogTitle(quest)
@@ -8365,10 +8365,10 @@
 						local questLogTitle = _G["QuestLogTitle" .. i]
 						local questCheck = _G["QuestLogTitle" .. i .. "Check"]
 						local title, level, suggestedGroup, isHeader = GetQuestLogTitle(questIndex)
-						if title and level and not isHeader and LeaPlusLC["EnhanceQuestLevels"] == "On" then
+						if title and level and not isHeader and RGXQoLLC["EnhanceQuestLevels"] == "On" then
 							-- Add level tag if its not a header
 							local levelSuffix = ""
-							if suggestedGroup and LeaPlusLC["EnhanceQuestDifficulty"] == "On" then
+							if suggestedGroup and RGXQoLLC["EnhanceQuestDifficulty"] == "On" then
 								if suggestedGroup == LFG_TYPE_DUNGEON then levelSuffix = "D"
 								elseif suggestedGroup == RAID then levelSuffix = "R"
 								elseif suggestedGroup == ELITE then levelSuffix = "+"
@@ -8397,27 +8397,27 @@
 			end)
 
 			-- Create configuration panel
-			local EnhanceQuestPanel = LeaPlusLC:CreatePanel("Enhance quest log", "EnhanceQuestPanel")
+			local EnhanceQuestPanel = RGXQoLLC:CreatePanel("Enhance quest log", "EnhanceQuestPanel")
 
-			LeaPlusLC:MakeTx(EnhanceQuestPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestTaller", "Larger quest log frame", 16, -92, true, "If checked, the quest log frame will be larger.")
+			RGXQoLLC:MakeTx(EnhanceQuestPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestTaller", "Larger quest log frame", 16, -92, true, "If checked, the quest log frame will be larger.")
 
-			LeaPlusLC:MakeTx(EnhanceQuestPanel, "Levels", 16, -132)
-			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestLevels", "Show quest levels", 16, -152, false, "If checked, quest levels will be shown.")
-			LeaPlusLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestDifficulty", "Show quest difficulty in quest log list", 16, -172, false, "If checked, the quest difficulty will be shown next to the quest level in the quest log list.|n|nThis will indicate whether the quest requires a group (+), dungeon (D), raid (R) or PvP (P).|n|nThe quest difficulty will always be shown in the quest log detail pane regardless of this setting.")
+			RGXQoLLC:MakeTx(EnhanceQuestPanel, "Levels", 16, -132)
+			RGXQoLLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestLevels", "Show quest levels", 16, -152, false, "If checked, quest levels will be shown.")
+			RGXQoLLC:MakeCB(EnhanceQuestPanel, "EnhanceQuestDifficulty", "Show quest difficulty in quest log list", 16, -172, false, "If checked, the quest difficulty will be shown next to the quest level in the quest log list.|n|nThis will indicate whether the quest requires a group (+), dungeon (D), raid (R) or PvP (P).|n|nThe quest difficulty will always be shown in the quest log detail pane regardless of this setting.")
 
 			-- Disable Show quest difficulty option if Show quest levels is disabled
-			LeaPlusCB["EnhanceQuestLevels"]:HookScript("OnClick", function()
-				LeaPlusLC:LockOption("EnhanceQuestLevels", "EnhanceQuestDifficulty", false)
+			RGXQoLCB["EnhanceQuestLevels"]:HookScript("OnClick", function()
+				RGXQoLLC:LockOption("EnhanceQuestLevels", "EnhanceQuestDifficulty", false)
 			end)
-			LeaPlusLC:LockOption("EnhanceQuestLevels", "EnhanceQuestDifficulty", false)
+			RGXQoLLC:LockOption("EnhanceQuestLevels", "EnhanceQuestDifficulty", false)
 
 			-- Help button hidden
 			EnhanceQuestPanel.h:Hide()
 
 			-- Back button handler
 			EnhanceQuestPanel.b:SetScript("OnClick", function()
-				EnhanceQuestPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show();
+				EnhanceQuestPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show();
 				return
 			end)
 
@@ -8426,8 +8426,8 @@
 			EnhanceQuestPanel.r:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["EnhanceQuestLevels"] = "On"
-				LeaPlusLC["EnhanceQuestDifficulty"] = "On"
+				RGXQoLLC["EnhanceQuestLevels"] = "On"
+				RGXQoLLC["EnhanceQuestDifficulty"] = "On"
 
 				-- Refresh panel
 				EnhanceQuestPanel:Hide(); EnhanceQuestPanel:Show()
@@ -8435,14 +8435,14 @@
 			end)
 
 			-- Show panal when options panel button is clicked
-			LeaPlusCB["EnhanceQuestLogBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["EnhanceQuestLogBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["EnhanceQuestLevels"] = "On"
-					LeaPlusLC["EnhanceQuestDifficulty"] = "On"
+					RGXQoLLC["EnhanceQuestLevels"] = "On"
+					RGXQoLLC["EnhanceQuestDifficulty"] = "On"
 				else
 					EnhanceQuestPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -8452,7 +8452,7 @@
 		--	Show bag search box
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowBagSearchBox"] == "On" and not LeaLockList["ShowBagSearchBox"] then
+		if RGXQoLLC["ShowBagSearchBox"] == "On" and not RGXQoLLockList["ShowBagSearchBox"] then
 
 			-- Create bag item search box
 			local BagItemSearchBox = CreateFrame("EditBox", nil, ContainerFrame1, "BagSearchBoxTemplate")
@@ -8485,7 +8485,7 @@
 		--	Show vendor price
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowVendorPrice"] == "On" then
+		if RGXQoLLC["ShowVendorPrice"] == "On" then
 
 			-- Function to show vendor price
 			local function ShowSellPrice(tooltip, tooltipObject)
@@ -8529,16 +8529,16 @@
 		--	Dismount me
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["StandAndDismount"] == "On" then
+		if RGXQoLLC["StandAndDismount"] == "On" then
 
 			local eFrame = CreateFrame("FRAME")
 			eFrame:RegisterEvent("UI_ERROR_MESSAGE")
 			eFrame:SetScript("OnEvent", function(self, event, messageType, msg)
 				-- Auto dismount
-				if msg == ERR_OUT_OF_RAGE and LeaPlusLC["DismountNoResource"] == "On"
-				or msg == ERR_OUT_OF_MANA and LeaPlusLC["DismountNoResource"] == "On"
-				or msg == ERR_OUT_OF_ENERGY and LeaPlusLC["DismountNoResource"] == "On"
-				or msg == SPELL_FAILED_MOVING and LeaPlusLC["DismountNoMoving"] == "On"
+				if msg == ERR_OUT_OF_RAGE and RGXQoLLC["DismountNoResource"] == "On"
+				or msg == ERR_OUT_OF_MANA and RGXQoLLC["DismountNoResource"] == "On"
+				or msg == ERR_OUT_OF_ENERGY and RGXQoLLC["DismountNoResource"] == "On"
+				or msg == SPELL_FAILED_MOVING and RGXQoLLC["DismountNoMoving"] == "On"
 				or msg == ERR_TAXIPLAYERSHAPESHIFTED
 				then
 					if IsMounted() then
@@ -8556,25 +8556,25 @@
 			end)
 
 			-- Create configuration panel
-			local DismountFrame = LeaPlusLC:CreatePanel("Dismount me", "DismountFrame")
+			local DismountFrame = RGXQoLLC:CreatePanel("Dismount me", "DismountFrame")
 
-			LeaPlusLC:MakeTx(DismountFrame, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(DismountFrame, "DismountNoResource", "Dismount when not enough rage, mana or energy", 16, -92, false, "If checked, you will be dismounted when you attempt to cast a spell but don't have the rage, mana or energy to cast it.")
-			LeaPlusLC:MakeCB(DismountFrame, "DismountNoMoving", "Dismount when casting a spell while moving", 16, -112, false, "If checked, you will be dismounted when you attempt to cast a non-instant cast spell while moving.")
-			LeaPlusLC:MakeCB(DismountFrame, "DismountNoTaxi", "Dismount when the flight map opens", 16, -132, false, "If checked, you will be dismounted when you instruct a flight master to open the flight map.")
+			RGXQoLLC:MakeTx(DismountFrame, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(DismountFrame, "DismountNoResource", "Dismount when not enough rage, mana or energy", 16, -92, false, "If checked, you will be dismounted when you attempt to cast a spell but don't have the rage, mana or energy to cast it.")
+			RGXQoLLC:MakeCB(DismountFrame, "DismountNoMoving", "Dismount when casting a spell while moving", 16, -112, false, "If checked, you will be dismounted when you attempt to cast a non-instant cast spell while moving.")
+			RGXQoLLC:MakeCB(DismountFrame, "DismountNoTaxi", "Dismount when the flight map opens", 16, -132, false, "If checked, you will be dismounted when you instruct a flight master to open the flight map.")
 
 			-- Help button hidden
 			DismountFrame.h.tiptext = L["The game will dismount you if you successfully cast a spell without addons.  These settings let you set some additional dismount rules."]
 
 			-- Back button handler
 			DismountFrame.b:SetScript("OnClick", function()
-				DismountFrame:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page7"]:Show()
+				DismountFrame:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page7"]:Show()
 				return
 			end)
 
 			-- Function to set dismount options
 			local function SetDismount()
-				if LeaPlusLC["DismountNoTaxi"] == "On" then
+				if RGXQoLLC["DismountNoTaxi"] == "On" then
 					taxiFrame:RegisterEvent("TAXIMAP_OPENED")
 				else
 					taxiFrame:UnregisterEvent("TAXIMAP_OPENED")
@@ -8582,16 +8582,16 @@
 			end
 
 			-- Run function when certain options are clicked and on startup
-			LeaPlusCB["DismountNoTaxi"]:HookScript("OnClick", SetDismount)
+			RGXQoLCB["DismountNoTaxi"]:HookScript("OnClick", SetDismount)
 			SetDismount()
 
 			-- Reset button handler
 			DismountFrame.r:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["DismountNoResource"] = "On"
-				LeaPlusLC["DismountNoMoving"] = "On"
-				LeaPlusLC["DismountNoTaxi"] = "On"
+				RGXQoLLC["DismountNoResource"] = "On"
+				RGXQoLLC["DismountNoMoving"] = "On"
+				RGXQoLLC["DismountNoTaxi"] = "On"
 
 				-- Update settings and configuration panel
 				SetDismount()
@@ -8600,16 +8600,16 @@
 			end)
 
 			-- Show configuration panal when options panel button is clicked
-			LeaPlusCB["DismountBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["DismountBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["DismountNoResource"] = "On"
-					LeaPlusLC["DismountNoMoving"] = "On"
-					LeaPlusLC["DismountNoTaxi"] = "On"
+					RGXQoLLC["DismountNoResource"] = "On"
+					RGXQoLLC["DismountNoMoving"] = "On"
+					RGXQoLLC["DismountNoTaxi"] = "On"
 					SetDismount()
 				else
 					DismountFrame:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -8619,7 +8619,7 @@
 		--	Use class colors in chat
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ClassColorsInChat"] == "On" and not LeaLockList["ClassColorsInChat"] then
+		if RGXQoLLC["ClassColorsInChat"] == "On" and not RGXQoLLockList["ClassColorsInChat"] then
 
 			SetCVar("chatClassColorOverride", "0")
 
@@ -8641,7 +8641,7 @@
 
 			-- Function to set screen glow
 			local function SetGlow()
-				if LeaPlusLC["NoScreenGlow"] == "On" then
+				if RGXQoLLC["NoScreenGlow"] == "On" then
 					SetCVar("ffxGlow", "0")
 				else
 					SetCVar("ffxGlow", "1")
@@ -8649,8 +8649,8 @@
 			end
 
 			-- Set screen glow on startup and when option is clicked (if enabled)
-			LeaPlusCB["NoScreenGlow"]:HookScript("OnClick", SetGlow)
-			if LeaPlusLC["NoScreenGlow"] == "On" then SetGlow() end
+			RGXQoLCB["NoScreenGlow"]:HookScript("OnClick", SetGlow)
+			if RGXQoLLC["NoScreenGlow"] == "On" then SetGlow() end
 
 		end
 
@@ -8662,7 +8662,7 @@
 
 			-- Function to set screen effects
 			local function SetEffects()
-				if LeaPlusLC["NoScreenEffects"] == "On" then
+				if RGXQoLLC["NoScreenEffects"] == "On" then
 					SetCVar("ffxDeath", "0")
 					SetCVar("ffxNether", "0")
 				else
@@ -8672,8 +8672,8 @@
 			end
 
 			-- Set screen effects when option is clicked and on startup (if enabled)
-			LeaPlusCB["NoScreenEffects"]:HookScript("OnClick", SetEffects)
-			if LeaPlusLC["NoScreenEffects"] == "On" then SetEffects() end
+			RGXQoLCB["NoScreenEffects"]:HookScript("OnClick", SetEffects)
+			if RGXQoLLC["NoScreenEffects"] == "On" then SetEffects() end
 
 		end
 
@@ -8685,7 +8685,7 @@
 
 			-- Function to set chat colors
 			local function SetCol()
-				if LeaPlusLC["UnivGroupColor"] == "On" then
+				if RGXQoLLC["UnivGroupColor"] == "On" then
 					ChangeChatColor("RAID", 0.67, 0.67, 1)
 					ChangeChatColor("RAID_LEADER", 0.46, 0.78, 1)
 				else
@@ -8695,8 +8695,8 @@
 			end
 
 			-- Set chat colors when option is clicked and on startup (if enabled)
-			LeaPlusCB["UnivGroupColor"]:HookScript("OnClick", SetCol)
-			if LeaPlusLC["UnivGroupColor"] == "On" then	SetCol() end
+			RGXQoLCB["UnivGroupColor"]:HookScript("OnClick", SetCol)
+			if RGXQoLLC["UnivGroupColor"] == "On" then	SetCol() end
 
 		end
 
@@ -8729,11 +8729,11 @@
 					-- Alt key toggles error messages
 					if IsAltKeyDown() and not IsControlKeyDown() and not IsShiftKeyDown() then
 						if RGXQoLDB["HideErrorMessages"] == "On" then -- Checks global
-							if LeaPlusLC["ShowErrorsFlag"] == 1 then
-								LeaPlusLC["ShowErrorsFlag"] = 0
+							if RGXQoLLC["ShowErrorsFlag"] == 1 then
+								RGXQoLLC["ShowErrorsFlag"] = 0
 								ActionStatus_DisplayMessage(L["Error messages will be shown"], true)
 							else
-								LeaPlusLC["ShowErrorsFlag"] = 1
+								RGXQoLLC["ShowErrorsFlag"] = 1
 								ActionStatus_DisplayMessage(L["Error messages will be hidden"], true)
 							end
 							return
@@ -8748,13 +8748,13 @@
 
 					-- Control key and alt key toggles Zygor addon
 					if IsControlKeyDown() and IsAltKeyDown() and not IsShiftKeyDown() then
-						LeaPlusLC:ZygorToggle()
+						RGXQoLLC:ZygorToggle()
 						return
 					end
 
 					-- Control key and shift key toggles maximised window mode
 					if IsControlKeyDown() and IsShiftKeyDown() and not IsAltKeyDown() then
-						if LeaPlusLC:PlayerInCombat() then
+						if RGXQoLLC:PlayerInCombat() then
 							return
 						else
 							SetCVar("gxMaximize", tostring(1 - GetCVar("gxMaximize")))
@@ -8764,43 +8764,43 @@
 					end
 
 					-- No modifier key toggles the options panel
-					if LeaPlusLC:IsPlusShowing() then
-						LeaPlusLC:HideFrames()
-						LeaPlusLC:HideConfigPanels()
+					if RGXQoLLC:IsPlusShowing() then
+						RGXQoLLC:HideFrames()
+						RGXQoLLC:HideConfigPanels()
 					else
-						LeaPlusLC:HideFrames()
-						LeaPlusLC["PageF"]:Show()
+						RGXQoLLC:HideFrames()
+						RGXQoLLC["PageF"]:Show()
 					end
-					LeaPlusLC["Page"..LeaPlusLC["LeaStartPage"]]:Show()
+					RGXQoLLC["Page"..RGXQoLLC["RGXQoLStartPage"]]:Show()
 				end
 
 				-- Right button down
 				if arg1 == "RightButton" then
 
 					-- No modifier key toggles the options panel
-					if LeaPlusLC:IsPlusShowing() then
-						LeaPlusLC:HideFrames()
-						LeaPlusLC:HideConfigPanels()
+					if RGXQoLLC:IsPlusShowing() then
+						RGXQoLLC:HideFrames()
+						RGXQoLLC:HideConfigPanels()
 					else
-						LeaPlusLC:HideFrames()
-						LeaPlusLC["PageF"]:Show()
+						RGXQoLLC:HideFrames()
+						RGXQoLLC["PageF"]:Show()
 					end
-					LeaPlusLC["Page" .. LeaPlusLC["LeaStartPage"]]:Show()
+					RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]]:Show()
 
 				end
 
 			end
 
 			-- Assign global scope for function
-			_G.LeaPlusGlobalMiniBtnClickFunc = MiniBtnClickFunc
+			_G.RGXQoLMiniBtnClickFunc = MiniBtnClickFunc
 
 			-- Create the RGX minimap button (framework-owned positioning)
 			local RGX = _G.RGXFramework
-			if RGX and RGX.GetMinimap and not LeaPlusLC.minimapButton then
+			if RGX and RGX.GetMinimap and not RGXQoLLC.minimapButton then
 				local MM = RGX:GetMinimap()
-				LeaPlusLC.minimapButton = MM:Create({
+				RGXQoLLC.minimapButton = MM:Create({
 					name = "RGXQoL_MinimapButton",
-					icon = "Interface\\HELPFRAME\\ReportLagIcon-Movement",
+					icon = "Interface\\AddOns\\RGX-Framework\\media\\logo.tga",
 					defaultAngle = 220,
 					storage = RGXQoLDB,
 					angleKey = "minimapAngle",
@@ -8817,19 +8817,19 @@
 					end,
 					onCtrlRight = function(btn)
 						btn:SetVisible(false)
-						LeaPlusLC["ShowMinimapIcon"] = "Off"
+						RGXQoLLC["ShowMinimapIcon"] = "Off"
 					end,
 				})
 			end
 
 			-- Show or hide the minimap button when the option is clicked
-			LeaPlusCB["ShowMinimapIcon"]:HookScript("OnClick", function()
-				if LeaPlusLC.minimapButton then
-					LeaPlusLC.minimapButton:SetVisible(LeaPlusLC["ShowMinimapIcon"] == "On")
+			RGXQoLCB["ShowMinimapIcon"]:HookScript("OnClick", function()
+				if RGXQoLLC.minimapButton then
+					RGXQoLLC.minimapButton:SetVisible(RGXQoLLC["ShowMinimapIcon"] == "On")
 				end
 			end)
-			if LeaPlusLC.minimapButton then
-				LeaPlusLC.minimapButton:SetVisible(LeaPlusLC["ShowMinimapIcon"] == "On")
+			if RGXQoLLC.minimapButton then
+				RGXQoLLC.minimapButton:SetVisible(RGXQoLLC["ShowMinimapIcon"] == "On")
 			end
 
 		end
@@ -8838,7 +8838,7 @@
 		-- Auction House Extras
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["AhExtras"] == "On" then
+		if RGXQoLLC["AhExtras"] == "On" then
 
 			EventUtil.ContinueOnAddOnLoaded("Blizzard_AuctionUI",function()
 
@@ -8859,23 +8859,23 @@
 
 				-- Functions
 				local function CreateAuctionCB(name, anchor, x, y, text)
-					LeaPlusCB[name] = CreateFrame("CheckButton", nil, AuctionFrameAuctions, "ChatConfigCheckButtonTemplate")
-					LeaPlusCB[name]:SetFrameStrata("HIGH")
-					LeaPlusCB[name]:SetSize(20, 20)
-					LeaPlusCB[name]:SetPoint(anchor, x, y)
-					LeaPlusCB[name].f = LeaPlusCB[name]:CreateFontString(nil, 'OVERLAY', "GameFontNormal")
-					LeaPlusCB[name].f:SetPoint("LEFT", 20, 0)
-					LeaPlusCB[name].f:SetText(L[text])
-					LeaPlusCB[name].f:Show();
-					LeaPlusCB[name]:SetScript('OnClick', function()
-						if LeaPlusCB[name]:GetChecked() then
-							LeaPlusLC[name] = "On"
+					RGXQoLCB[name] = CreateFrame("CheckButton", nil, AuctionFrameAuctions, "ChatConfigCheckButtonTemplate")
+					RGXQoLCB[name]:SetFrameStrata("HIGH")
+					RGXQoLCB[name]:SetSize(20, 20)
+					RGXQoLCB[name]:SetPoint(anchor, x, y)
+					RGXQoLCB[name].f = RGXQoLCB[name]:CreateFontString(nil, 'OVERLAY', "GameFontNormal")
+					RGXQoLCB[name].f:SetPoint("LEFT", 20, 0)
+					RGXQoLCB[name].f:SetText(L[text])
+					RGXQoLCB[name].f:Show();
+					RGXQoLCB[name]:SetScript('OnClick', function()
+						if RGXQoLCB[name]:GetChecked() then
+							RGXQoLLC[name] = "On"
 						else
-							LeaPlusLC[name] = "Off"
+							RGXQoLLC[name] = "Off"
 						end
 					end)
-					LeaPlusCB[name]:SetScript('OnShow', function(self)
-						if LeaPlusLC[name] == "On" then
+					RGXQoLCB[name]:SetScript('OnShow', function(self)
+						if RGXQoLLC[name] == "On" then
 							self:SetChecked(true)
 						else
 							self:SetChecked(false)
@@ -8885,7 +8885,7 @@
 
 				-- Show the correct fields in the AH frame and match prices
 				local function SetupAh()
-					if LeaPlusLC["AhBuyoutOnly"] == "On" then
+					if RGXQoLLC["AhBuyoutOnly"] == "On" then
 						-- Hide the start price
 						StartPrice:SetAlpha(0);
 						-- Set start price to buyout price
@@ -8897,7 +8897,7 @@
 						StartPrice:SetAlpha(1);
 					end
 					-- If gold only is on, set copper and silver to 99
-					if LeaPlusLC["AhGoldOnly"] == "On" then
+					if RGXQoLLC["AhGoldOnly"] == "On" then
 						StartPriceCopper:SetText("99"); StartPriceCopper:Disable();
 						StartPriceSilver:SetText("99"); StartPriceSilver:Disable();
 						BuyoutPriceCopper:SetText("99"); BuyoutPriceCopper:Disable();
@@ -8917,15 +8917,15 @@
 				CreateAuctionCB("AhGoldOnly", "BOTTOMLEFT", 320, 16, "Gold Only")
 
 				-- Reposition Gold Only checkbox so it does not overlap Buyout Only checkbox label
-				LeaPlusCB["AhGoldOnly"]:ClearAllPoints()
-				LeaPlusCB["AhGoldOnly"]:SetPoint("LEFT", LeaPlusCB["AhBuyoutOnly"].f, "RIGHT", 20, 0)
+				RGXQoLCB["AhGoldOnly"]:ClearAllPoints()
+				RGXQoLCB["AhGoldOnly"]:SetPoint("LEFT", RGXQoLCB["AhBuyoutOnly"].f, "RIGHT", 20, 0)
 
 				-- Set click boundaries
-				LeaPlusCB["AhBuyoutOnly"]:SetHitRectInsets(0, -LeaPlusCB["AhBuyoutOnly"].f:GetStringWidth() + 6, 0, 0);
-				LeaPlusCB["AhGoldOnly"]:SetHitRectInsets(0, -LeaPlusCB["AhGoldOnly"].f:GetStringWidth() + 6, 0, 0);
+				RGXQoLCB["AhBuyoutOnly"]:SetHitRectInsets(0, -RGXQoLCB["AhBuyoutOnly"].f:GetStringWidth() + 6, 0, 0);
+				RGXQoLCB["AhGoldOnly"]:SetHitRectInsets(0, -RGXQoLCB["AhGoldOnly"].f:GetStringWidth() + 6, 0, 0);
 
-				LeaPlusCB["AhBuyoutOnly"]:HookScript('OnClick', SetupAh);
-				LeaPlusCB["AhBuyoutOnly"]:HookScript('OnShow', SetupAh);
+				RGXQoLCB["AhBuyoutOnly"]:HookScript('OnClick', SetupAh);
+				RGXQoLCB["AhBuyoutOnly"]:HookScript('OnShow', SetupAh);
 
 				AuctionFrameAuctions:HookScript("OnShow", SetupAh)
 				BuyoutPriceGold:HookScript("OnTextChanged", SetupAh)
@@ -8940,7 +8940,7 @@
 					-- Do nothing if wow token frame is showing
 					if AuctionsWowTokenAuctionFrame:IsShown() then return end
 					-- Lock the create auction button if both checkboxes are enabled and buyout gold price is empty
-					if LeaPlusLC["AhGoldOnly"] == "On" and LeaPlusLC["AhBuyoutOnly"] == "On" then
+					if RGXQoLLC["AhGoldOnly"] == "On" and RGXQoLLC["AhBuyoutOnly"] == "On" then
 						if BuyoutPriceGold:GetText() == "" then
 							AuctionsCreateAuctionButton:Disable()
 						end
@@ -8948,8 +8948,8 @@
 				end)
 
 				-- Clear copper and silver prices if gold only box is unchecked
-				LeaPlusCB["AhGoldOnly"]:HookScript('OnClick', function()
-					if LeaPlusCB["AhGoldOnly"]:GetChecked() == false then
+				RGXQoLCB["AhGoldOnly"]:HookScript('OnClick', function()
+					if RGXQoLCB["AhGoldOnly"]:GetChecked() == false then
 						BuyoutPriceCopper:SetText("")
 						BuyoutPriceSilver:SetText("")
 						StartPriceCopper:SetText("")
@@ -8960,32 +8960,32 @@
 
 				-- Create find button
 				AuctionsItemText:Hide()
-				LeaPlusLC:CreateButton("FindAuctionButton", AuctionsStackSizeMaxButton, "Find Item", "CENTER", 0, 68, 0, 21, false, "")
-				LeaPlusCB["FindAuctionButton"]:SetParent(AuctionFrameAuctions)
+				RGXQoLLC:CreateButton("FindAuctionButton", AuctionsStackSizeMaxButton, "Find Item", "CENTER", 0, 68, 0, 21, false, "")
+				RGXQoLCB["FindAuctionButton"]:SetParent(AuctionFrameAuctions)
 
-				if LeaPlusLC.ElvUI then
-					_G.LeaPlusGlobalFindItemButton = LeaPlusCB["FindAuctionButton"]
-					LeaPlusLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalFindItemButton)
+				if RGXQoLLC.ElvUI then
+					_G.LeaPlusGlobalFindItemButton = RGXQoLCB["FindAuctionButton"]
+					RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalFindItemButton)
 				end
 
 				-- Show find button when the auctions tab is shown
 				AuctionFrameAuctions:HookScript("OnShow", function()
-					LeaPlusCB["FindAuctionButton"]:SetEnabled(GetAuctionSellItemInfo() and true or false)
+					RGXQoLCB["FindAuctionButton"]:SetEnabled(GetAuctionSellItemInfo() and true or false)
 				end)
 
 				-- Show find button when a new item is added
 				AuctionsItemButton:HookScript("OnEvent", function(self, event)
 					if event == "NEW_AUCTION_UPDATE" then
-						LeaPlusCB["FindAuctionButton"]:SetEnabled(GetAuctionSellItemInfo() and true or false)
+						RGXQoLCB["FindAuctionButton"]:SetEnabled(GetAuctionSellItemInfo() and true or false)
 					end
 				end)
 
-				LeaPlusCB["FindAuctionButton"]:SetScript("OnClick", function()
+				RGXQoLCB["FindAuctionButton"]:SetScript("OnClick", function()
 					if GetAuctionSellItemInfo() then
 						if BrowseWowTokenResults:IsShown() then
 							-- Stop if Game Time filter is currently shown
 							AuctionFrameTab1:Click()
-							LeaPlusLC:Print("To use the Find Item button, you need to deselect the WoW Token category.")
+							RGXQoLLC:Print("To use the Find Item button, you need to deselect the WoW Token category.")
 						else
 							-- Otherwise, search for the required item
 							local name = GetAuctionSellItemInfo()
@@ -9002,7 +9002,7 @@
 						-- Return anything you might be holding
 						ClearCursor();
 						-- Set copper and silver prices to 99 if gold mode is on
-						if LeaPlusLC["AhGoldOnly"] == "On" then
+						if RGXQoLLC["AhGoldOnly"] == "On" then
 							StartPriceCopper:SetText("99")
 							StartPriceSilver:SetText("99")
 							BuyoutPriceCopper:SetText("99")
@@ -9020,7 +9020,7 @@
 				-- Set tab key actions (if different from defaults)
 				StartPriceGold:HookScript("OnTabPressed", function()
 					if not IsShiftKeyDown() then
-						if LeaPlusLC["AhBuyoutOnly"] == "Off" and LeaPlusLC["AhGoldOnly"] == "On" then
+						if RGXQoLLC["AhBuyoutOnly"] == "Off" and RGXQoLLC["AhGoldOnly"] == "On" then
 							BuyoutPriceGold:SetFocus()
 						end
 					end
@@ -9028,7 +9028,7 @@
 
 				BuyoutPriceGold:HookScript("OnTabPressed", function()
 					if IsShiftKeyDown() then
-						if LeaPlusLC["AhBuyoutOnly"] == "Off" and LeaPlusLC["AhGoldOnly"] == "On" then
+						if RGXQoLLC["AhBuyoutOnly"] == "Off" and RGXQoLLC["AhGoldOnly"] == "On" then
 							StartPriceGold:SetFocus()
 						end
 					end
@@ -9041,37 +9041,37 @@
 		-- Show volume control on character frame
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowVolume"] == "On" then
+		if RGXQoLLC["ShowVolume"] == "On" then
 
 			-- Function to update master volume
 			local function MasterVolUpdate()
-				if LeaPlusLC["ShowVolume"] == "On" then
+				if RGXQoLLC["ShowVolume"] == "On" then
 					-- Set the volume
-					SetCVar("Sound_MasterVolume", LeaPlusLC["LeaPlusMaxVol"]);
+					SetCVar("Sound_MasterVolume", RGXQoLLC["LeaPlusMaxVol"]);
 					-- Format the slider text
-					LeaPlusCB["LeaPlusMaxVol"].f:SetFormattedText("%.0f", LeaPlusLC["LeaPlusMaxVol"] * 20)
+					RGXQoLCB["LeaPlusMaxVol"].f:SetFormattedText("%.0f", RGXQoLLC["LeaPlusMaxVol"] * 20)
 				end
 			end
 
 			-- Create slider control
-			LeaPlusLC["LeaPlusMaxVol"] = tonumber(GetCVar("Sound_MasterVolume"));
-			LeaPlusLC:MakeSL(CharacterModelFrame, "LeaPlusMaxVol", "",	0, 1, 0.05, -42, -328, "%.2f")
-			LeaPlusCB["LeaPlusMaxVol"]:SetWidth(64)
-			LeaPlusCB["LeaPlusMaxVol"].f:ClearAllPoints()
-			LeaPlusCB["LeaPlusMaxVol"].f:SetPoint("LEFT", LeaPlusCB["LeaPlusMaxVol"], "RIGHT", 6, 0)
+			RGXQoLLC["LeaPlusMaxVol"] = tonumber(GetCVar("Sound_MasterVolume"));
+			RGXQoLLC:MakeSL(CharacterModelFrame, "LeaPlusMaxVol", "",	0, 1, 0.05, -42, -328, "%.2f")
+			RGXQoLCB["LeaPlusMaxVol"]:SetWidth(64)
+			RGXQoLCB["LeaPlusMaxVol"].f:ClearAllPoints()
+			RGXQoLCB["LeaPlusMaxVol"].f:SetPoint("LEFT", RGXQoLCB["LeaPlusMaxVol"], "RIGHT", 6, 0)
 
 			-- Set slider control value when shown
-			LeaPlusCB["LeaPlusMaxVol"]:SetScript("OnShow", function()
-				LeaPlusCB["LeaPlusMaxVol"]:SetValue(GetCVar("Sound_MasterVolume"))
+			RGXQoLCB["LeaPlusMaxVol"]:SetScript("OnShow", function()
+				RGXQoLCB["LeaPlusMaxVol"]:SetValue(GetCVar("Sound_MasterVolume"))
 			end)
 
 			-- Update volume when slider control is changed
-			LeaPlusCB["LeaPlusMaxVol"]:HookScript("OnValueChanged", function()
+			RGXQoLCB["LeaPlusMaxVol"]:HookScript("OnValueChanged", function()
 				if IsMouseButtonDown("RightButton") and IsShiftKeyDown() then
 					-- Dual layout is active so don't adjust slider
-					LeaPlusCB["LeaPlusMaxVol"].f:SetFormattedText("%.0f", LeaPlusLC["LeaPlusMaxVol"] * 20)
-					LeaPlusCB["LeaPlusMaxVol"]:Hide()
-					LeaPlusCB["LeaPlusMaxVol"]:Show()
+					RGXQoLCB["LeaPlusMaxVol"].f:SetFormattedText("%.0f", RGXQoLLC["LeaPlusMaxVol"] * 20)
+					RGXQoLCB["LeaPlusMaxVol"]:Hide()
+					RGXQoLCB["LeaPlusMaxVol"]:Show()
 					return
 				else
 					-- Set sound level and refresh slider
@@ -9080,9 +9080,9 @@
 			end)
 
 			-- ElvUI skin for slider control
-			if LeaPlusLC.ElvUI then
-				_G.LeaPlusGlobalVolumeButton = LeaPlusCB["LeaPlusMaxVol"]
-				LeaPlusLC.ElvUI:GetModule("Skins"):HandleSliderFrame(_G.LeaPlusGlobalVolumeButton, false)
+			if RGXQoLLC.ElvUI then
+				_G.LeaPlusGlobalVolumeButton = RGXQoLCB["LeaPlusMaxVol"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleSliderFrame(_G.LeaPlusGlobalVolumeButton, false)
 			end
 
 		end
@@ -9091,7 +9091,7 @@
 		--	Use arrow keys in chat
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["UseArrowKeysInChat"] == "On" and not LeaLockList["UseArrowKeysInChat"] then
+		if RGXQoLLC["UseArrowKeysInChat"] == "On" and not RGXQoLLockList["UseArrowKeysInChat"] then
 			-- Enable arrow keys for normal and existing chat frames
 			for i = 1, 50 do
 				if _G["ChatFrame" .. i] then
@@ -9111,7 +9111,7 @@
 		-- L43: Manage widget
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ManageWidget"] == "On" and not LeaLockList["ManageWidget"] then
+		if RGXQoLLC["ManageWidget"] == "On" and not RGXQoLLockList["ManageWidget"] then
 
 			-- Create and manage container for UIWidgetTopCenterContainerFrame
 			local topCenterHolder = CreateFrame("Frame", nil, UIParent)
@@ -9139,9 +9139,9 @@
 
 			-- Set widget frame position at startup
 			topCenterHolder:ClearAllPoints()
-			topCenterHolder:SetPoint(LeaPlusLC["WidgetA"], UIParent, LeaPlusLC["WidgetR"], LeaPlusLC["WidgetX"], LeaPlusLC["WidgetY"])
-			topCenterHolder:SetScale(LeaPlusLC["WidgetScale"])
-			UIWidgetTopCenterContainerFrame:SetScale(LeaPlusLC["WidgetScale"])
+			topCenterHolder:SetPoint(RGXQoLLC["WidgetA"], UIParent, RGXQoLLC["WidgetR"], RGXQoLLC["WidgetX"], RGXQoLLC["WidgetY"])
+			topCenterHolder:SetScale(RGXQoLLC["WidgetScale"])
+			UIWidgetTopCenterContainerFrame:SetScale(RGXQoLLC["WidgetScale"])
 
 			-- Create drag frame
 			local dragframe = CreateFrame("FRAME", nil, nil, "BackdropTemplate")
@@ -9150,7 +9150,7 @@
 			dragframe:SetBackdrop({edgeFile = "Interface/Tooltips/UI-Tooltip-Border", tile = false, tileSize = 0, edgeSize = 16, insets = { left = 0, right = 0, top = 0, bottom = 0}})
 			dragframe:SetToplevel(true)
 			dragframe:Hide()
-			dragframe:SetScale(LeaPlusLC["WidgetScale"])
+			dragframe:SetScale(RGXQoLLC["WidgetScale"])
 
 			dragframe.t = dragframe:CreateTexture()
 			dragframe.t:SetAllPoints()
@@ -9172,10 +9172,10 @@
 			dragframe:SetScript("OnMouseUp", function()
 				-- Save frame position
 				topCenterHolder:StopMovingOrSizing()
-				LeaPlusLC["WidgetA"], void, LeaPlusLC["WidgetR"], LeaPlusLC["WidgetX"], LeaPlusLC["WidgetY"] = topCenterHolder:GetPoint()
+				RGXQoLLC["WidgetA"], void, RGXQoLLC["WidgetR"], RGXQoLLC["WidgetX"], RGXQoLLC["WidgetY"] = topCenterHolder:GetPoint()
 				topCenterHolder:SetMovable(true)
 				topCenterHolder:ClearAllPoints()
-				topCenterHolder:SetPoint(LeaPlusLC["WidgetA"], UIParent, LeaPlusLC["WidgetR"], LeaPlusLC["WidgetX"], LeaPlusLC["WidgetY"])
+				topCenterHolder:SetPoint(RGXQoLLC["WidgetA"], UIParent, RGXQoLLC["WidgetR"], RGXQoLLC["WidgetX"], RGXQoLLC["WidgetY"])
 			end)
 
 			-- Snap-to-grid
@@ -9201,48 +9201,48 @@
 			end
 
 			-- Create configuration panel
-			local WidgetPanel = LeaPlusLC:CreatePanel("Manage widget", "WidgetPanel")
+			local WidgetPanel = RGXQoLLC:CreatePanel("Manage widget", "WidgetPanel")
 
 			-- Create Titan Panel screen adjust warning
 			local titanFrame = CreateFrame("FRAME", nil, WidgetPanel)
 			titanFrame:SetAllPoints()
 			titanFrame:Hide()
-			LeaPlusLC:MakeTx(titanFrame, "Warning", 16, -172)
-			titanFrame.txt = LeaPlusLC:MakeWD(titanFrame, "Titan Panel screen adjust needs to be disabled for the frame to be saved correctly.", 16, -192, 500)
+			RGXQoLLC:MakeTx(titanFrame, "Warning", 16, -172)
+			titanFrame.txt = RGXQoLLC:MakeWD(titanFrame, "Titan Panel screen adjust needs to be disabled for the frame to be saved correctly.", 16, -192, 500)
 			titanFrame.txt:SetWordWrap(false)
 			titanFrame.txt:SetWidth(520)
-			titanFrame.btn = LeaPlusLC:CreateButton("fixTitanBtn", titanFrame, "Okay, disable screen adjust for me", "TOPLEFT", 16, -212, 0, 25, true, "Click to disable Titan Panel screen adjust.  Your UI will be reloaded.")
+			titanFrame.btn = RGXQoLLC:CreateButton("fixTitanBtn", titanFrame, "Okay, disable screen adjust for me", "TOPLEFT", 16, -212, 0, 25, true, "Click to disable Titan Panel screen adjust.  Your UI will be reloaded.")
 			titanFrame.btn:SetScript("OnClick", function()
 				TitanPanelSetVar("ScreenAdjust", 1)
 				ReloadUI()
 			end)
 
-			LeaPlusLC:MakeTx(WidgetPanel, "Scale", 16, -72)
-			LeaPlusLC:MakeSL(WidgetPanel, "WidgetScale", "Drag to set the widget scale.", 0.5, 2, 0.05, 16, -92, "%.2f")
+			RGXQoLLC:MakeTx(WidgetPanel, "Scale", 16, -72)
+			RGXQoLLC:MakeSL(WidgetPanel, "WidgetScale", "Drag to set the widget scale.", 0.5, 2, 0.05, 16, -92, "%.2f")
 
 			-- Set scale when slider is changed
-			LeaPlusCB["WidgetScale"]:HookScript("OnValueChanged", function()
-				topCenterHolder:SetScale(LeaPlusLC["WidgetScale"])
-				UIWidgetTopCenterContainerFrame:SetScale(LeaPlusLC["WidgetScale"])
-				dragframe:SetScale(LeaPlusLC["WidgetScale"])
+			RGXQoLCB["WidgetScale"]:HookScript("OnValueChanged", function()
+				topCenterHolder:SetScale(RGXQoLLC["WidgetScale"])
+				UIWidgetTopCenterContainerFrame:SetScale(RGXQoLLC["WidgetScale"])
+				dragframe:SetScale(RGXQoLLC["WidgetScale"])
 				-- Show formatted slider value
-				LeaPlusCB["WidgetScale"].f:SetFormattedText("%.0f%%", LeaPlusLC["WidgetScale"] * 100)
+				RGXQoLCB["WidgetScale"].f:SetFormattedText("%.0f%%", RGXQoLLC["WidgetScale"] * 100)
 			end)
 
 			-- Hide frame alignment grid with panel
 			WidgetPanel:HookScript("OnHide", function()
-				LeaPlusLC.grid:Hide()
+				RGXQoLLC.grid:Hide()
 			end)
 
 			-- Toggle grid button
-			local WidgetToggleGridButton = LeaPlusLC:CreateButton("WidgetToggleGridButton", WidgetPanel, "Toggle Grid", "TOPLEFT", 16, -72, 0, 25, true, "Click to toggle the frame alignment grid.")
-			LeaPlusCB["WidgetToggleGridButton"]:ClearAllPoints()
-			LeaPlusCB["WidgetToggleGridButton"]:SetPoint("LEFT", WidgetPanel.h, "RIGHT", 10, 0)
-			LeaPlusCB["WidgetToggleGridButton"]:SetScript("OnClick", function()
-				if LeaPlusLC.grid:IsShown() then LeaPlusLC.grid:Hide() else LeaPlusLC.grid:Show() end
+			local WidgetToggleGridButton = RGXQoLLC:CreateButton("WidgetToggleGridButton", WidgetPanel, "Toggle Grid", "TOPLEFT", 16, -72, 0, 25, true, "Click to toggle the frame alignment grid.")
+			RGXQoLCB["WidgetToggleGridButton"]:ClearAllPoints()
+			RGXQoLCB["WidgetToggleGridButton"]:SetPoint("LEFT", WidgetPanel.h, "RIGHT", 10, 0)
+			RGXQoLCB["WidgetToggleGridButton"]:SetScript("OnClick", function()
+				if RGXQoLLC.grid:IsShown() then RGXQoLLC.grid:Hide() else RGXQoLLC.grid:Show() end
 			end)
 			WidgetPanel:HookScript("OnHide", function()
-				if LeaPlusLC.grid then LeaPlusLC.grid:Hide() end
+				if RGXQoLLC.grid then RGXQoLLC.grid:Hide() end
 			end)
 
 			-- Help button tooltip
@@ -9250,7 +9250,7 @@
 
 			-- Back button handler
 			WidgetPanel.b:SetScript("OnClick", function()
-				WidgetPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page6"]:Show()
+				WidgetPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page6"]:Show()
 				return
 			end)
 
@@ -9258,36 +9258,36 @@
 			WidgetPanel.r:SetScript("OnClick", function()
 
 				-- Reset position and scale
-				LeaPlusLC["WidgetA"] = "TOP"
-				LeaPlusLC["WidgetR"] = "TOP"
-				LeaPlusLC["WidgetX"] = 0
-				LeaPlusLC["WidgetY"] = -15
-				LeaPlusLC["WidgetScale"] = 1
+				RGXQoLLC["WidgetA"] = "TOP"
+				RGXQoLLC["WidgetR"] = "TOP"
+				RGXQoLLC["WidgetX"] = 0
+				RGXQoLLC["WidgetY"] = -15
+				RGXQoLLC["WidgetScale"] = 1
 				topCenterHolder:ClearAllPoints()
-				topCenterHolder:SetPoint(LeaPlusLC["WidgetA"], UIParent, LeaPlusLC["WidgetR"], LeaPlusLC["WidgetX"], LeaPlusLC["WidgetY"])
+				topCenterHolder:SetPoint(RGXQoLLC["WidgetA"], UIParent, RGXQoLLC["WidgetR"], RGXQoLLC["WidgetX"], RGXQoLLC["WidgetY"])
 
 				-- Refresh configuration panel
 				WidgetPanel:Hide(); WidgetPanel:Show()
 				dragframe:Show()
 
 				-- Show frame alignment grid
-				LeaPlusLC.grid:Show()
+				RGXQoLLC.grid:Show()
 
 			end)
 
 			-- Show configuration panel when options panel button is clicked
-			LeaPlusCB["ManageWidgetButton"]:SetScript("OnClick", function()
+			RGXQoLCB["ManageWidgetButton"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["WidgetA"] = "CENTER"
-					LeaPlusLC["WidgetR"] = "CENTER"
-					LeaPlusLC["WidgetX"] = 0
-					LeaPlusLC["WidgetY"] = -160
-					LeaPlusLC["WidgetScale"] = 1.25
+					RGXQoLLC["WidgetA"] = "CENTER"
+					RGXQoLLC["WidgetR"] = "CENTER"
+					RGXQoLLC["WidgetX"] = 0
+					RGXQoLLC["WidgetY"] = -160
+					RGXQoLLC["WidgetScale"] = 1.25
 					topCenterHolder:ClearAllPoints()
-					topCenterHolder:SetPoint(LeaPlusLC["WidgetA"], UIParent, LeaPlusLC["WidgetR"], LeaPlusLC["WidgetX"], LeaPlusLC["WidgetY"])
-					topCenterHolder:SetScale(LeaPlusLC["WidgetScale"])
-					UIWidgetTopCenterContainerFrame:SetScale(LeaPlusLC["WidgetScale"])
+					topCenterHolder:SetPoint(RGXQoLLC["WidgetA"], UIParent, RGXQoLLC["WidgetR"], RGXQoLLC["WidgetX"], RGXQoLLC["WidgetY"])
+					topCenterHolder:SetScale(RGXQoLLC["WidgetScale"])
+					UIWidgetTopCenterContainerFrame:SetScale(RGXQoLLC["WidgetScale"])
 				else
 					-- Show Titan Panel screen adjust warning if Titan Panel is installed with screen adjust enabled
 					if C_AddOns.IsAddOnLoaded("TitanClassic") then
@@ -9300,22 +9300,22 @@
 
 					-- Find out if the UI has a non-standard scale
 					if GetCVar("useuiscale") == "1" then
-						LeaPlusLC["gscale"] = GetCVar("uiscale")
+						RGXQoLLC["gscale"] = GetCVar("uiscale")
 					else
-						LeaPlusLC["gscale"] = 1
+						RGXQoLLC["gscale"] = 1
 					end
 
 					-- Set drag frame size according to UI scale
-					dragframe:SetWidth(160 * LeaPlusLC["gscale"])
-					dragframe:SetHeight(79 * LeaPlusLC["gscale"])
+					dragframe:SetWidth(160 * RGXQoLLC["gscale"])
+					dragframe:SetHeight(79 * RGXQoLLC["gscale"])
 
 					-- Show configuration panel
 					WidgetPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 					dragframe:Show()
 
 					-- Show frame alignment grid
-					LeaPlusLC.grid:Show()
+					RGXQoLLC.grid:Show()
 				end
 			end)
 
@@ -9328,7 +9328,7 @@
 		-- Hide chat buttons
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoChatButtons"] == "On" and not LeaLockList["NoChatButtons"] then
+		if RGXQoLLC["NoChatButtons"] == "On" and not RGXQoLLockList["NoChatButtons"] then
 
 			-- Create hidden frame to store unwanted frames (more efficient than creating functions)
 			local tframe = CreateFrame("FRAME")
@@ -9396,7 +9396,7 @@
 						end
 					end
 					-- If combat log is hidden, resize it's bottom button
-					if LeaPlusLC["NoCombatLogTab"] == "On" and not LeaLockList["NoCombatLogTab"] then
+					if RGXQoLLC["NoCombatLogTab"] == "On" and not RGXQoLLockList["NoCombatLogTab"] then
 						if _G["ChatFrame2ButtonFrameBottomButton"] then
 							-- Resize combat log bottom button
 							_G["ChatFrame2ButtonFrameBottomButton"]:SetWidth(0.1);
@@ -9489,7 +9489,7 @@
 		-- Recent chat window
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["RecentChatWindow"] == "On" and not LeaLockList["RecentChatWindow"] then
+		if RGXQoLLC["RecentChatWindow"] == "On" and not RGXQoLLockList["RecentChatWindow"] then
 
 			-- Create recent chat frame
 			local editFrame = CreateFrame("ScrollFrame", nil, UIParent, "RGXQoLRecentChatScrollFrameTemplate")
@@ -9497,7 +9497,7 @@
 			-- Set frame parameters
 			editFrame:ClearAllPoints()
 			editFrame:SetPoint("BOTTOM", 0, 130)
-			editFrame:SetSize(600, LeaPlusLC["RecentChatSize"])
+			editFrame:SetSize(600, RGXQoLLC["RecentChatSize"])
 			editFrame:SetFrameStrata("MEDIUM")
 			editFrame:SetToplevel(true)
 			editFrame:Hide()
@@ -9550,11 +9550,11 @@
 			titleFrame:HookScript("OnMouseUp", function(self, btn)
 				if btn == "LeftButton" then
 					editFrame:StopMovingOrSizing()
-					LeaPlusLC["RecentChatSize"] = editFrame:GetHeight()
+					RGXQoLLC["RecentChatSize"] = editFrame:GetHeight()
 				elseif btn == "MiddleButton" then
 					-- Reset frame size
-					LeaPlusLC["RecentChatSize"] = 170
-					editFrame:SetSize(600, LeaPlusLC["RecentChatSize"])
+					RGXQoLLC["RecentChatSize"] = 170
+					editFrame:SetSize(600, RGXQoLLC["RecentChatSize"])
 					editFrame:ClearAllPoints()
 					editFrame:SetPoint("BOTTOM", 0, 130)
 				end
@@ -9689,7 +9689,7 @@
 		-- Show cooldowns
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowCooldowns"] == "On" then
+		if RGXQoLLC["ShowCooldowns"] == "On" then
 
 			-- Create main table structure in saved variables if it doesn't exist
 			if RGXQoLDB["Cooldowns"] == nil then
@@ -9739,7 +9739,7 @@
 				-- Show tooltip
 				icon[i]:SetScript("OnEnter", function(self)
 					GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 15, -25)
-					GameTooltip:SetText(GetSpellInfo(LeaPlusCB["Spell" .. i]:GetText()))
+					GameTooltip:SetText(GetSpellInfo(RGXQoLCB["Spell" .. i]:GetText()))
 				end)
 
 				-- Hide tooltip
@@ -9749,7 +9749,7 @@
 
 			-- Change cooldown icon scale when player frame scale changes
 			PlayerFrame:HookScript("OnSizeChanged", function()
-				if LeaPlusLC["CooldownsOnPlayer"] == "On" then
+				if RGXQoLLC["CooldownsOnPlayer"] == "On" then
 					for i = 1, iCount do
 						icon[i]:SetScale(PlayerFrame:GetScale())
 					end
@@ -9758,7 +9758,7 @@
 
 			-- Change cooldown icon scale when target frame scale changes
 			TargetFrame:HookScript("OnSizeChanged", function()
-				if LeaPlusLC["CooldownsOnPlayer"] == "Off" then
+				if RGXQoLLC["CooldownsOnPlayer"] == "Off" then
 					for i = 1, iCount do
 						icon[i]:SetScale(TargetFrame:GetScale())
 					end
@@ -9829,7 +9829,7 @@
 			end
 
 			-- Create configuration panel
-			local CooldownPanel = LeaPlusLC:CreatePanel("Show cooldowns", "CooldownPanel")
+			local CooldownPanel = RGXQoLLC:CreatePanel("Show cooldowns", "CooldownPanel")
 
 			-- Function to refresh the editbox tooltip with the spell name
 			local function RefSpellTip(self,elapsed)
@@ -9848,7 +9848,7 @@
 			local function MakeSpellEB(num, x, y, tab, shifttab)
 
 				-- Create editbox for spell ID
-                SpellEB[num] = LeaPlusLC:CreateEditBox("Spell" .. num, CooldownPanel, 80, 8, "TOPLEFT", x, y - 20, "Spell" .. tab, "Spell" .. shifttab)
+                SpellEB[num] = RGXQoLLC:CreateEditBox("Spell" .. num, CooldownPanel, 80, 8, "TOPLEFT", x, y - 20, "Spell" .. tab, "Spell" .. shifttab)
 				SpellEB[num]:SetNumeric(true)
 
 				-- Set initial value (for current spec)
@@ -9864,14 +9864,14 @@
 				end)
 
 				-- Create checkbox for pet cooldown
-				LeaPlusLC:MakeCB(CooldownPanel, "Spell" .. num .."Pet", "", 472, y - 20, false, "")
-				LeaPlusCB["Spell" .. num .."Pet"]:SetHitRectInsets(0, 0, 0, 0)
+				RGXQoLLC:MakeCB(CooldownPanel, "Spell" .. num .."Pet", "", 472, y - 20, false, "")
+				RGXQoLCB["Spell" .. num .."Pet"]:SetHitRectInsets(0, 0, 0, 0)
 
 			end
 
 			-- Add titles
-			LeaPlusLC:MakeTx(CooldownPanel, "Spell ID", 384, -92)
-			LeaPlusLC:MakeTx(CooldownPanel, "Pet", 472, -92)
+			RGXQoLLC:MakeTx(CooldownPanel, "Spell ID", 384, -92)
+			RGXQoLLC:MakeTx(CooldownPanel, "Pet", 472, -92)
 
 			-- Add editboxes and checkboxes
 			MakeSpellEB(1, 386, -92, "2", "5")
@@ -9881,10 +9881,10 @@
 			MakeSpellEB(5, 386, -212, "1", "4")
 
 			-- Add checkboxes
-			LeaPlusLC:MakeTx(CooldownPanel, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(CooldownPanel, "ShowCooldownID", "Show the spell ID in buff icon tooltips", 16, -92, false, "If checked, spell IDs will be shown in buff icon tooltips located in the buff frame and under the target frame.");
-			LeaPlusLC:MakeCB(CooldownPanel, "NoCooldownDuration", "Hide cooldown duration numbers (if enabled)", 16, -112, false, "If checked, cooldown duration numbers will not be shown over the cooldowns.|n|nIf unchecked, cooldown duration numbers will be shown over the cooldowns if they are enabled in the game options panel ('ActionBars' menu).")
-			LeaPlusLC:MakeCB(CooldownPanel, "CooldownsOnPlayer", "Show cooldowns above the player frame", 16, -132, false, "If checked, cooldown icons will be shown above the player frame instead of the target frame.|n|nIf unchecked, cooldown icons will be shown above the target frame.")
+			RGXQoLLC:MakeTx(CooldownPanel, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(CooldownPanel, "ShowCooldownID", "Show the spell ID in buff icon tooltips", 16, -92, false, "If checked, spell IDs will be shown in buff icon tooltips located in the buff frame and under the target frame.");
+			RGXQoLLC:MakeCB(CooldownPanel, "NoCooldownDuration", "Hide cooldown duration numbers (if enabled)", 16, -112, false, "If checked, cooldown duration numbers will not be shown over the cooldowns.|n|nIf unchecked, cooldown duration numbers will be shown over the cooldowns if they are enabled in the game options panel ('ActionBars' menu).")
+			RGXQoLLC:MakeCB(CooldownPanel, "CooldownsOnPlayer", "Show cooldowns above the player frame", 16, -132, false, "If checked, cooldown icons will be shown above the player frame instead of the target frame.|n|nIf unchecked, cooldown icons will be shown above the target frame.")
 
 			-- Function to save the panel control settings and refresh the cooldown icons
 			local function SavePanelControls()
@@ -9895,7 +9895,7 @@
 
 					-- Show icons above target or player frame
 					icon[i]:ClearAllPoints()
-					if LeaPlusLC["CooldownsOnPlayer"] == "On" then
+					if RGXQoLLC["CooldownsOnPlayer"] == "On" then
 						icon[i]:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 116 + (22 * (i - 1)), 5)
 						icon[i]:SetScale(PlayerFrame:GetScale())
 					else
@@ -9905,17 +9905,17 @@
 
 					-- Save control states to globals
 					RGXQoLDB["Cooldowns"][PlayerClass]["S" .. activeSpec .. "R" .. i .. "Idn"] = SpellEB[i]:GetText()
-					RGXQoLDB["Cooldowns"][PlayerClass]["S" .. activeSpec .. "R" .. i .. "Pet"] = LeaPlusCB["Spell" .. i .."Pet"]:GetChecked()
+					RGXQoLDB["Cooldowns"][PlayerClass]["S" .. activeSpec .. "R" .. i .. "Pet"] = RGXQoLCB["Spell" .. i .."Pet"]:GetChecked()
 
 					-- Set cooldowns
-					if LeaPlusCB["Spell" .. i .."Pet"]:GetChecked() then
+					if RGXQoLCB["Spell" .. i .."Pet"]:GetChecked() then
 						ShowIcon(i, tonumber(SpellEB[i]:GetText()), "pet")
 					else
 						ShowIcon(i, tonumber(SpellEB[i]:GetText()), "player")
 					end
 
 					-- Show or hide cooldown duration
-					if LeaPlusLC["NoCooldownDuration"] == "On" then
+					if RGXQoLLC["NoCooldownDuration"] == "On" then
 						icon[i].c:SetHideCountdownNumbers(true)
 					else
 						icon[i].c:SetHideCountdownNumbers(false)
@@ -9955,24 +9955,24 @@
 			end
 
 			-- Update cooldown icons when checkboxes are clicked
-			LeaPlusCB["NoCooldownDuration"]:HookScript("OnClick", SavePanelControls)
-			LeaPlusCB["CooldownsOnPlayer"]:HookScript("OnClick", SavePanelControls)
+			RGXQoLCB["NoCooldownDuration"]:HookScript("OnClick", SavePanelControls)
+			RGXQoLCB["CooldownsOnPlayer"]:HookScript("OnClick", SavePanelControls)
 
 			-- Help button hidden
 			CooldownPanel.h:Hide()
 
 			-- Back button handler
 			CooldownPanel.b:SetScript("OnClick", function()
-				CooldownPanel:Hide(); LeaPlusLC["PageF"]:Show(); LeaPlusLC["Page5"]:Show()
+				CooldownPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
 			-- Reset button handler
 			CooldownPanel.r:SetScript("OnClick", function()
 				-- Reset the checkboxes
-				LeaPlusLC["ShowCooldownID"] = "On"
-				LeaPlusLC["NoCooldownDuration"] = "On"
-				LeaPlusLC["CooldownsOnPlayer"] = "Off"
+				RGXQoLLC["ShowCooldownID"] = "On"
+				RGXQoLLC["NoCooldownDuration"] = "On"
+				RGXQoLLC["CooldownsOnPlayer"] = "Off"
 				for i = 1, iCount do
 					-- Reset the panel controls
 					SpellEB[i]:SetText("");
@@ -9987,27 +9987,27 @@
 			-- Save settings when changed
 			for i = 1, iCount do
 				-- Set initial checkbox states
-				LeaPlusCB["Spell" .. i .."Pet"]:SetChecked(RGXQoLDB["Cooldowns"][PlayerClass]["S" .. activeSpec .. "R" .. i .. "Pet"])
+				RGXQoLCB["Spell" .. i .."Pet"]:SetChecked(RGXQoLDB["Cooldowns"][PlayerClass]["S" .. activeSpec .. "R" .. i .. "Pet"])
 				-- Set checkbox states when shown
-				LeaPlusCB["Spell" .. i .."Pet"]:SetScript("OnShow", function()
-					LeaPlusCB["Spell" .. i .."Pet"]:SetChecked(RGXQoLDB["Cooldowns"][PlayerClass]["S" .. activeSpec .. "R" .. i .. "Pet"])
+				RGXQoLCB["Spell" .. i .."Pet"]:SetScript("OnShow", function()
+					RGXQoLCB["Spell" .. i .."Pet"]:SetChecked(RGXQoLDB["Cooldowns"][PlayerClass]["S" .. activeSpec .. "R" .. i .. "Pet"])
 				end)
 				-- Set states when changed
 				SpellEB[i]:SetScript("OnTextChanged", SavePanelControls)
-				LeaPlusCB["Spell" .. i .."Pet"]:SetScript("OnClick", SavePanelControls)
+				RGXQoLCB["Spell" .. i .."Pet"]:SetScript("OnClick", SavePanelControls)
 			end
 
 			-- Show cooldowns on startup
 			SavePanelControls()
 
 			-- Show panel when configuration button is clicked
-			LeaPlusCB["CooldownsButton"]:SetScript("OnClick", function()
+			RGXQoLCB["CooldownsButton"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- No preset profile
 				else
 					-- Show panel
 					CooldownPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -10018,11 +10018,11 @@
 			classTagBanner:SetText(myClassName)
 
 			-- Add help button
-			LeaPlusLC:CreateHelpButton("ShowCooldownsHelpButton", CooldownPanel, classTagBanner, "Enter the spell IDs for the cooldown icons that you want to see.|n|nIf a cooldown icon normally appears under the pet frame, check the pet checkbox.|n|nCooldown icons are saved to your class.")
+			RGXQoLLC:CreateHelpButton("ShowCooldownsHelpButton", CooldownPanel, classTagBanner, "Enter the spell IDs for the cooldown icons that you want to see.|n|nIf a cooldown icon normally appears under the pet frame, check the pet checkbox.|n|nCooldown icons are saved to your class.")
 
 			-- Function to show spell ID in tooltips
 			local function CooldownIDFunc(unit, target, index, auratype)
-				if LeaPlusLC["ShowCooldownID"] == "On" and auratype ~= "HARMFUL" then
+				if RGXQoLLC["ShowCooldownID"] == "On" and auratype ~= "HARMFUL" then
 					local AuraData = C_UnitAuras.GetAuraDataByIndex(target, index)
 					if AuraData then
 						local spellid = AuraData.spellId
@@ -10046,7 +10046,7 @@
 		-- Combat plates
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["CombatPlates"] == "On" then
+		if RGXQoLLC["CombatPlates"] == "On" then
 
 			-- Toggle nameplates with combat
 			local f = CreateFrame("Frame")
@@ -10065,36 +10065,36 @@
 		-- Enhance tooltip
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["TipModEnable"] == "On" and not LeaLockList["TipModEnable"] then
+		if RGXQoLLC["TipModEnable"] == "On" and not RGXQoLLockList["TipModEnable"] then
 
 			-- Enable mouse hover events for world frame (required for hide tooltips, cursor anchor and maybe other addons)
-			WorldFrame:EnableMouseMotion(true) -- LeaPlusLC.NewPatch: Using GetMouseFoci()[1] for now
+			WorldFrame:EnableMouseMotion(true) -- RGXQoLLC.NewPatch: Using GetMouseFoci()[1] for now
 
 			----------------------------------------------------------------------
 			--	Position the tooltip
 			----------------------------------------------------------------------
 
 			hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-				if LeaPlusLC["TooltipAnchorMenu"] ~= 1 then
+				if RGXQoLLC["TooltipAnchorMenu"] ~= 1 then
 					if (not tooltip or not parent) then
 						return
 					end
-					if LeaPlusLC["TooltipAnchorMenu"] == 2 or not WorldFrame:IsMouseMotionFocus() then
+					if RGXQoLLC["TooltipAnchorMenu"] == 2 or not WorldFrame:IsMouseMotionFocus() then
 						local a,b,c,d,e = tooltip:GetPoint()
 						if a ~= "BOTTOMRIGHT" or c ~= "BOTTOMRIGHT" then
 							tooltip:ClearAllPoints()
 						end
-						tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", LeaPlusLC["TipOffsetX"], LeaPlusLC["TipOffsetY"]);
+						tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", RGXQoLLC["TipOffsetX"], RGXQoLLC["TipOffsetY"]);
 						return
 					else
-						if LeaPlusLC["TooltipAnchorMenu"] == 3 then
+						if RGXQoLLC["TooltipAnchorMenu"] == 3 then
 							tooltip:SetOwner(parent, "ANCHOR_CURSOR")
 							return
-						elseif LeaPlusLC["TooltipAnchorMenu"] == 4 then
-							tooltip:SetOwner(parent, "ANCHOR_CURSOR_LEFT", LeaPlusLC["TipCursorX"], LeaPlusLC["TipCursorY"])
+						elseif RGXQoLLC["TooltipAnchorMenu"] == 4 then
+							tooltip:SetOwner(parent, "ANCHOR_CURSOR_LEFT", RGXQoLLC["TipCursorX"], RGXQoLLC["TipCursorY"])
 							return
-						elseif LeaPlusLC["TooltipAnchorMenu"] == 5 then
-							tooltip:SetOwner(parent, "ANCHOR_CURSOR_RIGHT", LeaPlusLC["TipCursorX"], LeaPlusLC["TipCursorY"])
+						elseif RGXQoLLC["TooltipAnchorMenu"] == 5 then
+							tooltip:SetOwner(parent, "ANCHOR_CURSOR_RIGHT", RGXQoLLC["TipCursorX"], RGXQoLLC["TipCursorY"])
 							return
 						end
 					end
@@ -10146,72 +10146,72 @@
 			---------------------------------------------------------------------------------------------------------
 
 			-- Create tooltip customisation side panel
-			local SideTip = LeaPlusLC:CreatePanel("Enhance tooltip", "SideTip")
+			local SideTip = RGXQoLLC:CreatePanel("Enhance tooltip", "SideTip")
 
 			-- Add controls
-			LeaPlusLC:MakeTx(SideTip, "Settings", 16, -72)
-			LeaPlusLC:MakeCB(SideTip, "TipShowRank", "Show guild ranks for your guild", 16, -92, false, "If checked, guild ranks will be shown for players in your guild.")
-			LeaPlusLC:MakeCB(SideTip, "TipShowOtherRank", "Show guild ranks for other guilds", 16, -112, false, "If checked, guild ranks will be shown for players who are not in your guild.")
-			LeaPlusLC:MakeCB(SideTip, "TipShowTarget", "Show unit targets", 16, -132, false, "If checked, unit targets will be shown.")
-			LeaPlusLC:MakeCB(SideTip, "TipNoHealthBar", "Hide the health bar", 16, -152, true, "If checked, the health bar will not be shown.")
+			RGXQoLLC:MakeTx(SideTip, "Settings", 16, -72)
+			RGXQoLLC:MakeCB(SideTip, "TipShowRank", "Show guild ranks for your guild", 16, -92, false, "If checked, guild ranks will be shown for players in your guild.")
+			RGXQoLLC:MakeCB(SideTip, "TipShowOtherRank", "Show guild ranks for other guilds", 16, -112, false, "If checked, guild ranks will be shown for players who are not in your guild.")
+			RGXQoLLC:MakeCB(SideTip, "TipShowTarget", "Show unit targets", 16, -132, false, "If checked, unit targets will be shown.")
+			RGXQoLLC:MakeCB(SideTip, "TipNoHealthBar", "Hide the health bar", 16, -152, true, "If checked, the health bar will not be shown.")
 
-			LeaPlusLC:MakeTx(SideTip, "Hide tooltips", 16, -192)
-			LeaPlusLC:MakeCB(SideTip, "TipHideInCombat", "Hide tooltips for world units during combat", 16, -212, false, "If checked, tooltips for world units will be hidden during combat.")
-			LeaPlusLC:MakeCB(SideTip, "TipHideShiftOverride", "Show tooltips with shift key", 16, -232, false, "If checked, you can hold shift while tooltips are hidden to show them temporarily.")
+			RGXQoLLC:MakeTx(SideTip, "Hide tooltips", 16, -192)
+			RGXQoLLC:MakeCB(SideTip, "TipHideInCombat", "Hide tooltips for world units during combat", 16, -212, false, "If checked, tooltips for world units will be hidden during combat.")
+			RGXQoLLC:MakeCB(SideTip, "TipHideShiftOverride", "Show tooltips with shift key", 16, -232, false, "If checked, you can hold shift while tooltips are hidden to show them temporarily.")
 
 			-- Handle show tooltips with shift key lock
 			local function SetTipHideShiftOverrideFunc()
-				if LeaPlusLC["TipHideInCombat"] == "On" then
-					LeaPlusLC:LockItem(LeaPlusCB["TipHideShiftOverride"], false)
+				if RGXQoLLC["TipHideInCombat"] == "On" then
+					RGXQoLLC:LockItem(RGXQoLCB["TipHideShiftOverride"], false)
 				else
-					LeaPlusLC:LockItem(LeaPlusCB["TipHideShiftOverride"], true)
+					RGXQoLLC:LockItem(RGXQoLCB["TipHideShiftOverride"], true)
 				end
 			end
 
-			LeaPlusCB["TipHideInCombat"]:HookScript("OnClick", SetTipHideShiftOverrideFunc)
+			RGXQoLCB["TipHideInCombat"]:HookScript("OnClick", SetTipHideShiftOverrideFunc)
 			SetTipHideShiftOverrideFunc()
 
-			LeaPlusLC:CreateDropdown("TooltipAnchorMenu", "Anchor", 146, "TOPLEFT", SideTip, "TOPLEFT", 356, -92, {{L["None"], 1}, {L["Overlay"], 2}, {L["Cursor"], 3}, {L["Cursor Left"], 4}, {L["Cursor Right"], 5}})
+			RGXQoLLC:CreateDropdown("TooltipAnchorMenu", "Anchor", 146, "TOPLEFT", SideTip, "TOPLEFT", 356, -92, {{L["None"], 1}, {L["Overlay"], 2}, {L["Cursor"], 3}, {L["Cursor Left"], 4}, {L["Cursor Right"], 5}})
 
-			local XOffsetHeading = LeaPlusLC:MakeTx(SideTip, "X Offset", 356, -132)
-			LeaPlusLC:MakeSL(SideTip, "TipCursorX", "Drag to set the cursor X offset.", -128, 128, 1, 356, -152, "%.0f")
+			local XOffsetHeading = RGXQoLLC:MakeTx(SideTip, "X Offset", 356, -132)
+			RGXQoLLC:MakeSL(SideTip, "TipCursorX", "Drag to set the cursor X offset.", -128, 128, 1, 356, -152, "%.0f")
 
-			local YOffsetHeading = LeaPlusLC:MakeTx(SideTip, "Y Offset", 356, -182)
-			LeaPlusLC:MakeSL(SideTip, "TipCursorY", "Drag to set the cursor Y offset.", -128, 128, 1, 356, -202, "%.0f")
+			local YOffsetHeading = RGXQoLLC:MakeTx(SideTip, "Y Offset", 356, -182)
+			RGXQoLLC:MakeSL(SideTip, "TipCursorY", "Drag to set the cursor Y offset.", -128, 128, 1, 356, -202, "%.0f")
 
-			LeaPlusLC:MakeTx(SideTip, "Scale", 356, -232)
-			LeaPlusLC:MakeSL(SideTip, "LeaPlusTipSize", "Drag to set the tooltip scale.", 0.50, 2.00, 0.05, 356, -252, "%.2f")
+			RGXQoLLC:MakeTx(SideTip, "Scale", 356, -232)
+			RGXQoLLC:MakeSL(SideTip, "LeaPlusTipSize", "Drag to set the tooltip scale.", 0.50, 2.00, 0.05, 356, -252, "%.2f")
 
 			-- Function to enable or disable anchor controls
 			local function SetAnchorControls()
 				-- Hide overlay if anchor is set to none
-				if LeaPlusLC["TooltipAnchorMenu"] == 1 then
+				if RGXQoLLC["TooltipAnchorMenu"] == 1 then
 					TipDrag:Hide()
 				else
 					TipDrag:Show()
 				end
 				-- Set the X and Y sliders
-				if LeaPlusLC["TooltipAnchorMenu"] == 1 or LeaPlusLC["TooltipAnchorMenu"] == 2 or LeaPlusLC["TooltipAnchorMenu"] == 3 then
+				if RGXQoLLC["TooltipAnchorMenu"] == 1 or RGXQoLLC["TooltipAnchorMenu"] == 2 or RGXQoLLC["TooltipAnchorMenu"] == 3 then
 					-- Dropdown is set to screen or cursor so disable X and Y offset sliders
-					LeaPlusLC:LockItem(LeaPlusCB["TipCursorX"], true)
-					LeaPlusLC:LockItem(LeaPlusCB["TipCursorY"], true)
+					RGXQoLLC:LockItem(RGXQoLCB["TipCursorX"], true)
+					RGXQoLLC:LockItem(RGXQoLCB["TipCursorY"], true)
 					XOffsetHeading:SetAlpha(0.3)
 					YOffsetHeading:SetAlpha(0.3)
-					LeaPlusCB["TipCursorX"]:SetScript("OnEnter", nil)
-					LeaPlusCB["TipCursorY"]:SetScript("OnEnter", nil)
+					RGXQoLCB["TipCursorX"]:SetScript("OnEnter", nil)
+					RGXQoLCB["TipCursorY"]:SetScript("OnEnter", nil)
 				else
 					-- Dropdown is set to cursor left or cursor right so enable X and Y offset sliders
-					LeaPlusLC:LockItem(LeaPlusCB["TipCursorX"], false)
-					LeaPlusLC:LockItem(LeaPlusCB["TipCursorY"], false)
+					RGXQoLLC:LockItem(RGXQoLCB["TipCursorX"], false)
+					RGXQoLLC:LockItem(RGXQoLCB["TipCursorY"], false)
 					XOffsetHeading:SetAlpha(1.0)
 					YOffsetHeading:SetAlpha(1.0)
-					LeaPlusCB["TipCursorX"]:SetScript("OnEnter", LeaPlusLC.TipSee)
-					LeaPlusCB["TipCursorY"]:SetScript("OnEnter", LeaPlusLC.TipSee)
+					RGXQoLCB["TipCursorX"]:SetScript("OnEnter", RGXQoLLC.TipSee)
+					RGXQoLCB["TipCursorY"]:SetScript("OnEnter", RGXQoLLC.TipSee)
 				end
 			end
 
 			-- Set controls when anchor dropdown menu is changed and on startup
-			LeaPlusCB["TooltipAnchorMenu"]:RegisterCallback("OnMenuClose", SetAnchorControls)
+			RGXQoLCB["TooltipAnchorMenu"]:RegisterCallback("OnMenuClose", SetAnchorControls)
 			SetAnchorControls()
 
 			---------------------------------------------------------------------------------------------------------
@@ -10227,34 +10227,34 @@
 				if TipDrag:IsShown() then
 					TipDrag:Hide();
 				end
-				LeaPlusLC["PageF"]:Show();
-				LeaPlusLC["Page5"]:Show();
+				RGXQoLLC["PageF"]:Show();
+				RGXQoLLC["Page5"]:Show();
 				return
 			end)
 
 			-- Reset button handler
 			SideTip.r.tiptext = SideTip.r.tiptext .. "|n|n" .. L["Note that this will not reset settings that require a UI reload."]
 			SideTip.r:SetScript("OnClick", function()
-				LeaPlusLC["TipShowRank"] = "On"
-				LeaPlusLC["TipShowOtherRank"] = "Off"
-				LeaPlusLC["TipShowTarget"] = "On"
-				LeaPlusLC["TipHideInCombat"] = "Off"; SetTipHideShiftOverrideFunc()
-				LeaPlusLC["TipHideShiftOverride"] = "On"
-				LeaPlusLC["LeaPlusTipSize"] = 1.00
-				LeaPlusLC["TipOffsetX"] = -13
-				LeaPlusLC["TipOffsetY"] = 94
-				LeaPlusLC["TooltipAnchorMenu"] = 1
-				LeaPlusLC["TipCursorX"] = 0
-				LeaPlusLC["TipCursorY"] = 0
-				TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", LeaPlusLC["TipOffsetX"], LeaPlusLC["TipOffsetY"]);
+				RGXQoLLC["TipShowRank"] = "On"
+				RGXQoLLC["TipShowOtherRank"] = "Off"
+				RGXQoLLC["TipShowTarget"] = "On"
+				RGXQoLLC["TipHideInCombat"] = "Off"; SetTipHideShiftOverrideFunc()
+				RGXQoLLC["TipHideShiftOverride"] = "On"
+				RGXQoLLC["LeaPlusTipSize"] = 1.00
+				RGXQoLLC["TipOffsetX"] = -13
+				RGXQoLLC["TipOffsetY"] = 94
+				RGXQoLLC["TooltipAnchorMenu"] = 1
+				RGXQoLLC["TipCursorX"] = 0
+				RGXQoLLC["TipCursorY"] = 0
+				TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", RGXQoLLC["TipOffsetX"], RGXQoLLC["TipOffsetY"]);
 				SetAnchorControls()
-				LeaPlusLC:SetTipScale()
+				RGXQoLLC:SetTipScale()
 				SideTip:Hide(); SideTip:Show();
 			end)
 
 			-- Show drag frame with configuration panel if anchor is not set to none
 			SideTip:HookScript("OnShow", function()
-				if LeaPlusLC["TooltipAnchorMenu"] == 1 then
+				if RGXQoLLC["TooltipAnchorMenu"] == 1 then
 					TipDrag:Hide()
 				else
 					TipDrag:Show()
@@ -10275,50 +10275,50 @@
 				if btn == "LeftButton" then
 					void, void, void, LTcx, LTcy = TipDrag:GetPoint()
 					TipDrag:StopMovingOrSizing();
-					LeaPlusLC["TipOffsetX"], LeaPlusLC["TipOffsetY"] = LTcx - LTbx + LTax, LTcy - LTby + LTay
+					RGXQoLLC["TipOffsetX"], RGXQoLLC["TipOffsetY"] = LTcx - LTbx + LTax, LTcy - LTby + LTay
 					TipDrag:ClearAllPoints()
-					TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", LeaPlusLC["TipOffsetX"], LeaPlusLC["TipOffsetY"])
+					TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", RGXQoLLC["TipOffsetX"], RGXQoLLC["TipOffsetY"])
 				end
 			end)
 
 			--	Move the tooltip
-			LeaPlusCB["MoveTooltipButton"]:SetScript("OnClick", function()
+			RGXQoLCB["MoveTooltipButton"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["TipShowRank"] = "On"
-					LeaPlusLC["TipShowOtherRank"] = "Off"
-					LeaPlusLC["TipShowTarget"] = "On"
-					LeaPlusLC["TipHideInCombat"] = "Off"; SetTipHideShiftOverrideFunc()
-					LeaPlusLC["TipHideShiftOverride"] = "On"
-					LeaPlusLC["LeaPlusTipSize"] = 1.25
-					LeaPlusLC["TipOffsetX"] = -13
-					LeaPlusLC["TipOffsetY"] = 94
-					LeaPlusLC["TooltipAnchorMenu"] = 2
-					LeaPlusLC["TipCursorX"] = 0
-					LeaPlusLC["TipCursorY"] = 0
-					TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", LeaPlusLC["TipOffsetX"], LeaPlusLC["TipOffsetY"]);
+					RGXQoLLC["TipShowRank"] = "On"
+					RGXQoLLC["TipShowOtherRank"] = "Off"
+					RGXQoLLC["TipShowTarget"] = "On"
+					RGXQoLLC["TipHideInCombat"] = "Off"; SetTipHideShiftOverrideFunc()
+					RGXQoLLC["TipHideShiftOverride"] = "On"
+					RGXQoLLC["LeaPlusTipSize"] = 1.25
+					RGXQoLLC["TipOffsetX"] = -13
+					RGXQoLLC["TipOffsetY"] = 94
+					RGXQoLLC["TooltipAnchorMenu"] = 2
+					RGXQoLLC["TipCursorX"] = 0
+					RGXQoLLC["TipCursorY"] = 0
+					TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", RGXQoLLC["TipOffsetX"], RGXQoLLC["TipOffsetY"]);
 					SetAnchorControls()
-					LeaPlusLC:SetTipScale()
-					LeaPlusLC:SetDim();
-					LeaPlusLC:ReloadCheck()
+					RGXQoLLC:SetTipScale()
+					RGXQoLLC:SetDim();
+					RGXQoLLC:ReloadCheck()
 					SideTip:Show(); SideTip:Hide(); -- Needed to update tooltip scale
-					LeaPlusLC["PageF"]:Hide(); LeaPlusLC["PageF"]:Show()
+					RGXQoLLC["PageF"]:Hide(); RGXQoLLC["PageF"]:Show()
 				else
 					-- Show tooltip configuration panel
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 					SideTip:Show()
 
 					-- Set scale
-					TipDrag:SetScale(LeaPlusLC["LeaPlusTipSize"])
+					TipDrag:SetScale(RGXQoLLC["LeaPlusTipSize"])
 
 					-- Set position of the drag frame
-					TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", LeaPlusLC["TipOffsetX"], LeaPlusLC["TipOffsetY"])
+					TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", RGXQoLLC["TipOffsetX"], RGXQoLLC["TipOffsetY"])
 				end
 
 			end)
 
 			-- Hide health bar
-			if LeaPlusLC["TipNoHealthBar"] == "On" then
+			if RGXQoLLC["TipNoHealthBar"] == "On" then
 				local tipHide = GameTooltip.Hide
 				GameTooltipStatusBar:HookScript("OnShow", tipHide)
 				GameTooltipStatusBar:Hide()
@@ -10332,54 +10332,54 @@
 			local function SetTipScale()
 
 				-- General tooltip
-				if GameTooltip then GameTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
+				if GameTooltip then GameTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
 
 				-- Friends
-				if FriendsTooltip then FriendsTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
+				if FriendsTooltip then FriendsTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
 
 				-- AutoCompleteBox
-				if AutoCompleteBox then AutoCompleteBox:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
+				if AutoCompleteBox then AutoCompleteBox:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
 
 				-- Items (links, comparisons)
-				if ItemRefTooltip then ItemRefTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
-				if ItemRefShoppingTooltip1 then ItemRefShoppingTooltip1:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
-				if ItemRefShoppingTooltip2 then ItemRefShoppingTooltip2:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
-				if ShoppingTooltip1 then ShoppingTooltip1:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
-				if ShoppingTooltip2 then ShoppingTooltip2:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
+				if ItemRefTooltip then ItemRefTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if ItemRefShoppingTooltip1 then ItemRefShoppingTooltip1:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if ItemRefShoppingTooltip2 then ItemRefShoppingTooltip2:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if ShoppingTooltip1 then ShoppingTooltip1:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if ShoppingTooltip2 then ShoppingTooltip2:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
 
 				-- Embedded item tooltip (as used in PVP UI)
-				if EmbeddedItemTooltip then EmbeddedItemTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
+				if EmbeddedItemTooltip then EmbeddedItemTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
 
 				-- Nameplate tooltip
-				if NamePlateTooltip then NamePlateTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
+				if NamePlateTooltip then NamePlateTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
 
 				-- LibDBIcon
-				if LibDBIconTooltip then LibDBIconTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"]) end
+				if LibDBIconTooltip then LibDBIconTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
 
 				-- Total RP 3
 				if C_AddOns.IsAddOnLoaded("totalRP3") and TRP3_MainTooltip and TRP3_CharacterTooltip then
-					TRP3_MainTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"])
-					TRP3_CharacterTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"])
+					TRP3_MainTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"])
+					TRP3_CharacterTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"])
 				end
 
 				-- Altoholic
 				if AltoTooltip then
-					AltoTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"])
+					AltoTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"])
 				end
 
 				-- Leatrix Plus
-				TipDrag:SetScale(LeaPlusLC["LeaPlusTipSize"])
+				TipDrag:SetScale(RGXQoLLC["LeaPlusTipSize"])
 
 				-- Set slider formatted text
-				LeaPlusCB["LeaPlusTipSize"].f:SetFormattedText("%.0f%%", LeaPlusLC["LeaPlusTipSize"] * 100)
+				RGXQoLCB["LeaPlusTipSize"].f:SetFormattedText("%.0f%%", RGXQoLLC["LeaPlusTipSize"] * 100)
 
 			end
 
 			-- Give function a file level scope
-			LeaPlusLC.SetTipScale = SetTipScale
+			RGXQoLLC.SetTipScale = SetTipScale
 
 			-- Set tooltip scale when slider or checkbox changes and on startup
-			LeaPlusCB["LeaPlusTipSize"]:HookScript("OnValueChanged", SetTipScale)
+			RGXQoLCB["LeaPlusTipSize"]:HookScript("OnValueChanged", SetTipScale)
 			SetTipScale()
 
 			----------------------------------------------------------------------
@@ -10388,7 +10388,7 @@
 
 			-- Set tooltip scale when tooltip is shown
 			SettingsTooltip:HookScript("OnShow", function()
-				SettingsTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"] * UIParent:GetScale())
+				SettingsTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"] * UIParent:GetScale())
 			end)
 
 			---------------------------------------------------------------------------------------------------------
@@ -10446,8 +10446,8 @@
 				if WorldFrame:IsMouseMotionFocus() then
 					LT["Unit"] = "mouseover"
 					-- Hide and quit if tips should be hidden during combat
-					if LeaPlusLC["TipHideInCombat"] == "On" and UnitAffectingCombat("player") then
-						if not IsShiftKeyDown() or LeaPlusLC["TipHideShiftOverride"] == "Off" then
+					if RGXQoLLC["TipHideInCombat"] == "On" and UnitAffectingCombat("player") then
+						if not IsShiftKeyDown() or RGXQoLLC["TipHideShiftOverride"] == "Off" then
 							GameTooltip:Hide()
 							return
 						end
@@ -10494,7 +10494,7 @@
 						LT["Class"] = TipFClass[LT["UnitClass"]]
 					end
 					-- Define class color
-					LT["ClassCol"] = LeaPlusLC["RaidColors"][LT["UnitClass"]]
+					LT["ClassCol"] = RGXQoLLC["RaidColors"][LT["UnitClass"]]
 					LT["LpTipClassColor"] = "|cff" .. string.format("%02x%02x%02x", LT["ClassCol"].r * 255, LT["ClassCol"].g * 255, LT["ClassCol"].b * 255)
 				end
 
@@ -10728,13 +10728,13 @@
 					local unitGuild, unitRank = GetGuildInfo(LT["Unit"])
 					if unitGuild and unitRank then
 						if UnitIsInMyGuild(LT["Unit"]) then
-							if LeaPlusLC["TipShowRank"] == "On" then
+							if RGXQoLLC["TipShowRank"] == "On" then
 								GameTooltip:AddLine("|c00aaaaff" .. unitGuild .. " - " .. unitRank .. "|r")
 							else
 								GameTooltip:AddLine("|c00aaaaff" .. unitGuild .. "|cffffffff|r")
 							end
 						else
-							if LeaPlusLC["TipShowOtherRank"] == "On" then
+							if RGXQoLLC["TipShowOtherRank"] == "On" then
 								GameTooltip:AddLine("|c00aaaaff" .. unitGuild .. " - " .. unitRank .. "|r")
 							else
 								GameTooltip:AddLine("|c00aaaaff" .. unitGuild .. "|cffffffff|r")
@@ -10747,7 +10747,7 @@
 				--	Show target
 				----------------------------------------------------------------------
 
-				if LeaPlusLC["TipShowTarget"] == "On" then
+				if RGXQoLLC["TipShowTarget"] == "On" then
 
 					-- Get target
 					LT["Target"] = UnitName(LT["Unit"] .. "target");
@@ -10762,7 +10762,7 @@
 					-- If it's not you, but it's a player, show target in class color
 					elseif UnitIsPlayer(LT["Unit"] .. "target") then
 						LT["TargetBase"] = UnitClassBase(LT["Unit"] .. "target")
-						LT["TargetCol"] = LeaPlusLC["RaidColors"][LT["TargetBase"]]
+						LT["TargetCol"] = RGXQoLLC["RaidColors"][LT["TargetBase"]]
 						LT["TargetCol"] = "|cff" .. string.format('%02x%02x%02x', LT["TargetCol"].r * 255, LT["TargetCol"].g * 255, LT["TargetCol"].b * 255)
 						LT["Target"] = (LT["TargetCol"] .. LT["Target"])
 
@@ -10785,7 +10785,7 @@
 		--	Move chat editbox to top
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MoveChatEditBoxToTop"] == "On" then
+		if RGXQoLLC["MoveChatEditBoxToTop"] == "On" then
 
 			-- Set options for normal chat frames
 			for i = 1, 50 do
@@ -10816,7 +10816,7 @@
 		-- Show borders
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowBorders"] == "On" then
+		if RGXQoLLC["ShowBorders"] == "On" then
 
 			-- Create border textures
 			local BordTop = WorldFrame:CreateTexture(nil, "ARTWORK"); BordTop:SetColorTexture(0, 0, 0, 1); BordTop:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0); BordTop:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0)
@@ -10825,42 +10825,42 @@
 			local BordRight = WorldFrame:CreateTexture(nil, "ARTWORK"); BordRight:SetColorTexture(0, 0, 0, 1); BordRight:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0); BordRight:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 0)
 
 			-- Create border configuration panel
-			local bordersPanel = LeaPlusLC:CreatePanel("Show borders", "bordersPanel")
+			local bordersPanel = RGXQoLLC:CreatePanel("Show borders", "bordersPanel")
 
 			-- Function to set border parameters
 			local function RefreshBorders()
 
 				-- Set border size and transparency
-				BordTop:SetHeight(LeaPlusLC["BordersTop"]); BordTop:SetAlpha(1 - LeaPlusLC["BordersAlpha"])
-				BordBot:SetHeight(LeaPlusLC["BordersBottom"]); BordBot:SetAlpha(1 - LeaPlusLC["BordersAlpha"])
-				BordLeft:SetWidth(LeaPlusLC["BordersLeft"]); BordLeft:SetAlpha(1 - LeaPlusLC["BordersAlpha"])
-				BordRight:SetWidth(LeaPlusLC["BordersRight"]); BordRight:SetAlpha(1 - LeaPlusLC["BordersAlpha"])
+				BordTop:SetHeight(RGXQoLLC["BordersTop"]); BordTop:SetAlpha(1 - RGXQoLLC["BordersAlpha"])
+				BordBot:SetHeight(RGXQoLLC["BordersBottom"]); BordBot:SetAlpha(1 - RGXQoLLC["BordersAlpha"])
+				BordLeft:SetWidth(RGXQoLLC["BordersLeft"]); BordLeft:SetAlpha(1 - RGXQoLLC["BordersAlpha"])
+				BordRight:SetWidth(RGXQoLLC["BordersRight"]); BordRight:SetAlpha(1 - RGXQoLLC["BordersAlpha"])
 
 				-- Show formatted slider value
-				LeaPlusCB["BordersAlpha"].f:SetFormattedText("%.0f%%", LeaPlusLC["BordersAlpha"] * 100)
+				RGXQoLCB["BordersAlpha"].f:SetFormattedText("%.0f%%", RGXQoLLC["BordersAlpha"] * 100)
 
 			end
 
 			-- Create slider controls
-			LeaPlusLC:MakeTx(bordersPanel, "Top", 16, -72)
-			LeaPlusLC:MakeSL(bordersPanel, "BordersTop", "Drag to set the size of the top border.", 0, 300, 5, 16, -92, "%.0f")
-			LeaPlusCB["BordersTop"]:HookScript("OnValueChanged", RefreshBorders)
+			RGXQoLLC:MakeTx(bordersPanel, "Top", 16, -72)
+			RGXQoLLC:MakeSL(bordersPanel, "BordersTop", "Drag to set the size of the top border.", 0, 300, 5, 16, -92, "%.0f")
+			RGXQoLCB["BordersTop"]:HookScript("OnValueChanged", RefreshBorders)
 
-			LeaPlusLC:MakeTx(bordersPanel, "Bottom", 16, -132)
-			LeaPlusLC:MakeSL(bordersPanel, "BordersBottom", "Drag to set the size of the bottom border.", 0, 300, 5, 16, -152, "%.0f")
-			LeaPlusCB["BordersBottom"]:HookScript("OnValueChanged", RefreshBorders)
+			RGXQoLLC:MakeTx(bordersPanel, "Bottom", 16, -132)
+			RGXQoLLC:MakeSL(bordersPanel, "BordersBottom", "Drag to set the size of the bottom border.", 0, 300, 5, 16, -152, "%.0f")
+			RGXQoLCB["BordersBottom"]:HookScript("OnValueChanged", RefreshBorders)
 
-			LeaPlusLC:MakeTx(bordersPanel, "Left", 186, -72)
-			LeaPlusLC:MakeSL(bordersPanel, "BordersLeft", "Drag to set the size of the left border.", 0, 300, 5, 186, -92, "%.0f")
-			LeaPlusCB["BordersLeft"]:HookScript("OnValueChanged", RefreshBorders)
+			RGXQoLLC:MakeTx(bordersPanel, "Left", 186, -72)
+			RGXQoLLC:MakeSL(bordersPanel, "BordersLeft", "Drag to set the size of the left border.", 0, 300, 5, 186, -92, "%.0f")
+			RGXQoLCB["BordersLeft"]:HookScript("OnValueChanged", RefreshBorders)
 
-			LeaPlusLC:MakeTx(bordersPanel, "Right", 186, -132)
-			LeaPlusLC:MakeSL(bordersPanel, "BordersRight", "Drag to set the size of the right border.", 0, 300, 5, 186, -152, "%.0f")
-			LeaPlusCB["BordersRight"]:HookScript("OnValueChanged", RefreshBorders)
+			RGXQoLLC:MakeTx(bordersPanel, "Right", 186, -132)
+			RGXQoLLC:MakeSL(bordersPanel, "BordersRight", "Drag to set the size of the right border.", 0, 300, 5, 186, -152, "%.0f")
+			RGXQoLCB["BordersRight"]:HookScript("OnValueChanged", RefreshBorders)
 
-			LeaPlusLC:MakeTx(bordersPanel, "Transparency", 356, -132)
-			LeaPlusLC:MakeSL(bordersPanel, "BordersAlpha", "Drag to set the transparency of the borders.", 0, 0.9, 0.1, 356, -152, "%.1f")
-			LeaPlusCB["BordersAlpha"]:HookScript("OnValueChanged", RefreshBorders)
+			RGXQoLLC:MakeTx(bordersPanel, "Transparency", 356, -132)
+			RGXQoLLC:MakeSL(bordersPanel, "BordersAlpha", "Drag to set the transparency of the borders.", 0, 0.9, 0.1, 356, -152, "%.1f")
+			RGXQoLCB["BordersAlpha"]:HookScript("OnValueChanged", RefreshBorders)
 
 			-- Help button hidden
 			bordersPanel.h:Hide()
@@ -10868,35 +10868,35 @@
 			-- Back button handler
 			bordersPanel.b:SetScript("OnClick", function()
 				bordersPanel:Hide()
-				LeaPlusLC["PageF"]:Show()
-				LeaPlusLC["Page5"]:Show()
+				RGXQoLLC["PageF"]:Show()
+				RGXQoLLC["Page5"]:Show()
 				return
 			end)
 
 			-- Reset button handler
 			bordersPanel.r:SetScript("OnClick", function()
-				LeaPlusLC["BordersTop"] = 0
-				LeaPlusLC["BordersBottom"] = 0
-				LeaPlusLC["BordersLeft"] = 0
-				LeaPlusLC["BordersRight"] = 0
-				LeaPlusLC["BordersAlpha"] = 0
+				RGXQoLLC["BordersTop"] = 0
+				RGXQoLLC["BordersBottom"] = 0
+				RGXQoLLC["BordersLeft"] = 0
+				RGXQoLLC["BordersRight"] = 0
+				RGXQoLLC["BordersAlpha"] = 0
 				bordersPanel:Hide(); bordersPanel:Show()
 				RefreshBorders()
 			end)
 
 			-- Configuration button handler
-			LeaPlusCB["ModBordersBtn"]:SetScript("OnClick", function()
+			RGXQoLCB["ModBordersBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					LeaPlusLC["BordersTop"] = 0
-					LeaPlusLC["BordersBottom"] = 0
-					LeaPlusLC["BordersLeft"] = 0
-					LeaPlusLC["BordersRight"] = 0
-					LeaPlusLC["BordersAlpha"] = 0.7
+					RGXQoLLC["BordersTop"] = 0
+					RGXQoLLC["BordersBottom"] = 0
+					RGXQoLLC["BordersLeft"] = 0
+					RGXQoLLC["BordersRight"] = 0
+					RGXQoLLC["BordersAlpha"] = 0.7
 					RefreshBorders()
 				else
 					bordersPanel:Show()
-					LeaPlusLC:HideFrames()
+					RGXQoLLC:HideFrames()
 				end
 			end)
 
@@ -10918,7 +10918,7 @@
 		----------------------------------------------------------------------
 
 		-- Manage emotes
-		if LeaPlusLC["NoRestedEmotes"] == "On" then
+		if RGXQoLLC["NoRestedEmotes"] == "On" then
 
 			-- Zone table 		English					, French					, German					, Italian						, Russian					, S Chinese	, Spanish					, T Chinese	,
 			local zonetable = {	"The Grim Guzzler"		, "Le Sinistre �cluseur"	, "Zum Grimmigen S�ufer"	, "Torvo Beone"					, "??????? ??????? ??????"	, "????"	, "Tragapenas"				, "????"	,}
@@ -10982,7 +10982,7 @@
 
 			-- Function to set camera zoom
 			local function SetZoom()
-				if LeaPlusLC["MaxCameraZoom"] == "On" then
+				if RGXQoLLC["MaxCameraZoom"] == "On" then
 					SetCVar("cameraDistanceMaxZoomFactor", 4.0)
 					frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 				else
@@ -10994,8 +10994,8 @@
 			frame:SetScript("OnEvent", SetZoom)
 
 			-- Set camera zoom when option is clicked and on startup (if enabled)
-			LeaPlusCB["MaxCameraZoom"]:HookScript("OnClick", SetZoom)
-			if LeaPlusLC["MaxCameraZoom"] == "On" then SetZoom() end
+			RGXQoLCB["MaxCameraZoom"]:HookScript("OnClick", SetZoom)
+			if RGXQoLLC["MaxCameraZoom"] == "On" then SetZoom() end
 
 		end
 
@@ -11008,22 +11008,22 @@
 			local interPanel = CreateFrame("FRAME")
 			interPanel.name = "RGX QoL"
 
-			local maintitle = LeaPlusLC:MakeTx(interPanel, "RGX QoL", 0, 0)
+			local maintitle = RGXQoLLC:MakeTx(interPanel, "RGX QoL", 0, 0)
 			maintitle:SetFont(maintitle:GetFont(), 72)
 			maintitle:ClearAllPoints()
 			maintitle:SetPoint("TOP", 0, -72)
 
-			local expTitle = LeaPlusLC:MakeTx(interPanel, L["World of Warcraft Classic"], 0, 0)
+			local expTitle = RGXQoLLC:MakeTx(interPanel, L["World of Warcraft Classic"], 0, 0)
 			expTitle:SetFont(expTitle:GetFont(), 32)
 			expTitle:ClearAllPoints()
 			expTitle:SetPoint("TOP", 0, -152)
 
-			local subTitle = LeaPlusLC:MakeTx(interPanel, "curseforge.com/wow/addons/leatrix-plus", 0, 0)
+			local subTitle = RGXQoLLC:MakeTx(interPanel, "curseforge.com/wow/addons/leatrix-plus", 0, 0)
 			subTitle:SetFont(subTitle:GetFont(), 20)
 			subTitle:ClearAllPoints()
 			subTitle:SetPoint("BOTTOM", 0, 72)
 
-			local slashTitle = LeaPlusLC:MakeTx(interPanel, "/ltp", 0, 0)
+			local slashTitle = RGXQoLLC:MakeTx(interPanel, "/ltp", 0, 0)
 			slashTitle:SetFont(slashTitle:GetFont(), 72)
 			slashTitle:ClearAllPoints()
 			slashTitle:SetPoint("BOTTOM", subTitle, "TOP", 0, 40)
@@ -11059,7 +11059,7 @@
 
 			-- Create frame alignment grid
 			local grid = CreateFrame('FRAME')
-			LeaPlusLC.grid = grid
+			RGXQoLLC.grid = grid
 			grid:Hide()
 			grid:SetAllPoints(UIParent)
 			local w, h = GetScreenWidth() * UIParent:GetEffectiveScale(), GetScreenHeight() * UIParent:GetEffectiveScale()
@@ -11069,14 +11069,14 @@
 			local hline = floor(sqsize / ratio - ((sqsize / ratio) % 2))
 			-- Plot vertical lines
 			for i = 0, wline do
-				local t = LeaPlusLC.grid:CreateTexture(nil, 'BACKGROUND')
+				local t = RGXQoLLC.grid:CreateTexture(nil, 'BACKGROUND')
 				if i == wline / 2 then t:SetColorTexture(1, 0, 0, 0.5) else t:SetColorTexture(0, 0, 0, 0.5) end
 				t:SetPoint('TOPLEFT', grid, 'TOPLEFT', i * w / wline - 1, 0)
 				t:SetPoint('BOTTOMRIGHT', grid, 'BOTTOMLEFT', i * w / wline + 1, 0)
 			end
 			-- Plot horizontal lines
 			for i = 0, hline do
-				local t = LeaPlusLC.grid:CreateTexture(nil, 'BACKGROUND')
+				local t = RGXQoLLC.grid:CreateTexture(nil, 'BACKGROUND')
 				if i == hline / 2 then	t:SetColorTexture(1, 0, 0, 0.5) else t:SetColorTexture(0, 0, 0, 0.5) end
 				t:SetPoint('TOPLEFT', grid, 'TOPLEFT', 0, -i * h / hline + 1)
 				t:SetPoint('BOTTOMRIGHT', grid, 'TOPRIGHT', 0, -i * h / hline - 1)
@@ -11088,18 +11088,18 @@
 		-- Media player
 		----------------------------------------------------------------------
 
-		function LeaPlusLC:MediaFunc()
+		function RGXQoLLC:MediaFunc()
 
 			-- Create tables for list data and zone listing
 			local ListData, playlist = {}, {}
 			local scrollFrame, willPlay, musicHandle, ZonePage, LastPlayed, LastFolder, TempFolder, HeadingOfClickedTrack, LastMusicHandle
-			local numButtons = math.floor((LeaPlusLC.MainPanelHeight - 110) / 16) - 1
+			local numButtons = math.floor((RGXQoLLC.MainPanelHeight - 110) / 16) - 1
 
 			-- These categories will not appear in random track selections
 			local randomBannedList = {L["Narration"], L["Cinematics"]}
 
 			-- Get media table
-			local ZoneList = Leatrix_Plus["ZoneList"]
+			local ZoneList = RGXQoLAddon["ZoneList"]
 
 			-- Show relevant list items
 			local function UpdateList()
@@ -11152,13 +11152,13 @@
 					end
 				end
 
-				local bRoll = ((36 + (LeaPlusLC.MainPanelHeight - 370)) / 16) + 16
+				local bRoll = ((36 + (RGXQoLLC.MainPanelHeight - 370)) / 16) + 16
 				scrollFrame.child:SetSize(200, #ListData + (math.floor(bRoll * 15)))
 
 			end
 
 			-- Give function file level scope (it's used in SetPlusScale to set the highlight bar scale)
-			LeaPlusLC.UpdateList = UpdateList
+			RGXQoLLC.UpdateList = UpdateList
 
 			-- Right-button click to go back
 			local function BackClick()
@@ -11179,7 +11179,7 @@
 
 			-- Function to make navigation menu buttons
 			local function MakeButton(where, y)
-				local mbtn = CreateFrame("Button", nil, LeaPlusLC["Page9"])
+				local mbtn = CreateFrame("Button", nil, RGXQoLLC["Page9"])
 				mbtn:Show()
 				mbtn:SetAlpha(1.0)
 				mbtn:SetPoint("TOPLEFT", 146, y)
@@ -11238,7 +11238,7 @@
 				conbtn[title]:ClearAllPoints()
 				if title == L["Zones"] then
 					-- Set first button position
-					conbtn[title]:SetPoint("TOPLEFT", LeaPlusLC["Page9"], "TOPLEFT", 145, -70)
+					conbtn[title]:SetPoint("TOPLEFT", RGXQoLLC["Page9"], "TOPLEFT", 145, -70)
 				elseif anchor then
 					-- Set subsequent button positions
 					conbtn[title]:SetPoint("TOPLEFT", conbtn[anchor], "BOTTOMLEFT", 0, 0)
@@ -11275,7 +11275,7 @@
 			end
 
 			-- Create scroll bar
-			scrollFrame = CreateFrame("ScrollFrame", nil, LeaPlusLC["Page9"], "RGXQoLConfigurationPanelScrollFrameTemplate")
+			scrollFrame = CreateFrame("ScrollFrame", nil, RGXQoLLC["Page9"], "RGXQoLConfigurationPanelScrollFrameTemplate")
 			scrollFrame:SetPoint("TOPLEFT", 0, -32)
 			scrollFrame:SetPoint("BOTTOMRIGHT", -30, 50)
 			scrollFrame:SetPanExtent(1)
@@ -11286,9 +11286,9 @@
 			scrollFrame:SetScrollChild(scrollFrame.child)
 
 			-- Add stop button
-			local stopBtn = LeaPlusLC:CreateButton("StopMusicBtn", LeaPlusLC["Page9"], "Stop", "BOTTOMLEFT", 146, 53, 0, 25, true, "")
+			local stopBtn = RGXQoLLC:CreateButton("StopMusicBtn", RGXQoLLC["Page9"], "Stop", "BOTTOMLEFT", 146, 53, 0, 25, true, "")
 			stopBtn:Hide(); stopBtn:Show()
-			LeaPlusLC:LockItem(stopBtn, true)
+			RGXQoLLC:LockItem(stopBtn, true)
 			stopBtn:SetScript("OnClick", function()
 				if musicHandle then
 					StopSound(musicHandle)
@@ -11299,9 +11299,9 @@
 					UpdateList()
 				end
 				-- Cancel sound file music timer
-				if LeaPlusLC.TrackTimer then LeaPlusLC.TrackTimer:Cancel() end
+				if RGXQoLLC.TrackTimer then RGXQoLLC.TrackTimer:Cancel() end
 				-- Lock button
-				LeaPlusLC:LockItem(stopBtn, true)
+				RGXQoLLC:LockItem(stopBtn, true)
 			end)
 
 			-- Store currently playing track number
@@ -11326,10 +11326,10 @@
 					willPlay, musicHandle = PlaySoundFile(cleanFile, "Master", false, true)
 				end
 				-- Cancel existing music timer for a sound file
-				if LeaPlusLC.TrackTimer then LeaPlusLC.TrackTimer:Cancel() end
+				if RGXQoLLC.TrackTimer then RGXQoLLC.TrackTimer:Cancel() end
 				if strfind(playlist[tracknumber], "#") then
 					-- Track is a sound file with track time so create track timer
-					LeaPlusLC.TrackTimer = C_Timer.NewTimer(trackTime + 1, function()
+					RGXQoLLC.TrackTimer = C_Timer.NewTimer(trackTime + 1, function()
 						if musicHandle then StopSound(musicHandle) end
 						if tracknumber == #playlist then
 							-- Playlist is at the end, restart from first track
@@ -11362,7 +11362,7 @@
 			end
 
 			-- Create editbox for search
-			local sBox = LeaPlusLC:CreateEditBox("MusicSearchBox", LeaPlusLC["Page9"], 78, 10, "TOPLEFT", 150, -(LeaPlusLC.MainPanelHeight - 110), "MusicSearchBox", "MusicSearchBox")
+			local sBox = RGXQoLLC:CreateEditBox("MusicSearchBox", RGXQoLLC["Page9"], 78, 10, "TOPLEFT", 150, -(RGXQoLLC.MainPanelHeight - 110), "MusicSearchBox", "MusicSearchBox")
 			sBox:SetMaxLetters(50)
 
 			-- Position search button above editbox
@@ -11531,7 +11531,7 @@
 			-- Create list items
 			scrollFrame.buttons = {}
 			for i = 1, numButtons do
-				scrollFrame.buttons[i] = CreateFrame("Button", nil, LeaPlusLC["Page9"])
+				scrollFrame.buttons[i] = CreateFrame("Button", nil, RGXQoLLC["Page9"])
 				local button = scrollFrame.buttons[i]
 
 				button:SetSize(470 - 14, 16)
@@ -11613,7 +11613,7 @@
 								end
 							end
 							-- Enable the stop button
-							LeaPlusLC:LockItem(stopBtn, false)
+							RGXQoLLC:LockItem(stopBtn, false)
 							-- Set Temp Folder to Random if track is in Random
 							if ListData[1] == "|cffffd800" .. L["Random"] then TempFolder = L["Random"] end
 							-- Set Temp Folder to Search if track is in Search
@@ -11634,7 +11634,7 @@
 								stopBtn:Click()
 								MovieFrame_PlayMovie(MovieFrame, movieID)
 							else
-								LeaPlusLC:Print("Movie not playable.")
+								RGXQoLLC:Print("Movie not playable.")
 							end
 							return
 						else
@@ -11669,8 +11669,8 @@
 			end
 
 			-- Right-click to go back (from anywhere on the main content area of the panel)
-			LeaPlusLC["PageF"]:HookScript("OnMouseUp", function(self, btn)
-				if LeaPlusLC["Page9"]:IsShown() and LeaPlusLC["Page9"]:IsMouseOver(0, 0, 0, -440) == false and LeaPlusLC["Page9"]:IsMouseOver(-(LeaPlusLC.MainPanelHeight - 47), 0, 0, 0) == false then
+			RGXQoLLC["PageF"]:HookScript("OnMouseUp", function(self, btn)
+				if RGXQoLLC["Page9"]:IsShown() and RGXQoLLC["Page9"]:IsMouseOver(0, 0, 0, -440) == false and RGXQoLLC["Page9"]:IsMouseOver(-(RGXQoLLC.MainPanelHeight - 47), 0, 0, 0) == false then
 					if btn == "RightButton" then
 						BackClick()
 					end
@@ -11697,9 +11697,9 @@
 			UpdateList()
 
 			-- Manage events
-			LeaPlusLC["Page9"]:RegisterEvent("PLAYER_LOGOUT")
-			LeaPlusLC["Page9"]:RegisterEvent("UI_SCALE_CHANGED")
-			LeaPlusLC["Page9"]:SetScript("OnEvent", function(self, event)
+			RGXQoLLC["Page9"]:RegisterEvent("PLAYER_LOGOUT")
+			RGXQoLLC["Page9"]:RegisterEvent("UI_SCALE_CHANGED")
+			RGXQoLLC["Page9"]:SetScript("OnEvent", function(self, event)
 				if event == "PLAYER_LOGOUT" then
 					-- Stop playing at reload or logout
 					if musicHandle then
@@ -11714,10 +11714,10 @@
 		end
 
 		-- Run on startup
-		LeaPlusLC:MediaFunc()
+		RGXQoLLC:MediaFunc()
 
 		-- Release memory
-		LeaPlusLC.MediaFunc = nil
+		RGXQoLLC.MediaFunc = nil
 
 		----------------------------------------------------------------------
 		-- Panel alpha
@@ -11728,16 +11728,16 @@
 			-- Function to set panel alpha
 			local function SetPlusAlpha()
 				-- Set panel alpha
-				LeaPlusLC["PageF"].t:SetAlpha(1 - LeaPlusLC["PlusPanelAlpha"])
+				RGXQoLLC["PageF"].t:SetAlpha(1 - RGXQoLLC["PlusPanelAlpha"])
 				-- Show formatted value
-				LeaPlusCB["PlusPanelAlpha"].f:SetFormattedText("%.0f%%", LeaPlusLC["PlusPanelAlpha"] * 100)
+				RGXQoLCB["PlusPanelAlpha"].f:SetFormattedText("%.0f%%", RGXQoLLC["PlusPanelAlpha"] * 100)
 			end
 
 			-- Set alpha on startup
 			SetPlusAlpha()
 
 			-- Set alpha after changing slider
-			LeaPlusCB["PlusPanelAlpha"]:HookScript("OnValueChanged", SetPlusAlpha)
+			RGXQoLCB["PlusPanelAlpha"]:HookScript("OnValueChanged", SetPlusAlpha)
 
 		end
 
@@ -11750,27 +11750,27 @@
 			-- Function to set panel scale
 			local function SetPlusScale()
 				-- Reset panel position
-				LeaPlusLC["MainPanelA"], LeaPlusLC["MainPanelR"], LeaPlusLC["MainPanelX"], LeaPlusLC["MainPanelY"] = "CENTER", "CENTER", 0, 0
-				if LeaPlusLC["PageF"]:IsShown() then
-					LeaPlusLC["PageF"]:Hide()
-					LeaPlusLC["PageF"]:Show()
+				RGXQoLLC["MainPanelA"], RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"] = "CENTER", "CENTER", 0, 0
+				if RGXQoLLC["PageF"]:IsShown() then
+					RGXQoLLC["PageF"]:Hide()
+					RGXQoLLC["PageF"]:Show()
 				end
 				-- Set panel scale
-				LeaPlusLC["PageF"]:SetScale(LeaPlusLC["PlusPanelScale"])
+				RGXQoLLC["PageF"]:SetScale(RGXQoLLC["PlusPanelScale"])
 				-- Update music player highlight bar scale
-				LeaPlusLC:UpdateList()
+				RGXQoLLC:UpdateList()
 			end
 
 			-- Set scale on startup
-			LeaPlusLC["PageF"]:SetScale(LeaPlusLC["PlusPanelScale"])
+			RGXQoLLC["PageF"]:SetScale(RGXQoLLC["PlusPanelScale"])
 
 			-- Set scale and reset panel position after changing slider
-			LeaPlusCB["PlusPanelScale"]:HookScript("OnMouseUp", SetPlusScale)
-			LeaPlusCB["PlusPanelScale"]:HookScript("OnMouseWheel", SetPlusScale)
+			RGXQoLCB["PlusPanelScale"]:HookScript("OnMouseUp", SetPlusScale)
+			RGXQoLCB["PlusPanelScale"]:HookScript("OnMouseWheel", SetPlusScale)
 
 			-- Show formatted slider value
-			LeaPlusCB["PlusPanelScale"]:HookScript("OnValueChanged", function()
-				LeaPlusCB["PlusPanelScale"].f:SetFormattedText("%.0f%%", LeaPlusLC["PlusPanelScale"] * 100)
+			RGXQoLCB["PlusPanelScale"]:HookScript("OnValueChanged", function()
+				RGXQoLCB["PlusPanelScale"].f:SetFormattedText("%.0f%%", RGXQoLLC["PlusPanelScale"] * 100)
 			end)
 
 		end
@@ -11782,19 +11782,19 @@
 		-- Show first run message
 		if not RGXQoLDB["FirstRunMessageSeen"] then
 			C_Timer.After(1, function()
-				LeaPlusLC:Print(L["Enter"] .. " |cff00ff00" .. "/ltp" .. "|r " .. L["or click the minimap button to open Leatrix Plus."])
+				RGXQoLLC:Print(L["Enter"] .. " |cff00ff00" .. "/ltp" .. "|r " .. L["or click the minimap button to open Leatrix Plus."])
 				RGXQoLDB["FirstRunMessageSeen"] = true
 			end)
 		end
 
 		-- Register logout event to save settings
-		LpEvt:RegisterEvent("PLAYER_LOGOUT")
+		RGXQoLEvt:RegisterEvent("PLAYER_LOGOUT")
 
 		-- Update addon memory usage (speeds up initial value)
 		UpdateAddOnMemoryUsage()
 
 		-- Release memory
-		LeaPlusLC.Player = nil
+		RGXQoLLC.Player = nil
 
 	end
 
@@ -11826,247 +11826,247 @@
 					or RGXQoLDB["MuteStriders"] == "On"
 					or RGXQoLDB["MuteHorsesteps"] == "On"
 					then
-						LeaPlusLC["MuteMountSounds"] = "On"
+						RGXQoLLC["MuteMountSounds"] = "On"
 						RGXQoLDB["MuteMountSounds"] = "On"
 					end
 				end
 
 				-- Automation
-				LeaPlusLC:LoadVarChk("AutomateQuests", "Off")				-- Automate quests
-				LeaPlusLC:LoadVarChk("AutoQuestShift", "Off")				-- Automate quests requires shift
-				LeaPlusLC:LoadVarChk("AutoQuestAvailable", "On")			-- Accept available quests
-				LeaPlusLC:LoadVarChk("AutoQuestCompleted", "On")			-- Turn-in completed quests
-				LeaPlusLC:LoadVarNum("AutoQuestKeyMenu", 1, 1, 4)			-- Automate quests override key
-				LeaPlusLC:LoadVarChk("AutomateGossip", "Off")				-- Automate gossip
-				LeaPlusLC:LoadVarChk("AutoAcceptSummon", "Off")				-- Accept summon
-				LeaPlusLC:LoadVarChk("AutoAcceptRes", "Off")				-- Accept resurrection
-				LeaPlusLC:LoadVarChk("AutoResNoCombat", "On")				-- Accept resurrection exclude combat
-				LeaPlusLC:LoadVarChk("AutoReleasePvP", "Off")				-- Release in PvP
-				LeaPlusLC:LoadVarChk("AutoReleaseNoAlterac", "Off")			-- Release in PvP Exclude Alterac Valley
-				LeaPlusLC:LoadVarNum("AutoReleaseDelay", 200, 200, 3000)	-- Release in PvP Delay
+				RGXQoLLC:LoadVarChk("AutomateQuests", "Off")				-- Automate quests
+				RGXQoLLC:LoadVarChk("AutoQuestShift", "Off")				-- Automate quests requires shift
+				RGXQoLLC:LoadVarChk("AutoQuestAvailable", "On")			-- Accept available quests
+				RGXQoLLC:LoadVarChk("AutoQuestCompleted", "On")			-- Turn-in completed quests
+				RGXQoLLC:LoadVarNum("AutoQuestKeyMenu", 1, 1, 4)			-- Automate quests override key
+				RGXQoLLC:LoadVarChk("AutomateGossip", "Off")				-- Automate gossip
+				RGXQoLLC:LoadVarChk("AutoAcceptSummon", "Off")				-- Accept summon
+				RGXQoLLC:LoadVarChk("AutoAcceptRes", "Off")				-- Accept resurrection
+				RGXQoLLC:LoadVarChk("AutoResNoCombat", "On")				-- Accept resurrection exclude combat
+				RGXQoLLC:LoadVarChk("AutoReleasePvP", "Off")				-- Release in PvP
+				RGXQoLLC:LoadVarChk("AutoReleaseNoAlterac", "Off")			-- Release in PvP Exclude Alterac Valley
+				RGXQoLLC:LoadVarNum("AutoReleaseDelay", 200, 200, 3000)	-- Release in PvP Delay
 
-				LeaPlusLC:LoadVarChk("AutoSellJunk", "Off")					-- Sell junk automatically
-				LeaPlusLC:LoadVarChk("AutoSellShowSummary", "On")			-- Sell junk summary in chat
-				LeaPlusLC:LoadVarStr("AutoSellExcludeList", "")				-- Sell junk exclude list
-				LeaPlusLC:LoadVarChk("AutoRepairGear", "Off")				-- Repair automatically
-				LeaPlusLC:LoadVarChk("AutoRepairShowSummary", "On")			-- Repair show summary in chat
+				RGXQoLLC:LoadVarChk("AutoSellJunk", "Off")					-- Sell junk automatically
+				RGXQoLLC:LoadVarChk("AutoSellShowSummary", "On")			-- Sell junk summary in chat
+				RGXQoLLC:LoadVarStr("AutoSellExcludeList", "")				-- Sell junk exclude list
+				RGXQoLLC:LoadVarChk("AutoRepairGear", "Off")				-- Repair automatically
+				RGXQoLLC:LoadVarChk("AutoRepairShowSummary", "On")			-- Repair show summary in chat
 
 				-- Social
-				LeaPlusLC:LoadVarChk("NoDuelRequests", "Off")				-- Block duels
-				LeaPlusLC:LoadVarChk("NoPartyInvites", "Off")				-- Block party invites
-				LeaPlusLC:LoadVarChk("NoFriendRequests", "Off")				-- Block friend requests
-				LeaPlusLC:LoadVarChk("NoSharedQuests", "Off")				-- Block shared quests
+				RGXQoLLC:LoadVarChk("NoDuelRequests", "Off")				-- Block duels
+				RGXQoLLC:LoadVarChk("NoPartyInvites", "Off")				-- Block party invites
+				RGXQoLLC:LoadVarChk("NoFriendRequests", "Off")				-- Block friend requests
+				RGXQoLLC:LoadVarChk("NoSharedQuests", "Off")				-- Block shared quests
 
-				LeaPlusLC:LoadVarChk("AcceptPartyFriends", "Off")			-- Party from friends
-				LeaPlusLC:LoadVarChk("InviteFromWhisper", "Off")			-- Invite from whispers
-				LeaPlusLC:LoadVarChk("InviteFriendsOnly", "Off")			-- Restrict invites to friends
-				LeaPlusLC["InvKey"]	= RGXQoLDB["InvKey"] or "inv"			-- Invite from whisper keyword
-				LeaPlusLC:LoadVarChk("FriendlyGuild", "On")					-- Friendly guild
+				RGXQoLLC:LoadVarChk("AcceptPartyFriends", "Off")			-- Party from friends
+				RGXQoLLC:LoadVarChk("InviteFromWhisper", "Off")			-- Invite from whispers
+				RGXQoLLC:LoadVarChk("InviteFriendsOnly", "Off")			-- Restrict invites to friends
+				RGXQoLLC["InvKey"]	= RGXQoLDB["InvKey"] or "inv"			-- Invite from whisper keyword
+				RGXQoLLC:LoadVarChk("FriendlyGuild", "On")					-- Friendly guild
 
 				-- Chat
-				LeaPlusLC:LoadVarChk("UseEasyChatResizing", "Off")			-- Use easy resizing
-				LeaPlusLC:LoadVarChk("NoCombatLogTab", "Off")				-- Hide the combat log
-				LeaPlusLC:LoadVarChk("NoChatButtons", "Off")				-- Hide chat buttons
-				LeaPlusLC:LoadVarChk("UnclampChat", "Off")					-- Unclamp chat frame
-				LeaPlusLC:LoadVarChk("MoveChatEditBoxToTop", "Off")			-- Move editbox to top
-				LeaPlusLC:LoadVarChk("MoreFontSizes", "Off")				-- More font sizes
+				RGXQoLLC:LoadVarChk("UseEasyChatResizing", "Off")			-- Use easy resizing
+				RGXQoLLC:LoadVarChk("NoCombatLogTab", "Off")				-- Hide the combat log
+				RGXQoLLC:LoadVarChk("NoChatButtons", "Off")				-- Hide chat buttons
+				RGXQoLLC:LoadVarChk("UnclampChat", "Off")					-- Unclamp chat frame
+				RGXQoLLC:LoadVarChk("MoveChatEditBoxToTop", "Off")			-- Move editbox to top
+				RGXQoLLC:LoadVarChk("MoreFontSizes", "Off")				-- More font sizes
 
-				LeaPlusLC:LoadVarChk("NoStickyChat", "Off")					-- Disable sticky chat
-				LeaPlusLC:LoadVarChk("UseArrowKeysInChat", "Off")			-- Use arrow keys in chat
-				LeaPlusLC:LoadVarChk("NoChatFade", "Off")					-- Disable chat fade
-				LeaPlusLC:LoadVarChk("UnivGroupColor", "Off")				-- Universal group color
-				LeaPlusLC:LoadVarChk("ClassColorsInChat", "Off")			-- Use class colors in chat
-				LeaPlusLC:LoadVarChk("RecentChatWindow", "Off")				-- Recent chat window
-				LeaPlusLC:LoadVarNum("RecentChatSize", 170, 170, 600)		-- Recent chat size
-				LeaPlusLC:LoadVarChk("MaxChatHstory", "Off")				-- Increase chat history
-				LeaPlusLC:LoadVarChk("FilterChatMessages", "Off")			-- Filter chat messages
-				LeaPlusLC:LoadVarChk("BlockDrunkenSpam", "Off")				-- Block drunken spam
-				LeaPlusLC:LoadVarChk("BlockDuelSpam", "Off")				-- Block duel spam
-				LeaPlusLC:LoadVarChk("RestoreChatMessages", "Off")			-- Restore chat messages
+				RGXQoLLC:LoadVarChk("NoStickyChat", "Off")					-- Disable sticky chat
+				RGXQoLLC:LoadVarChk("UseArrowKeysInChat", "Off")			-- Use arrow keys in chat
+				RGXQoLLC:LoadVarChk("NoChatFade", "Off")					-- Disable chat fade
+				RGXQoLLC:LoadVarChk("UnivGroupColor", "Off")				-- Universal group color
+				RGXQoLLC:LoadVarChk("ClassColorsInChat", "Off")			-- Use class colors in chat
+				RGXQoLLC:LoadVarChk("RecentChatWindow", "Off")				-- Recent chat window
+				RGXQoLLC:LoadVarNum("RecentChatSize", 170, 170, 600)		-- Recent chat size
+				RGXQoLLC:LoadVarChk("MaxChatHstory", "Off")				-- Increase chat history
+				RGXQoLLC:LoadVarChk("FilterChatMessages", "Off")			-- Filter chat messages
+				RGXQoLLC:LoadVarChk("BlockDrunkenSpam", "Off")				-- Block drunken spam
+				RGXQoLLC:LoadVarChk("BlockDuelSpam", "Off")				-- Block duel spam
+				RGXQoLLC:LoadVarChk("RestoreChatMessages", "Off")			-- Restore chat messages
 
 				-- Text
-				LeaPlusLC:LoadVarChk("HideErrorMessages", "Off")			-- Hide error messages
-				LeaPlusLC:LoadVarChk("NoHitIndicators", "Off")				-- Hide portrait text
-				LeaPlusLC:LoadVarChk("HideZoneText", "Off")					-- Hide zone text
-				LeaPlusLC:LoadVarChk("HideKeybindText", "Off")				-- Hide keybind text
-				LeaPlusLC:LoadVarChk("HideMacroText", "Off")				-- Hide macro text
-				LeaPlusLC:LoadVarChk("HideRaidGroupLabels", "Off")			-- Hide raid group labels
+				RGXQoLLC:LoadVarChk("HideErrorMessages", "Off")			-- Hide error messages
+				RGXQoLLC:LoadVarChk("NoHitIndicators", "Off")				-- Hide portrait text
+				RGXQoLLC:LoadVarChk("HideZoneText", "Off")					-- Hide zone text
+				RGXQoLLC:LoadVarChk("HideKeybindText", "Off")				-- Hide keybind text
+				RGXQoLLC:LoadVarChk("HideMacroText", "Off")				-- Hide macro text
+				RGXQoLLC:LoadVarChk("HideRaidGroupLabels", "Off")			-- Hide raid group labels
 
-				LeaPlusLC:LoadVarChk("MailFontChange", "Off")				-- Resize mail text
-				LeaPlusLC:LoadVarNum("LeaPlusMailFontSize", 15, 10, 30)		-- Mail text slider
+				RGXQoLLC:LoadVarChk("MailFontChange", "Off")				-- Resize mail text
+				RGXQoLLC:LoadVarNum("LeaPlusMailFontSize", 15, 10, 30)		-- Mail text slider
 
-				LeaPlusLC:LoadVarChk("QuestFontChange", "Off")				-- Resize quest text
-				LeaPlusLC:LoadVarNum("LeaPlusQuestFontSize", 12, 10, 30)	-- Quest text slider
+				RGXQoLLC:LoadVarChk("QuestFontChange", "Off")				-- Resize quest text
+				RGXQoLLC:LoadVarNum("LeaPlusQuestFontSize", 12, 10, 30)	-- Quest text slider
 
-				LeaPlusLC:LoadVarChk("BookFontChange", "Off")				-- Resize book text
-				LeaPlusLC:LoadVarNum("LeaPlusBookFontSize", 15, 10, 30)		-- Book text slider
+				RGXQoLLC:LoadVarChk("BookFontChange", "Off")				-- Resize book text
+				RGXQoLLC:LoadVarNum("LeaPlusBookFontSize", 15, 10, 30)		-- Book text slider
 
 				-- Interface
-				LeaPlusLC:LoadVarChk("MinimapModder", "Off")				-- Enhance minimap
-				LeaPlusLC:LoadVarChk("SquareMinimap", "Off")				-- Square minimap
-				LeaPlusLC:LoadVarChk("MinimapButtonBag", "Off")				-- Minimap button bag
-				LeaPlusLC:LoadVarStr("MiniExcludeList", "")					-- Minimap exclude list
-				LeaPlusLC:LoadVarChk("HideMiniZoomBtns", "Off")				-- Hide zoom buttons
-				LeaPlusLC:LoadVarChk("HideMiniClock", "Off")				-- Hide the clock
-				LeaPlusLC:LoadVarChk("HideMiniDayNight", "Off")				-- Hide the day and night indicator
-				LeaPlusLC:LoadVarChk("HideMiniZoneText", "Off")				-- Hide the zone text bar
-				LeaPlusLC:LoadVarChk("HideMiniAddonButtons", "On")			-- Hide addon buttons
-				LeaPlusLC:LoadVarChk("HideMiniTracking", "Off")				-- Hide the tracking button
-				LeaPlusLC:LoadVarChk("HideMiniLFG", "Off")					-- Hide the Looking for Group button
-				LeaPlusLC:LoadVarNum("MinimapSize", 140, 140, 560)			-- Minimap size slider
-				LeaPlusLC:LoadVarNum("MinimapBorderWidth", 3, 1, 10)		-- Minimap border width
-				LeaPlusLC:LoadVarChk("TipModEnable", "Off")					-- Enhance tooltip
-				LeaPlusLC:LoadVarChk("TipShowRank", "On")					-- Show guild rank for your own guild
-				LeaPlusLC:LoadVarChk("TipShowOtherRank", "Off")				-- Show guild rank for other guilds
-				LeaPlusLC:LoadVarChk("TipShowTarget", "On")					-- Show target
-				LeaPlusLC:LoadVarChk("TipHideInCombat", "Off")				-- Hide tooltips during combat
-				LeaPlusLC:LoadVarChk("TipHideShiftOverride", "On")			-- Hide tooltips shift override
-				LeaPlusLC:LoadVarChk("TipNoHealthBar", "Off")				-- Hide health bar
-				LeaPlusLC:LoadVarNum("LeaPlusTipSize", 1.00, 0.50, 2.00)	-- Tooltip scale slider
-				LeaPlusLC:LoadVarNum("TipOffsetX", -13, -5000, 5000)		-- Tooltip X offset
-				LeaPlusLC:LoadVarNum("TipOffsetY", 94, -5000, 5000)			-- Tooltip Y offset
-				LeaPlusLC:LoadVarNum("TooltipAnchorMenu", 1, 1, 5)			-- Tooltip anchor menu
-				LeaPlusLC:LoadVarNum("TipCursorX", 0, -128, 128)			-- Tooltip cursor X offset
-				LeaPlusLC:LoadVarNum("TipCursorY", 0, -128, 128)			-- Tooltip cursor Y offset
+				RGXQoLLC:LoadVarChk("MinimapModder", "Off")				-- Enhance minimap
+				RGXQoLLC:LoadVarChk("SquareMinimap", "Off")				-- Square minimap
+				RGXQoLLC:LoadVarChk("MinimapButtonBag", "Off")				-- Minimap button bag
+				RGXQoLLC:LoadVarStr("MiniExcludeList", "")					-- Minimap exclude list
+				RGXQoLLC:LoadVarChk("HideMiniZoomBtns", "Off")				-- Hide zoom buttons
+				RGXQoLLC:LoadVarChk("HideMiniClock", "Off")				-- Hide the clock
+				RGXQoLLC:LoadVarChk("HideMiniDayNight", "Off")				-- Hide the day and night indicator
+				RGXQoLLC:LoadVarChk("HideMiniZoneText", "Off")				-- Hide the zone text bar
+				RGXQoLLC:LoadVarChk("HideMiniAddonButtons", "On")			-- Hide addon buttons
+				RGXQoLLC:LoadVarChk("HideMiniTracking", "Off")				-- Hide the tracking button
+				RGXQoLLC:LoadVarChk("HideMiniLFG", "Off")					-- Hide the Looking for Group button
+				RGXQoLLC:LoadVarNum("MinimapSize", 140, 140, 560)			-- Minimap size slider
+				RGXQoLLC:LoadVarNum("MinimapBorderWidth", 3, 1, 10)		-- Minimap border width
+				RGXQoLLC:LoadVarChk("TipModEnable", "Off")					-- Enhance tooltip
+				RGXQoLLC:LoadVarChk("TipShowRank", "On")					-- Show guild rank for your own guild
+				RGXQoLLC:LoadVarChk("TipShowOtherRank", "Off")				-- Show guild rank for other guilds
+				RGXQoLLC:LoadVarChk("TipShowTarget", "On")					-- Show target
+				RGXQoLLC:LoadVarChk("TipHideInCombat", "Off")				-- Hide tooltips during combat
+				RGXQoLLC:LoadVarChk("TipHideShiftOverride", "On")			-- Hide tooltips shift override
+				RGXQoLLC:LoadVarChk("TipNoHealthBar", "Off")				-- Hide health bar
+				RGXQoLLC:LoadVarNum("LeaPlusTipSize", 1.00, 0.50, 2.00)	-- Tooltip scale slider
+				RGXQoLLC:LoadVarNum("TipOffsetX", -13, -5000, 5000)		-- Tooltip X offset
+				RGXQoLLC:LoadVarNum("TipOffsetY", 94, -5000, 5000)			-- Tooltip Y offset
+				RGXQoLLC:LoadVarNum("TooltipAnchorMenu", 1, 1, 5)			-- Tooltip anchor menu
+				RGXQoLLC:LoadVarNum("TipCursorX", 0, -128, 128)			-- Tooltip cursor X offset
+				RGXQoLLC:LoadVarNum("TipCursorY", 0, -128, 128)			-- Tooltip cursor Y offset
 
-				LeaPlusLC:LoadVarChk("EnhanceDressup", "Off")				-- Enhance dressup
-				LeaPlusLC:LoadVarChk("DressupItemButtons", "On")			-- Dressup item buttons
-				LeaPlusLC:LoadVarChk("DressupAnimControl", "On")			-- Dressup animation control
-				LeaPlusLC:LoadVarChk("HideDressupStats", "Off")				-- Hide dressup stats
-				LeaPlusLC:LoadVarChk("EnhanceQuestLog", "Off")				-- Enhance quest log
-				LeaPlusLC:LoadVarChk("EnhanceQuestTaller", "On")			-- Enhance quest log taller
-				LeaPlusLC:LoadVarChk("EnhanceQuestLevels", "On")			-- Enhance quest log quest levels
-				LeaPlusLC:LoadVarChk("EnhanceQuestDifficulty", "On")		-- Enhance quest log quest difficulty
-				LeaPlusLC:LoadVarChk("EnhanceProfessions", "Off")			-- Enhance professions
-				LeaPlusLC:LoadVarChk("EnhanceTrainers", "Off")				-- Enhance trainers
-				LeaPlusLC:LoadVarChk("ShowTrainAllBtn", "On")				-- Enhance trainers train all button
-				LeaPlusLC:LoadVarChk("EnhanceFlightMap", "Off")				-- Enhance flight map
-				LeaPlusLC:LoadVarNum("LeaPlusTaxiMapScale", 1.9, 1, 3)		-- Enhance flight map scale
-				LeaPlusLC:LoadVarNum("LeaPlusTaxiIconSize", 10, 5, 30)		-- Enhance flight icon size
-				LeaPlusLC:LoadVarAnc("FlightMapA", "TOPLEFT")				-- Enhance flight map anchor
-				LeaPlusLC:LoadVarAnc("FlightMapR", "TOPLEFT")				-- Enhance flight map relative
-				LeaPlusLC:LoadVarNum("FlightMapX", 0, -5000, 5000)			-- Enhance flight map X
-				LeaPlusLC:LoadVarNum("FlightMapY", 61, -5000, 5000)			-- Enhance flight map Y
+				RGXQoLLC:LoadVarChk("EnhanceDressup", "Off")				-- Enhance dressup
+				RGXQoLLC:LoadVarChk("DressupItemButtons", "On")			-- Dressup item buttons
+				RGXQoLLC:LoadVarChk("DressupAnimControl", "On")			-- Dressup animation control
+				RGXQoLLC:LoadVarChk("HideDressupStats", "Off")				-- Hide dressup stats
+				RGXQoLLC:LoadVarChk("EnhanceQuestLog", "Off")				-- Enhance quest log
+				RGXQoLLC:LoadVarChk("EnhanceQuestTaller", "On")			-- Enhance quest log taller
+				RGXQoLLC:LoadVarChk("EnhanceQuestLevels", "On")			-- Enhance quest log quest levels
+				RGXQoLLC:LoadVarChk("EnhanceQuestDifficulty", "On")		-- Enhance quest log quest difficulty
+				RGXQoLLC:LoadVarChk("EnhanceProfessions", "Off")			-- Enhance professions
+				RGXQoLLC:LoadVarChk("EnhanceTrainers", "Off")				-- Enhance trainers
+				RGXQoLLC:LoadVarChk("ShowTrainAllBtn", "On")				-- Enhance trainers train all button
+				RGXQoLLC:LoadVarChk("EnhanceFlightMap", "Off")				-- Enhance flight map
+				RGXQoLLC:LoadVarNum("LeaPlusTaxiMapScale", 1.9, 1, 3)		-- Enhance flight map scale
+				RGXQoLLC:LoadVarNum("LeaPlusTaxiIconSize", 10, 5, 30)		-- Enhance flight icon size
+				RGXQoLLC:LoadVarAnc("FlightMapA", "TOPLEFT")				-- Enhance flight map anchor
+				RGXQoLLC:LoadVarAnc("FlightMapR", "TOPLEFT")				-- Enhance flight map relative
+				RGXQoLLC:LoadVarNum("FlightMapX", 0, -5000, 5000)			-- Enhance flight map X
+				RGXQoLLC:LoadVarNum("FlightMapY", 61, -5000, 5000)			-- Enhance flight map Y
 
-				LeaPlusLC:LoadVarChk("ShowVolume", "Off")					-- Show volume slider
-				LeaPlusLC:LoadVarChk("AhExtras", "Off")						-- Show auction controls
-				LeaPlusLC:LoadVarChk("AhBuyoutOnly", "Off")					-- Auction buyout only
-				LeaPlusLC:LoadVarChk("AhGoldOnly", "Off")					-- Auction gold only
+				RGXQoLLC:LoadVarChk("ShowVolume", "Off")					-- Show volume slider
+				RGXQoLLC:LoadVarChk("AhExtras", "Off")						-- Show auction controls
+				RGXQoLLC:LoadVarChk("AhBuyoutOnly", "Off")					-- Auction buyout only
+				RGXQoLLC:LoadVarChk("AhGoldOnly", "Off")					-- Auction gold only
 
-				LeaPlusLC:LoadVarChk("ShowCooldowns", "Off")				-- Show cooldowns
-				LeaPlusLC:LoadVarChk("ShowCooldownID", "On")				-- Show cooldown ID in tips
-				LeaPlusLC:LoadVarChk("NoCooldownDuration", "On")			-- Hide cooldown duration
-				LeaPlusLC:LoadVarChk("CooldownsOnPlayer", "Off")			-- Anchor to player
-				LeaPlusLC:LoadVarChk("DurabilityStatus", "Off")				-- Show durability status
-				LeaPlusLC:LoadVarChk("ShowVanityControls", "Off")			-- Show vanity controls
-				LeaPlusLC:LoadVarChk("VanityAltLayout", "Off")				-- Vanity alternative layout
-				LeaPlusLC:LoadVarChk("ShowBagSearchBox", "Off")				-- Show bag search box
-				LeaPlusLC:LoadVarChk("ShowFreeBagSlots", "Off")				-- Show free bag slots
-				LeaPlusLC:LoadVarChk("ShowRaidToggle", "Off")				-- Show raid button
-				LeaPlusLC:LoadVarChk("ShowBorders", "Off")					-- Show borders
-				LeaPlusLC:LoadVarNum("BordersTop", 0, 0, 300)				-- Top border
-				LeaPlusLC:LoadVarNum("BordersBottom", 0, 0, 300)			-- Bottom border
-				LeaPlusLC:LoadVarNum("BordersLeft", 0, 0, 300)				-- Left border
-				LeaPlusLC:LoadVarNum("BordersRight", 0, 0, 300)				-- Right border
-				LeaPlusLC:LoadVarNum("BordersAlpha", 0, 0, 0.9)				-- Border alpha
-				LeaPlusLC:LoadVarChk("ShowPlayerChain", "Off")				-- Show player chain
-				LeaPlusLC:LoadVarChk("ShowReadyTimer", "Off")				-- Show ready timer
-				LeaPlusLC:LoadVarNum("PlayerChainMenu", 2, 1, 3)			-- Player chain dropdown value
-				LeaPlusLC:LoadVarChk("ShowDruidPowerBar", "Off")			-- Show druid power bar
-				LeaPlusLC:LoadVarChk("ShowDruidStatusText", "On")			-- Show druid power bar status text
-				LeaPlusLC:LoadVarChk("ShowWowheadLinks", "Off")				-- Show Wowhead links
-				LeaPlusLC:LoadVarChk("WowheadLinkComments", "Off")			-- Show Wowhead links to comments
+				RGXQoLLC:LoadVarChk("ShowCooldowns", "Off")				-- Show cooldowns
+				RGXQoLLC:LoadVarChk("ShowCooldownID", "On")				-- Show cooldown ID in tips
+				RGXQoLLC:LoadVarChk("NoCooldownDuration", "On")			-- Hide cooldown duration
+				RGXQoLLC:LoadVarChk("CooldownsOnPlayer", "Off")			-- Anchor to player
+				RGXQoLLC:LoadVarChk("DurabilityStatus", "Off")				-- Show durability status
+				RGXQoLLC:LoadVarChk("ShowVanityControls", "Off")			-- Show vanity controls
+				RGXQoLLC:LoadVarChk("VanityAltLayout", "Off")				-- Vanity alternative layout
+				RGXQoLLC:LoadVarChk("ShowBagSearchBox", "Off")				-- Show bag search box
+				RGXQoLLC:LoadVarChk("ShowFreeBagSlots", "Off")				-- Show free bag slots
+				RGXQoLLC:LoadVarChk("ShowRaidToggle", "Off")				-- Show raid button
+				RGXQoLLC:LoadVarChk("ShowBorders", "Off")					-- Show borders
+				RGXQoLLC:LoadVarNum("BordersTop", 0, 0, 300)				-- Top border
+				RGXQoLLC:LoadVarNum("BordersBottom", 0, 0, 300)			-- Bottom border
+				RGXQoLLC:LoadVarNum("BordersLeft", 0, 0, 300)				-- Left border
+				RGXQoLLC:LoadVarNum("BordersRight", 0, 0, 300)				-- Right border
+				RGXQoLLC:LoadVarNum("BordersAlpha", 0, 0, 0.9)				-- Border alpha
+				RGXQoLLC:LoadVarChk("ShowPlayerChain", "Off")				-- Show player chain
+				RGXQoLLC:LoadVarChk("ShowReadyTimer", "Off")				-- Show ready timer
+				RGXQoLLC:LoadVarNum("PlayerChainMenu", 2, 1, 3)			-- Player chain dropdown value
+				RGXQoLLC:LoadVarChk("ShowDruidPowerBar", "Off")			-- Show druid power bar
+				RGXQoLLC:LoadVarChk("ShowDruidStatusText", "On")			-- Show druid power bar status text
+				RGXQoLLC:LoadVarChk("ShowWowheadLinks", "Off")				-- Show Wowhead links
+				RGXQoLLC:LoadVarChk("WowheadLinkComments", "Off")			-- Show Wowhead links to comments
 
 				-- Frames
-				LeaPlusLC:LoadVarChk("ManageWidget", "Off")					-- Manage widget
-				LeaPlusLC:LoadVarAnc("WidgetA", "TOP")						-- Manage widget anchor
-				LeaPlusLC:LoadVarAnc("WidgetR", "TOP")						-- Manage widget relative
-				LeaPlusLC:LoadVarNum("WidgetX", 0, -5000, 5000)				-- Manage widget position X
-				LeaPlusLC:LoadVarNum("WidgetY", -15, -5000, 5000)			-- Manage widget position Y
-				LeaPlusLC:LoadVarNum("WidgetScale", 1, 0.5, 2)				-- Manage widget scale
+				RGXQoLLC:LoadVarChk("ManageWidget", "Off")					-- Manage widget
+				RGXQoLLC:LoadVarAnc("WidgetA", "TOP")						-- Manage widget anchor
+				RGXQoLLC:LoadVarAnc("WidgetR", "TOP")						-- Manage widget relative
+				RGXQoLLC:LoadVarNum("WidgetX", 0, -5000, 5000)				-- Manage widget position X
+				RGXQoLLC:LoadVarNum("WidgetY", -15, -5000, 5000)			-- Manage widget position Y
+				RGXQoLLC:LoadVarNum("WidgetScale", 1, 0.5, 2)				-- Manage widget scale
 
-				LeaPlusLC:LoadVarChk("ManageTimer", "Off")					-- Manage timer
-				LeaPlusLC:LoadVarAnc("TimerA", "TOP")						-- Manage timer anchor
-				LeaPlusLC:LoadVarAnc("TimerR", "TOP")						-- Manage timer relative
-				LeaPlusLC:LoadVarNum("TimerX", -5, -5000, 5000)				-- Manage timer position X
-				LeaPlusLC:LoadVarNum("TimerY", -96, -5000, 5000)			-- Manage timer position Y
-				LeaPlusLC:LoadVarNum("TimerScale", 1, 0.5, 2)				-- Manage timer scale
+				RGXQoLLC:LoadVarChk("ManageTimer", "Off")					-- Manage timer
+				RGXQoLLC:LoadVarAnc("TimerA", "TOP")						-- Manage timer anchor
+				RGXQoLLC:LoadVarAnc("TimerR", "TOP")						-- Manage timer relative
+				RGXQoLLC:LoadVarNum("TimerX", -5, -5000, 5000)				-- Manage timer position X
+				RGXQoLLC:LoadVarNum("TimerY", -96, -5000, 5000)			-- Manage timer position Y
+				RGXQoLLC:LoadVarNum("TimerScale", 1, 0.5, 2)				-- Manage timer scale
 
-				LeaPlusLC:LoadVarChk("ClassColFrames", "Off")				-- Class colored frames
-				LeaPlusLC:LoadVarChk("ClassColPlayer", "On")				-- Class colored player frame
-				LeaPlusLC:LoadVarChk("ClassColTarget", "On")				-- Class colored target frame
+				RGXQoLLC:LoadVarChk("ClassColFrames", "Off")				-- Class colored frames
+				RGXQoLLC:LoadVarChk("ClassColPlayer", "On")				-- Class colored player frame
+				RGXQoLLC:LoadVarChk("ClassColTarget", "On")				-- Class colored target frame
 
-				LeaPlusLC:LoadVarChk("NoGryphons", "Off")					-- Hide gryphons
-				LeaPlusLC:LoadVarChk("NoClassBar", "Off")					-- Hide stance bar
+				RGXQoLLC:LoadVarChk("NoGryphons", "Off")					-- Hide gryphons
+				RGXQoLLC:LoadVarChk("NoClassBar", "Off")					-- Hide stance bar
 
 				-- System
-				LeaPlusLC:LoadVarChk("NoScreenGlow", "Off")					-- Disable screen glow
-				LeaPlusLC:LoadVarChk("NoScreenEffects", "Off")				-- Disable screen effects
-				LeaPlusLC:LoadVarChk("SetWeatherDensity", "Off")			-- Set weather density
-				LeaPlusLC:LoadVarNum("WeatherLevel", 3, 0, 3)				-- Weather density level
-				LeaPlusLC:LoadVarChk("MaxCameraZoom", "Off")				-- Max camera zoom
+				RGXQoLLC:LoadVarChk("NoScreenGlow", "Off")					-- Disable screen glow
+				RGXQoLLC:LoadVarChk("NoScreenEffects", "Off")				-- Disable screen effects
+				RGXQoLLC:LoadVarChk("SetWeatherDensity", "Off")			-- Set weather density
+				RGXQoLLC:LoadVarNum("WeatherLevel", 3, 0, 3)				-- Weather density level
+				RGXQoLLC:LoadVarChk("MaxCameraZoom", "Off")				-- Max camera zoom
 
-				LeaPlusLC:LoadVarChk("NoRestedEmotes", "Off")				-- Silence rested emotes
-				LeaPlusLC:LoadVarChk("KeepAudioSynced", "Off")				-- Keep audio synced
-				LeaPlusLC:LoadVarChk("MuteGameSounds", "Off")				-- Mute game sounds
-				LeaPlusLC:LoadVarChk("MuteMountSounds", "Off")				-- Mute mount sounds
-				LeaPlusLC:LoadVarChk("MuteCustomSounds", "Off")				-- Mute custom sounds
-				LeaPlusLC:LoadVarStr("MuteCustomList", "")					-- Mute custom sounds list
+				RGXQoLLC:LoadVarChk("NoRestedEmotes", "Off")				-- Silence rested emotes
+				RGXQoLLC:LoadVarChk("KeepAudioSynced", "Off")				-- Keep audio synced
+				RGXQoLLC:LoadVarChk("MuteGameSounds", "Off")				-- Mute game sounds
+				RGXQoLLC:LoadVarChk("MuteMountSounds", "Off")				-- Mute mount sounds
+				RGXQoLLC:LoadVarChk("MuteCustomSounds", "Off")				-- Mute custom sounds
+				RGXQoLLC:LoadVarStr("MuteCustomList", "")					-- Mute custom sounds list
 
-				LeaPlusLC:LoadVarChk("NoBagAutomation", "Off")				-- Disable bag automation
-				LeaPlusLC:LoadVarChk("NoConfirmLoot", "Off")				-- Disable loot warnings
-				LeaPlusLC:LoadVarChk("FasterLooting", "Off")				-- Faster auto loot
-				LeaPlusLC:LoadVarChk("FasterMovieSkip", "Off")				-- Faster movie skip
-				LeaPlusLC:LoadVarChk("StandAndDismount", "Off")				-- Dismount me
-				LeaPlusLC:LoadVarChk("DismountNoResource", "On")			-- Dismount on resource error
-				LeaPlusLC:LoadVarChk("DismountNoMoving", "On")				-- Dismount on moving
-				LeaPlusLC:LoadVarChk("DismountNoTaxi", "On")				-- Dismount on flight map open
-				LeaPlusLC:LoadVarChk("ShowVendorPrice", "Off")				-- Show vendor price
-				LeaPlusLC:LoadVarChk("CombatPlates", "Off")					-- Combat plates
-				LeaPlusLC:LoadVarChk("EasyItemDestroy", "Off")				-- Easy item destroy
+				RGXQoLLC:LoadVarChk("NoBagAutomation", "Off")				-- Disable bag automation
+				RGXQoLLC:LoadVarChk("NoConfirmLoot", "Off")				-- Disable loot warnings
+				RGXQoLLC:LoadVarChk("FasterLooting", "Off")				-- Faster auto loot
+				RGXQoLLC:LoadVarChk("FasterMovieSkip", "Off")				-- Faster movie skip
+				RGXQoLLC:LoadVarChk("StandAndDismount", "Off")				-- Dismount me
+				RGXQoLLC:LoadVarChk("DismountNoResource", "On")			-- Dismount on resource error
+				RGXQoLLC:LoadVarChk("DismountNoMoving", "On")				-- Dismount on moving
+				RGXQoLLC:LoadVarChk("DismountNoTaxi", "On")				-- Dismount on flight map open
+				RGXQoLLC:LoadVarChk("ShowVendorPrice", "Off")				-- Show vendor price
+				RGXQoLLC:LoadVarChk("CombatPlates", "Off")					-- Combat plates
+				RGXQoLLC:LoadVarChk("EasyItemDestroy", "Off")				-- Easy item destroy
 
-				LeaPlusLC:LoadVarChk("ShowFlightTimes", "Off")				-- Show flight times
-				LeaPlusLC:LoadVarChk("FlightBarBackground", "On")			-- Show flight times bar background
-				LeaPlusLC:LoadVarChk("FlightBarDestination", "On")			-- Show flight times bar destination
-				LeaPlusLC:LoadVarChk("FlightBarFillBar", "Off")				-- Show flight times bar fill mode
-				LeaPlusLC:LoadVarChk("FlightBarSpeech", "Off")				-- Show flight times bar speech
-				LeaPlusLC:LoadVarChk("FlightBarContribute", "On")			-- Show flight times contribute
-				LeaPlusLC:LoadVarAnc("FlightBarA", "TOP")					-- Show flight times anchor
-				LeaPlusLC:LoadVarAnc("FlightBarR", "TOP")					-- Show flight times relative
-				LeaPlusLC:LoadVarNum("FlightBarX", 0, -5000, 5000)			-- Show flight position X
-				LeaPlusLC:LoadVarNum("FlightBarY", -66, -5000, 5000)		-- Show flight position Y
-				LeaPlusLC:LoadVarNum("FlightBarScale", 2, 1, 5)				-- Show flight times bar scale
-				LeaPlusLC:LoadVarNum("FlightBarWidth", 230, 40, 460)		-- Show flight times bar width
+				RGXQoLLC:LoadVarChk("ShowFlightTimes", "Off")				-- Show flight times
+				RGXQoLLC:LoadVarChk("FlightBarBackground", "On")			-- Show flight times bar background
+				RGXQoLLC:LoadVarChk("FlightBarDestination", "On")			-- Show flight times bar destination
+				RGXQoLLC:LoadVarChk("FlightBarFillBar", "Off")				-- Show flight times bar fill mode
+				RGXQoLLC:LoadVarChk("FlightBarSpeech", "Off")				-- Show flight times bar speech
+				RGXQoLLC:LoadVarChk("FlightBarContribute", "On")			-- Show flight times contribute
+				RGXQoLLC:LoadVarAnc("FlightBarA", "TOP")					-- Show flight times anchor
+				RGXQoLLC:LoadVarAnc("FlightBarR", "TOP")					-- Show flight times relative
+				RGXQoLLC:LoadVarNum("FlightBarX", 0, -5000, 5000)			-- Show flight position X
+				RGXQoLLC:LoadVarNum("FlightBarY", -66, -5000, 5000)		-- Show flight position Y
+				RGXQoLLC:LoadVarNum("FlightBarScale", 2, 1, 5)				-- Show flight times bar scale
+				RGXQoLLC:LoadVarNum("FlightBarWidth", 230, 40, 460)		-- Show flight times bar width
 
 				-- Settings
-				LeaPlusLC:LoadVarChk("ShowMinimapIcon", "On")				-- Show minimap button
-				LeaPlusLC:LoadVarChk("UseEnglishLanguage", "Off")			-- Use English language
-				LeaPlusLC:LoadVarNum("PlusPanelScale", 1, 1, 2)				-- Panel scale
-				LeaPlusLC:LoadVarNum("PlusPanelAlpha", 0, 0, 1)				-- Panel alpha
+				RGXQoLLC:LoadVarChk("ShowMinimapIcon", "On")				-- Show minimap button
+				RGXQoLLC:LoadVarChk("UseEnglishLanguage", "Off")			-- Use English language
+				RGXQoLLC:LoadVarNum("PlusPanelScale", 1, 1, 2)				-- Panel scale
+				RGXQoLLC:LoadVarNum("PlusPanelAlpha", 0, 0, 1)				-- Panel alpha
 
 				-- Panel position
-				LeaPlusLC:LoadVarAnc("MainPanelA", "CENTER")				-- Panel anchor
-				LeaPlusLC:LoadVarAnc("MainPanelR", "CENTER")				-- Panel relative
-				LeaPlusLC:LoadVarNum("MainPanelX", 0, -5000, 5000)			-- Panel X axis
-				LeaPlusLC:LoadVarNum("MainPanelY", 0, -5000, 5000)			-- Panel Y axis
+				RGXQoLLC:LoadVarAnc("MainPanelA", "CENTER")				-- Panel anchor
+				RGXQoLLC:LoadVarAnc("MainPanelR", "CENTER")				-- Panel relative
+				RGXQoLLC:LoadVarNum("MainPanelX", 0, -5000, 5000)			-- Panel X axis
+				RGXQoLLC:LoadVarNum("MainPanelY", 0, -5000, 5000)			-- Panel Y axis
 
 				-- Start page
-				LeaPlusLC:LoadVarNum("LeaStartPage", 0, 0, LeaPlusLC["NumberOfPages"])
+				RGXQoLLC:LoadVarNum("RGXQoLStartPage", 0, 0, RGXQoLLC["NumberOfPages"])
 
 				-- Lock conflicting options
 				do
 
 					-- Function to disable and lock an option and add a note to the tooltip
 					local function Lock(option, reason, optmodule)
-						LeaLockList[option] = LeaPlusLC[option]
-						LeaPlusLC:LockItem(LeaPlusCB[option], true)
-						LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. "|n|n|cff00AAFF" .. reason
+						RGXQoLLockList[option] = RGXQoLLC[option]
+						RGXQoLLC:LockItem(RGXQoLCB[option], true)
+						RGXQoLCB[option].tiptext = RGXQoLCB[option].tiptext .. "|n|n|cff00AAFF" .. reason
 						if optmodule then
-							LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. " " .. optmodule .. " " .. L["module"]
+							RGXQoLCB[option].tiptext = RGXQoLCB[option].tiptext .. " " .. optmodule .. " " .. L["module"]
 						end
-						LeaPlusCB[option].tiptext = LeaPlusCB[option].tiptext .. "."
+						RGXQoLCB[option].tiptext = RGXQoLCB[option].tiptext .. "."
 						-- Remove hover from configuration button if there is one
-						local temp = {LeaPlusCB[option]:GetChildren()}
+						local temp = {RGXQoLCB[option]:GetChildren()}
 						if temp and temp[1] and temp[1].t and temp[1].t:GetTexture() == "Interface\\WorldMap\\Gear_64.png" then
 							temp[1]:SetHighlightTexture(0)
 							temp[1]:SetScript("OnEnter", nil)
@@ -12093,8 +12093,8 @@
 					end
 
 					-- Disable items that conflict with ElvUI
-					if LeaPlusLC.ElvUI then
-						local E = LeaPlusLC.ElvUI
+					if RGXQoLLC.ElvUI then
+						local E = RGXQoLLC.ElvUI
 						if E and E.private then
 
 							local reason = L["Cannot be used with ElvUI"]
@@ -12169,19 +12169,19 @@
 				end
 
 				-- Run other startup items
-				LeaPlusLC:SetDim()
+				RGXQoLLC:SetDim()
 
 			end
 			return
 		end
 
 		if event == "PLAYER_LOGIN" then
-			LeaPlusLC:Player()
+			RGXQoLLC:Player()
 
 			-- Sound features removed on this build (BLU owns sounds)
-			if LeaPlusCB["MuteGameSoundsBtn"] then LeaPlusCB["MuteGameSoundsBtn"]:Hide() end
-			if LeaPlusCB["MuteMountSoundsBtn"] then LeaPlusCB["MuteMountSoundsBtn"]:Hide() end
-			if LeaPlusCB["MuteCustomSoundsBtn"] then LeaPlusCB["MuteCustomSoundsBtn"]:Hide() end
+			if RGXQoLCB["MuteGameSoundsBtn"] then RGXQoLCB["MuteGameSoundsBtn"]:Hide() end
+			if RGXQoLCB["MuteMountSoundsBtn"] then RGXQoLCB["MuteMountSoundsBtn"]:Hide() end
+			if RGXQoLCB["MuteCustomSoundsBtn"] then RGXQoLCB["MuteCustomSoundsBtn"]:Hide() end
 
 			collectgarbage()
 			return
@@ -12191,239 +12191,239 @@
 		if event == "PLAYER_LOGOUT" then
 
 			-- Run the logout function without wipe flag
-			LeaPlusLC:PlayerLogout(false)
+			RGXQoLLC:PlayerLogout(false)
 
 			-- Automation
-			RGXQoLDB["AutomateQuests"]			= LeaPlusLC["AutomateQuests"]
-			RGXQoLDB["AutoQuestShift"]			= LeaPlusLC["AutoQuestShift"]
-			RGXQoLDB["AutoQuestAvailable"]		= LeaPlusLC["AutoQuestAvailable"]
-			RGXQoLDB["AutoQuestCompleted"]		= LeaPlusLC["AutoQuestCompleted"]
-			RGXQoLDB["AutoQuestKeyMenu"]		= LeaPlusLC["AutoQuestKeyMenu"]
-			RGXQoLDB["AutomateGossip"]			= LeaPlusLC["AutomateGossip"]
-			RGXQoLDB["AutoAcceptSummon"] 		= LeaPlusLC["AutoAcceptSummon"]
-			RGXQoLDB["AutoAcceptRes"] 			= LeaPlusLC["AutoAcceptRes"]
-			RGXQoLDB["AutoResNoCombat"] 		= LeaPlusLC["AutoResNoCombat"]
-			RGXQoLDB["AutoReleasePvP"] 		= LeaPlusLC["AutoReleasePvP"]
-			RGXQoLDB["AutoReleaseNoAlterac"] 	= LeaPlusLC["AutoReleaseNoAlterac"]
-			RGXQoLDB["AutoReleaseDelay"] 		= LeaPlusLC["AutoReleaseDelay"]
+			RGXQoLDB["AutomateQuests"]			= RGXQoLLC["AutomateQuests"]
+			RGXQoLDB["AutoQuestShift"]			= RGXQoLLC["AutoQuestShift"]
+			RGXQoLDB["AutoQuestAvailable"]		= RGXQoLLC["AutoQuestAvailable"]
+			RGXQoLDB["AutoQuestCompleted"]		= RGXQoLLC["AutoQuestCompleted"]
+			RGXQoLDB["AutoQuestKeyMenu"]		= RGXQoLLC["AutoQuestKeyMenu"]
+			RGXQoLDB["AutomateGossip"]			= RGXQoLLC["AutomateGossip"]
+			RGXQoLDB["AutoAcceptSummon"] 		= RGXQoLLC["AutoAcceptSummon"]
+			RGXQoLDB["AutoAcceptRes"] 			= RGXQoLLC["AutoAcceptRes"]
+			RGXQoLDB["AutoResNoCombat"] 		= RGXQoLLC["AutoResNoCombat"]
+			RGXQoLDB["AutoReleasePvP"] 		= RGXQoLLC["AutoReleasePvP"]
+			RGXQoLDB["AutoReleaseNoAlterac"] 	= RGXQoLLC["AutoReleaseNoAlterac"]
+			RGXQoLDB["AutoReleaseDelay"] 		= RGXQoLLC["AutoReleaseDelay"]
 
-			RGXQoLDB["AutoSellJunk"] 			= LeaPlusLC["AutoSellJunk"]
-			RGXQoLDB["AutoSellShowSummary"] 	= LeaPlusLC["AutoSellShowSummary"]
-			RGXQoLDB["AutoSellExcludeList"] 	= LeaPlusLC["AutoSellExcludeList"]
-			RGXQoLDB["AutoRepairGear"] 		= LeaPlusLC["AutoRepairGear"]
-			RGXQoLDB["AutoRepairShowSummary"] 	= LeaPlusLC["AutoRepairShowSummary"]
+			RGXQoLDB["AutoSellJunk"] 			= RGXQoLLC["AutoSellJunk"]
+			RGXQoLDB["AutoSellShowSummary"] 	= RGXQoLLC["AutoSellShowSummary"]
+			RGXQoLDB["AutoSellExcludeList"] 	= RGXQoLLC["AutoSellExcludeList"]
+			RGXQoLDB["AutoRepairGear"] 		= RGXQoLLC["AutoRepairGear"]
+			RGXQoLDB["AutoRepairShowSummary"] 	= RGXQoLLC["AutoRepairShowSummary"]
 
 			-- Social
-			RGXQoLDB["NoDuelRequests"] 		= LeaPlusLC["NoDuelRequests"]
-			RGXQoLDB["NoPartyInvites"]			= LeaPlusLC["NoPartyInvites"]
-			RGXQoLDB["NoFriendRequests"]		= LeaPlusLC["NoFriendRequests"]
-			RGXQoLDB["NoSharedQuests"]			= LeaPlusLC["NoSharedQuests"]
+			RGXQoLDB["NoDuelRequests"] 		= RGXQoLLC["NoDuelRequests"]
+			RGXQoLDB["NoPartyInvites"]			= RGXQoLLC["NoPartyInvites"]
+			RGXQoLDB["NoFriendRequests"]		= RGXQoLLC["NoFriendRequests"]
+			RGXQoLDB["NoSharedQuests"]			= RGXQoLLC["NoSharedQuests"]
 
-			RGXQoLDB["AcceptPartyFriends"]		= LeaPlusLC["AcceptPartyFriends"]
-			RGXQoLDB["InviteFromWhisper"]		= LeaPlusLC["InviteFromWhisper"]
-			RGXQoLDB["InviteFriendsOnly"]		= LeaPlusLC["InviteFriendsOnly"]
-			RGXQoLDB["InvKey"]					= LeaPlusLC["InvKey"]
-			RGXQoLDB["FriendlyGuild"]			= LeaPlusLC["FriendlyGuild"]
+			RGXQoLDB["AcceptPartyFriends"]		= RGXQoLLC["AcceptPartyFriends"]
+			RGXQoLDB["InviteFromWhisper"]		= RGXQoLLC["InviteFromWhisper"]
+			RGXQoLDB["InviteFriendsOnly"]		= RGXQoLLC["InviteFriendsOnly"]
+			RGXQoLDB["InvKey"]					= RGXQoLLC["InvKey"]
+			RGXQoLDB["FriendlyGuild"]			= RGXQoLLC["FriendlyGuild"]
 
 			-- Chat
-			RGXQoLDB["UseEasyChatResizing"]	= LeaPlusLC["UseEasyChatResizing"]
-			RGXQoLDB["NoCombatLogTab"]			= LeaPlusLC["NoCombatLogTab"]
-			RGXQoLDB["NoChatButtons"]			= LeaPlusLC["NoChatButtons"]
-			RGXQoLDB["UnclampChat"]			= LeaPlusLC["UnclampChat"]
-			RGXQoLDB["MoveChatEditBoxToTop"]	= LeaPlusLC["MoveChatEditBoxToTop"]
-			RGXQoLDB["MoreFontSizes"]			= LeaPlusLC["MoreFontSizes"]
+			RGXQoLDB["UseEasyChatResizing"]	= RGXQoLLC["UseEasyChatResizing"]
+			RGXQoLDB["NoCombatLogTab"]			= RGXQoLLC["NoCombatLogTab"]
+			RGXQoLDB["NoChatButtons"]			= RGXQoLLC["NoChatButtons"]
+			RGXQoLDB["UnclampChat"]			= RGXQoLLC["UnclampChat"]
+			RGXQoLDB["MoveChatEditBoxToTop"]	= RGXQoLLC["MoveChatEditBoxToTop"]
+			RGXQoLDB["MoreFontSizes"]			= RGXQoLLC["MoreFontSizes"]
 
-			RGXQoLDB["NoStickyChat"] 			= LeaPlusLC["NoStickyChat"]
-			RGXQoLDB["UseArrowKeysInChat"]		= LeaPlusLC["UseArrowKeysInChat"]
-			RGXQoLDB["NoChatFade"]				= LeaPlusLC["NoChatFade"]
-			RGXQoLDB["UnivGroupColor"]			= LeaPlusLC["UnivGroupColor"]
-			RGXQoLDB["ClassColorsInChat"]		= LeaPlusLC["ClassColorsInChat"]
-			RGXQoLDB["RecentChatWindow"]		= LeaPlusLC["RecentChatWindow"]
-			RGXQoLDB["RecentChatSize"]			= LeaPlusLC["RecentChatSize"]
-			RGXQoLDB["MaxChatHstory"]			= LeaPlusLC["MaxChatHstory"]
-			RGXQoLDB["FilterChatMessages"]		= LeaPlusLC["FilterChatMessages"]
-			RGXQoLDB["BlockDrunkenSpam"]		= LeaPlusLC["BlockDrunkenSpam"]
-			RGXQoLDB["BlockDuelSpam"]			= LeaPlusLC["BlockDuelSpam"]
-			RGXQoLDB["RestoreChatMessages"]	= LeaPlusLC["RestoreChatMessages"]
+			RGXQoLDB["NoStickyChat"] 			= RGXQoLLC["NoStickyChat"]
+			RGXQoLDB["UseArrowKeysInChat"]		= RGXQoLLC["UseArrowKeysInChat"]
+			RGXQoLDB["NoChatFade"]				= RGXQoLLC["NoChatFade"]
+			RGXQoLDB["UnivGroupColor"]			= RGXQoLLC["UnivGroupColor"]
+			RGXQoLDB["ClassColorsInChat"]		= RGXQoLLC["ClassColorsInChat"]
+			RGXQoLDB["RecentChatWindow"]		= RGXQoLLC["RecentChatWindow"]
+			RGXQoLDB["RecentChatSize"]			= RGXQoLLC["RecentChatSize"]
+			RGXQoLDB["MaxChatHstory"]			= RGXQoLLC["MaxChatHstory"]
+			RGXQoLDB["FilterChatMessages"]		= RGXQoLLC["FilterChatMessages"]
+			RGXQoLDB["BlockDrunkenSpam"]		= RGXQoLLC["BlockDrunkenSpam"]
+			RGXQoLDB["BlockDuelSpam"]			= RGXQoLLC["BlockDuelSpam"]
+			RGXQoLDB["RestoreChatMessages"]	= RGXQoLLC["RestoreChatMessages"]
 
 			-- Text
-			RGXQoLDB["HideErrorMessages"]		= LeaPlusLC["HideErrorMessages"]
-			RGXQoLDB["NoHitIndicators"]		= LeaPlusLC["NoHitIndicators"]
-			RGXQoLDB["HideZoneText"] 			= LeaPlusLC["HideZoneText"]
-			RGXQoLDB["HideKeybindText"] 		= LeaPlusLC["HideKeybindText"]
-			RGXQoLDB["HideMacroText"] 			= LeaPlusLC["HideMacroText"]
-			RGXQoLDB["HideRaidGroupLabels"] 	= LeaPlusLC["HideRaidGroupLabels"]
+			RGXQoLDB["HideErrorMessages"]		= RGXQoLLC["HideErrorMessages"]
+			RGXQoLDB["NoHitIndicators"]		= RGXQoLLC["NoHitIndicators"]
+			RGXQoLDB["HideZoneText"] 			= RGXQoLLC["HideZoneText"]
+			RGXQoLDB["HideKeybindText"] 		= RGXQoLLC["HideKeybindText"]
+			RGXQoLDB["HideMacroText"] 			= RGXQoLLC["HideMacroText"]
+			RGXQoLDB["HideRaidGroupLabels"] 	= RGXQoLLC["HideRaidGroupLabels"]
 
-			RGXQoLDB["MailFontChange"] 		= LeaPlusLC["MailFontChange"]
-			RGXQoLDB["LeaPlusMailFontSize"] 	= LeaPlusLC["LeaPlusMailFontSize"]
+			RGXQoLDB["MailFontChange"] 		= RGXQoLLC["MailFontChange"]
+			RGXQoLDB["LeaPlusMailFontSize"] 	= RGXQoLLC["LeaPlusMailFontSize"]
 
-			RGXQoLDB["QuestFontChange"] 		= LeaPlusLC["QuestFontChange"]
-			RGXQoLDB["LeaPlusQuestFontSize"]	= LeaPlusLC["LeaPlusQuestFontSize"]
+			RGXQoLDB["QuestFontChange"] 		= RGXQoLLC["QuestFontChange"]
+			RGXQoLDB["LeaPlusQuestFontSize"]	= RGXQoLLC["LeaPlusQuestFontSize"]
 
-			RGXQoLDB["BookFontChange"] 		= LeaPlusLC["BookFontChange"]
-			RGXQoLDB["LeaPlusBookFontSize"]	= LeaPlusLC["LeaPlusBookFontSize"]
+			RGXQoLDB["BookFontChange"] 		= RGXQoLLC["BookFontChange"]
+			RGXQoLDB["LeaPlusBookFontSize"]	= RGXQoLLC["LeaPlusBookFontSize"]
 
 			-- Interface
-			RGXQoLDB["MinimapModder"]			= LeaPlusLC["MinimapModder"]
-			RGXQoLDB["SquareMinimap"]			= LeaPlusLC["SquareMinimap"]
-			RGXQoLDB["MinimapButtonBag"]		= LeaPlusLC["MinimapButtonBag"]
-			RGXQoLDB["MiniExcludeList"] 		= LeaPlusLC["MiniExcludeList"]
-			RGXQoLDB["HideMiniZoomBtns"]		= LeaPlusLC["HideMiniZoomBtns"]
-			RGXQoLDB["HideMiniClock"]			= LeaPlusLC["HideMiniClock"]
-			RGXQoLDB["HideMiniDayNight"]		= LeaPlusLC["HideMiniDayNight"]
-			RGXQoLDB["HideMiniZoneText"]		= LeaPlusLC["HideMiniZoneText"]
-			RGXQoLDB["HideMiniAddonButtons"]	= LeaPlusLC["HideMiniAddonButtons"]
-			RGXQoLDB["HideMiniTracking"]		= LeaPlusLC["HideMiniTracking"]
-			RGXQoLDB["HideMiniLFG"]			= LeaPlusLC["HideMiniLFG"]
-			RGXQoLDB["MinimapSize"]			= LeaPlusLC["MinimapSize"]
-			RGXQoLDB["MinimapBorderWidth"]		= LeaPlusLC["MinimapBorderWidth"]
+			RGXQoLDB["MinimapModder"]			= RGXQoLLC["MinimapModder"]
+			RGXQoLDB["SquareMinimap"]			= RGXQoLLC["SquareMinimap"]
+			RGXQoLDB["MinimapButtonBag"]		= RGXQoLLC["MinimapButtonBag"]
+			RGXQoLDB["MiniExcludeList"] 		= RGXQoLLC["MiniExcludeList"]
+			RGXQoLDB["HideMiniZoomBtns"]		= RGXQoLLC["HideMiniZoomBtns"]
+			RGXQoLDB["HideMiniClock"]			= RGXQoLLC["HideMiniClock"]
+			RGXQoLDB["HideMiniDayNight"]		= RGXQoLLC["HideMiniDayNight"]
+			RGXQoLDB["HideMiniZoneText"]		= RGXQoLLC["HideMiniZoneText"]
+			RGXQoLDB["HideMiniAddonButtons"]	= RGXQoLLC["HideMiniAddonButtons"]
+			RGXQoLDB["HideMiniTracking"]		= RGXQoLLC["HideMiniTracking"]
+			RGXQoLDB["HideMiniLFG"]			= RGXQoLLC["HideMiniLFG"]
+			RGXQoLDB["MinimapSize"]			= RGXQoLLC["MinimapSize"]
+			RGXQoLDB["MinimapBorderWidth"]		= RGXQoLLC["MinimapBorderWidth"]
 
-			RGXQoLDB["TipModEnable"]			= LeaPlusLC["TipModEnable"]
-			RGXQoLDB["TipShowRank"]			= LeaPlusLC["TipShowRank"]
-			RGXQoLDB["TipShowOtherRank"]		= LeaPlusLC["TipShowOtherRank"]
-			RGXQoLDB["TipShowTarget"]			= LeaPlusLC["TipShowTarget"]
-			RGXQoLDB["TipHideInCombat"]		= LeaPlusLC["TipHideInCombat"]
-			RGXQoLDB["TipHideShiftOverride"]	= LeaPlusLC["TipHideShiftOverride"]
-			RGXQoLDB["TipNoHealthBar"]			= LeaPlusLC["TipNoHealthBar"]
-			RGXQoLDB["LeaPlusTipSize"]			= LeaPlusLC["LeaPlusTipSize"]
-			RGXQoLDB["TipOffsetX"]				= LeaPlusLC["TipOffsetX"]
-			RGXQoLDB["TipOffsetY"]				= LeaPlusLC["TipOffsetY"]
-			RGXQoLDB["TooltipAnchorMenu"]		= LeaPlusLC["TooltipAnchorMenu"]
-			RGXQoLDB["TipCursorX"]				= LeaPlusLC["TipCursorX"]
-			RGXQoLDB["TipCursorY"]				= LeaPlusLC["TipCursorY"]
+			RGXQoLDB["TipModEnable"]			= RGXQoLLC["TipModEnable"]
+			RGXQoLDB["TipShowRank"]			= RGXQoLLC["TipShowRank"]
+			RGXQoLDB["TipShowOtherRank"]		= RGXQoLLC["TipShowOtherRank"]
+			RGXQoLDB["TipShowTarget"]			= RGXQoLLC["TipShowTarget"]
+			RGXQoLDB["TipHideInCombat"]		= RGXQoLLC["TipHideInCombat"]
+			RGXQoLDB["TipHideShiftOverride"]	= RGXQoLLC["TipHideShiftOverride"]
+			RGXQoLDB["TipNoHealthBar"]			= RGXQoLLC["TipNoHealthBar"]
+			RGXQoLDB["LeaPlusTipSize"]			= RGXQoLLC["LeaPlusTipSize"]
+			RGXQoLDB["TipOffsetX"]				= RGXQoLLC["TipOffsetX"]
+			RGXQoLDB["TipOffsetY"]				= RGXQoLLC["TipOffsetY"]
+			RGXQoLDB["TooltipAnchorMenu"]		= RGXQoLLC["TooltipAnchorMenu"]
+			RGXQoLDB["TipCursorX"]				= RGXQoLLC["TipCursorX"]
+			RGXQoLDB["TipCursorY"]				= RGXQoLLC["TipCursorY"]
 
-			RGXQoLDB["EnhanceDressup"]			= LeaPlusLC["EnhanceDressup"]
-			RGXQoLDB["DressupItemButtons"]		= LeaPlusLC["DressupItemButtons"]
-			RGXQoLDB["DressupAnimControl"]		= LeaPlusLC["DressupAnimControl"]
-			RGXQoLDB["HideDressupStats"]		= LeaPlusLC["HideDressupStats"]
-			RGXQoLDB["EnhanceQuestLog"]		= LeaPlusLC["EnhanceQuestLog"]
-			RGXQoLDB["EnhanceQuestTaller"]		= LeaPlusLC["EnhanceQuestTaller"]
-			RGXQoLDB["EnhanceQuestLevels"]		= LeaPlusLC["EnhanceQuestLevels"]
-			RGXQoLDB["EnhanceQuestDifficulty"]	= LeaPlusLC["EnhanceQuestDifficulty"]
-			RGXQoLDB["EnhanceProfessions"]		= LeaPlusLC["EnhanceProfessions"]
-			RGXQoLDB["EnhanceTrainers"]		= LeaPlusLC["EnhanceTrainers"]
-			RGXQoLDB["ShowTrainAllBtn"]		= LeaPlusLC["ShowTrainAllBtn"]
-			RGXQoLDB["EnhanceFlightMap"]		= LeaPlusLC["EnhanceFlightMap"]
-			RGXQoLDB["LeaPlusTaxiMapScale"]	= LeaPlusLC["LeaPlusTaxiMapScale"]
-			RGXQoLDB["LeaPlusTaxiIconSize"]	= LeaPlusLC["LeaPlusTaxiIconSize"]
-			RGXQoLDB["FlightMapA"]				= LeaPlusLC["FlightMapA"]
-			RGXQoLDB["FlightMapR"]				= LeaPlusLC["FlightMapR"]
-			RGXQoLDB["FlightMapX"]				= LeaPlusLC["FlightMapX"]
-			RGXQoLDB["FlightMapY"]				= LeaPlusLC["FlightMapY"]
+			RGXQoLDB["EnhanceDressup"]			= RGXQoLLC["EnhanceDressup"]
+			RGXQoLDB["DressupItemButtons"]		= RGXQoLLC["DressupItemButtons"]
+			RGXQoLDB["DressupAnimControl"]		= RGXQoLLC["DressupAnimControl"]
+			RGXQoLDB["HideDressupStats"]		= RGXQoLLC["HideDressupStats"]
+			RGXQoLDB["EnhanceQuestLog"]		= RGXQoLLC["EnhanceQuestLog"]
+			RGXQoLDB["EnhanceQuestTaller"]		= RGXQoLLC["EnhanceQuestTaller"]
+			RGXQoLDB["EnhanceQuestLevels"]		= RGXQoLLC["EnhanceQuestLevels"]
+			RGXQoLDB["EnhanceQuestDifficulty"]	= RGXQoLLC["EnhanceQuestDifficulty"]
+			RGXQoLDB["EnhanceProfessions"]		= RGXQoLLC["EnhanceProfessions"]
+			RGXQoLDB["EnhanceTrainers"]		= RGXQoLLC["EnhanceTrainers"]
+			RGXQoLDB["ShowTrainAllBtn"]		= RGXQoLLC["ShowTrainAllBtn"]
+			RGXQoLDB["EnhanceFlightMap"]		= RGXQoLLC["EnhanceFlightMap"]
+			RGXQoLDB["LeaPlusTaxiMapScale"]	= RGXQoLLC["LeaPlusTaxiMapScale"]
+			RGXQoLDB["LeaPlusTaxiIconSize"]	= RGXQoLLC["LeaPlusTaxiIconSize"]
+			RGXQoLDB["FlightMapA"]				= RGXQoLLC["FlightMapA"]
+			RGXQoLDB["FlightMapR"]				= RGXQoLLC["FlightMapR"]
+			RGXQoLDB["FlightMapX"]				= RGXQoLLC["FlightMapX"]
+			RGXQoLDB["FlightMapY"]				= RGXQoLLC["FlightMapY"]
 
-			RGXQoLDB["ShowVolume"] 			= LeaPlusLC["ShowVolume"]
-			RGXQoLDB["AhExtras"]				= LeaPlusLC["AhExtras"]
-			RGXQoLDB["AhBuyoutOnly"]			= LeaPlusLC["AhBuyoutOnly"]
-			RGXQoLDB["AhGoldOnly"]				= LeaPlusLC["AhGoldOnly"]
+			RGXQoLDB["ShowVolume"] 			= RGXQoLLC["ShowVolume"]
+			RGXQoLDB["AhExtras"]				= RGXQoLLC["AhExtras"]
+			RGXQoLDB["AhBuyoutOnly"]			= RGXQoLLC["AhBuyoutOnly"]
+			RGXQoLDB["AhGoldOnly"]				= RGXQoLLC["AhGoldOnly"]
 
-			RGXQoLDB["ShowCooldowns"]			= LeaPlusLC["ShowCooldowns"]
-			RGXQoLDB["ShowCooldownID"]			= LeaPlusLC["ShowCooldownID"]
-			RGXQoLDB["NoCooldownDuration"]		= LeaPlusLC["NoCooldownDuration"]
-			RGXQoLDB["CooldownsOnPlayer"]		= LeaPlusLC["CooldownsOnPlayer"]
-			RGXQoLDB["DurabilityStatus"]		= LeaPlusLC["DurabilityStatus"]
-			RGXQoLDB["ShowVanityControls"]		= LeaPlusLC["ShowVanityControls"]
-			RGXQoLDB["VanityAltLayout"]		= LeaPlusLC["VanityAltLayout"]
-			RGXQoLDB["ShowBagSearchBox"]		= LeaPlusLC["ShowBagSearchBox"]
-			RGXQoLDB["ShowFreeBagSlots"]		= LeaPlusLC["ShowFreeBagSlots"]
-			RGXQoLDB["ShowRaidToggle"]			= LeaPlusLC["ShowRaidToggle"]
-			RGXQoLDB["ShowBorders"]			= LeaPlusLC["ShowBorders"]
-			RGXQoLDB["BordersTop"]				= LeaPlusLC["BordersTop"]
-			RGXQoLDB["BordersBottom"]			= LeaPlusLC["BordersBottom"]
-			RGXQoLDB["BordersLeft"]			= LeaPlusLC["BordersLeft"]
-			RGXQoLDB["BordersRight"]			= LeaPlusLC["BordersRight"]
-			RGXQoLDB["BordersAlpha"]			= LeaPlusLC["BordersAlpha"]
-			RGXQoLDB["ShowPlayerChain"]		= LeaPlusLC["ShowPlayerChain"]
-			RGXQoLDB["PlayerChainMenu"]		= LeaPlusLC["PlayerChainMenu"]
-			RGXQoLDB["ShowReadyTimer"]			= LeaPlusLC["ShowReadyTimer"]
-			RGXQoLDB["ShowDruidPowerBar"]		= LeaPlusLC["ShowDruidPowerBar"]
-			RGXQoLDB["ShowDruidStatusText"]	= LeaPlusLC["ShowDruidStatusText"]
-			RGXQoLDB["ShowWowheadLinks"]		= LeaPlusLC["ShowWowheadLinks"]
-			RGXQoLDB["WowheadLinkComments"]	= LeaPlusLC["WowheadLinkComments"]
+			RGXQoLDB["ShowCooldowns"]			= RGXQoLLC["ShowCooldowns"]
+			RGXQoLDB["ShowCooldownID"]			= RGXQoLLC["ShowCooldownID"]
+			RGXQoLDB["NoCooldownDuration"]		= RGXQoLLC["NoCooldownDuration"]
+			RGXQoLDB["CooldownsOnPlayer"]		= RGXQoLLC["CooldownsOnPlayer"]
+			RGXQoLDB["DurabilityStatus"]		= RGXQoLLC["DurabilityStatus"]
+			RGXQoLDB["ShowVanityControls"]		= RGXQoLLC["ShowVanityControls"]
+			RGXQoLDB["VanityAltLayout"]		= RGXQoLLC["VanityAltLayout"]
+			RGXQoLDB["ShowBagSearchBox"]		= RGXQoLLC["ShowBagSearchBox"]
+			RGXQoLDB["ShowFreeBagSlots"]		= RGXQoLLC["ShowFreeBagSlots"]
+			RGXQoLDB["ShowRaidToggle"]			= RGXQoLLC["ShowRaidToggle"]
+			RGXQoLDB["ShowBorders"]			= RGXQoLLC["ShowBorders"]
+			RGXQoLDB["BordersTop"]				= RGXQoLLC["BordersTop"]
+			RGXQoLDB["BordersBottom"]			= RGXQoLLC["BordersBottom"]
+			RGXQoLDB["BordersLeft"]			= RGXQoLLC["BordersLeft"]
+			RGXQoLDB["BordersRight"]			= RGXQoLLC["BordersRight"]
+			RGXQoLDB["BordersAlpha"]			= RGXQoLLC["BordersAlpha"]
+			RGXQoLDB["ShowPlayerChain"]		= RGXQoLLC["ShowPlayerChain"]
+			RGXQoLDB["PlayerChainMenu"]		= RGXQoLLC["PlayerChainMenu"]
+			RGXQoLDB["ShowReadyTimer"]			= RGXQoLLC["ShowReadyTimer"]
+			RGXQoLDB["ShowDruidPowerBar"]		= RGXQoLLC["ShowDruidPowerBar"]
+			RGXQoLDB["ShowDruidStatusText"]	= RGXQoLLC["ShowDruidStatusText"]
+			RGXQoLDB["ShowWowheadLinks"]		= RGXQoLLC["ShowWowheadLinks"]
+			RGXQoLDB["WowheadLinkComments"]	= RGXQoLLC["WowheadLinkComments"]
 
 			-- Frames
-			RGXQoLDB["ManageWidget"]			= LeaPlusLC["ManageWidget"]
-			RGXQoLDB["WidgetA"]				= LeaPlusLC["WidgetA"]
-			RGXQoLDB["WidgetR"]				= LeaPlusLC["WidgetR"]
-			RGXQoLDB["WidgetX"]				= LeaPlusLC["WidgetX"]
-			RGXQoLDB["WidgetY"]				= LeaPlusLC["WidgetY"]
-			RGXQoLDB["WidgetScale"]			= LeaPlusLC["WidgetScale"]
+			RGXQoLDB["ManageWidget"]			= RGXQoLLC["ManageWidget"]
+			RGXQoLDB["WidgetA"]				= RGXQoLLC["WidgetA"]
+			RGXQoLDB["WidgetR"]				= RGXQoLLC["WidgetR"]
+			RGXQoLDB["WidgetX"]				= RGXQoLLC["WidgetX"]
+			RGXQoLDB["WidgetY"]				= RGXQoLLC["WidgetY"]
+			RGXQoLDB["WidgetScale"]			= RGXQoLLC["WidgetScale"]
 
-			RGXQoLDB["ManageTimer"]			= LeaPlusLC["ManageTimer"]
-			RGXQoLDB["TimerA"]					= LeaPlusLC["TimerA"]
-			RGXQoLDB["TimerR"]					= LeaPlusLC["TimerR"]
-			RGXQoLDB["TimerX"]					= LeaPlusLC["TimerX"]
-			RGXQoLDB["TimerY"]					= LeaPlusLC["TimerY"]
-			RGXQoLDB["TimerScale"]				= LeaPlusLC["TimerScale"]
+			RGXQoLDB["ManageTimer"]			= RGXQoLLC["ManageTimer"]
+			RGXQoLDB["TimerA"]					= RGXQoLLC["TimerA"]
+			RGXQoLDB["TimerR"]					= RGXQoLLC["TimerR"]
+			RGXQoLDB["TimerX"]					= RGXQoLLC["TimerX"]
+			RGXQoLDB["TimerY"]					= RGXQoLLC["TimerY"]
+			RGXQoLDB["TimerScale"]				= RGXQoLLC["TimerScale"]
 
-			RGXQoLDB["ClassColFrames"]			= LeaPlusLC["ClassColFrames"]
-			RGXQoLDB["ClassColPlayer"]			= LeaPlusLC["ClassColPlayer"]
-			RGXQoLDB["ClassColTarget"]			= LeaPlusLC["ClassColTarget"]
+			RGXQoLDB["ClassColFrames"]			= RGXQoLLC["ClassColFrames"]
+			RGXQoLDB["ClassColPlayer"]			= RGXQoLLC["ClassColPlayer"]
+			RGXQoLDB["ClassColTarget"]			= RGXQoLLC["ClassColTarget"]
 
-			RGXQoLDB["NoGryphons"]				= LeaPlusLC["NoGryphons"]
-			RGXQoLDB["NoClassBar"]				= LeaPlusLC["NoClassBar"]
+			RGXQoLDB["NoGryphons"]				= RGXQoLLC["NoGryphons"]
+			RGXQoLDB["NoClassBar"]				= RGXQoLLC["NoClassBar"]
 
 			-- System
-			RGXQoLDB["NoScreenGlow"] 			= LeaPlusLC["NoScreenGlow"]
-			RGXQoLDB["NoScreenEffects"] 		= LeaPlusLC["NoScreenEffects"]
-			RGXQoLDB["SetWeatherDensity"] 		= LeaPlusLC["SetWeatherDensity"]
-			RGXQoLDB["WeatherLevel"] 			= LeaPlusLC["WeatherLevel"]
-			RGXQoLDB["MaxCameraZoom"] 			= LeaPlusLC["MaxCameraZoom"]
+			RGXQoLDB["NoScreenGlow"] 			= RGXQoLLC["NoScreenGlow"]
+			RGXQoLDB["NoScreenEffects"] 		= RGXQoLLC["NoScreenEffects"]
+			RGXQoLDB["SetWeatherDensity"] 		= RGXQoLLC["SetWeatherDensity"]
+			RGXQoLDB["WeatherLevel"] 			= RGXQoLLC["WeatherLevel"]
+			RGXQoLDB["MaxCameraZoom"] 			= RGXQoLLC["MaxCameraZoom"]
 
-			RGXQoLDB["NoRestedEmotes"]			= LeaPlusLC["NoRestedEmotes"]
-			RGXQoLDB["KeepAudioSynced"]		= LeaPlusLC["KeepAudioSynced"]
-			RGXQoLDB["MuteGameSounds"]			= LeaPlusLC["MuteGameSounds"]
-			RGXQoLDB["MuteMountSounds"]		= LeaPlusLC["MuteMountSounds"]
-			RGXQoLDB["MuteCustomSounds"]		= LeaPlusLC["MuteCustomSounds"]
-			RGXQoLDB["MuteCustomList"]			= LeaPlusLC["MuteCustomList"]
+			RGXQoLDB["NoRestedEmotes"]			= RGXQoLLC["NoRestedEmotes"]
+			RGXQoLDB["KeepAudioSynced"]		= RGXQoLLC["KeepAudioSynced"]
+			RGXQoLDB["MuteGameSounds"]			= RGXQoLLC["MuteGameSounds"]
+			RGXQoLDB["MuteMountSounds"]		= RGXQoLLC["MuteMountSounds"]
+			RGXQoLDB["MuteCustomSounds"]		= RGXQoLLC["MuteCustomSounds"]
+			RGXQoLDB["MuteCustomList"]			= RGXQoLLC["MuteCustomList"]
 
-			RGXQoLDB["NoBagAutomation"]		= LeaPlusLC["NoBagAutomation"]
-			RGXQoLDB["NoConfirmLoot"] 			= LeaPlusLC["NoConfirmLoot"]
-			RGXQoLDB["FasterLooting"] 			= LeaPlusLC["FasterLooting"]
-			RGXQoLDB["FasterMovieSkip"] 		= LeaPlusLC["FasterMovieSkip"]
-			RGXQoLDB["StandAndDismount"] 		= LeaPlusLC["StandAndDismount"]
-			RGXQoLDB["DismountNoResource"] 	= LeaPlusLC["DismountNoResource"]
-			RGXQoLDB["DismountNoMoving"] 		= LeaPlusLC["DismountNoMoving"]
-			RGXQoLDB["DismountNoTaxi"] 		= LeaPlusLC["DismountNoTaxi"]
-			RGXQoLDB["ShowVendorPrice"] 		= LeaPlusLC["ShowVendorPrice"]
-			RGXQoLDB["CombatPlates"]			= LeaPlusLC["CombatPlates"]
-			RGXQoLDB["EasyItemDestroy"]		= LeaPlusLC["EasyItemDestroy"]
+			RGXQoLDB["NoBagAutomation"]		= RGXQoLLC["NoBagAutomation"]
+			RGXQoLDB["NoConfirmLoot"] 			= RGXQoLLC["NoConfirmLoot"]
+			RGXQoLDB["FasterLooting"] 			= RGXQoLLC["FasterLooting"]
+			RGXQoLDB["FasterMovieSkip"] 		= RGXQoLLC["FasterMovieSkip"]
+			RGXQoLDB["StandAndDismount"] 		= RGXQoLLC["StandAndDismount"]
+			RGXQoLDB["DismountNoResource"] 	= RGXQoLLC["DismountNoResource"]
+			RGXQoLDB["DismountNoMoving"] 		= RGXQoLLC["DismountNoMoving"]
+			RGXQoLDB["DismountNoTaxi"] 		= RGXQoLLC["DismountNoTaxi"]
+			RGXQoLDB["ShowVendorPrice"] 		= RGXQoLLC["ShowVendorPrice"]
+			RGXQoLDB["CombatPlates"]			= RGXQoLLC["CombatPlates"]
+			RGXQoLDB["EasyItemDestroy"]		= RGXQoLLC["EasyItemDestroy"]
 
-			RGXQoLDB["ShowFlightTimes"]		= LeaPlusLC["ShowFlightTimes"]
-			RGXQoLDB["FlightBarBackground"]	= LeaPlusLC["FlightBarBackground"]
-			RGXQoLDB["FlightBarDestination"]	= LeaPlusLC["FlightBarDestination"]
-			RGXQoLDB["FlightBarFillBar"]		= LeaPlusLC["FlightBarFillBar"]
-			RGXQoLDB["FlightBarSpeech"]		= LeaPlusLC["FlightBarSpeech"]
-			RGXQoLDB["FlightBarContribute"]	= LeaPlusLC["FlightBarContribute"]
-			RGXQoLDB["FlightBarA"]				= LeaPlusLC["FlightBarA"]
-			RGXQoLDB["FlightBarR"]				= LeaPlusLC["FlightBarR"]
-			RGXQoLDB["FlightBarX"]				= LeaPlusLC["FlightBarX"]
-			RGXQoLDB["FlightBarY"]				= LeaPlusLC["FlightBarY"]
-			RGXQoLDB["FlightBarScale"]			= LeaPlusLC["FlightBarScale"]
-			RGXQoLDB["FlightBarWidth"]			= LeaPlusLC["FlightBarWidth"]
+			RGXQoLDB["ShowFlightTimes"]		= RGXQoLLC["ShowFlightTimes"]
+			RGXQoLDB["FlightBarBackground"]	= RGXQoLLC["FlightBarBackground"]
+			RGXQoLDB["FlightBarDestination"]	= RGXQoLLC["FlightBarDestination"]
+			RGXQoLDB["FlightBarFillBar"]		= RGXQoLLC["FlightBarFillBar"]
+			RGXQoLDB["FlightBarSpeech"]		= RGXQoLLC["FlightBarSpeech"]
+			RGXQoLDB["FlightBarContribute"]	= RGXQoLLC["FlightBarContribute"]
+			RGXQoLDB["FlightBarA"]				= RGXQoLLC["FlightBarA"]
+			RGXQoLDB["FlightBarR"]				= RGXQoLLC["FlightBarR"]
+			RGXQoLDB["FlightBarX"]				= RGXQoLLC["FlightBarX"]
+			RGXQoLDB["FlightBarY"]				= RGXQoLLC["FlightBarY"]
+			RGXQoLDB["FlightBarScale"]			= RGXQoLLC["FlightBarScale"]
+			RGXQoLDB["FlightBarWidth"]			= RGXQoLLC["FlightBarWidth"]
 
 			-- Settings
-			RGXQoLDB["ShowMinimapIcon"] 		= LeaPlusLC["ShowMinimapIcon"]
-			RGXQoLDB["UseEnglishLanguage"] 	= LeaPlusLC["UseEnglishLanguage"]
-			RGXQoLDB["PlusPanelScale"] 		= LeaPlusLC["PlusPanelScale"]
-			RGXQoLDB["PlusPanelAlpha"] 		= LeaPlusLC["PlusPanelAlpha"]
+			RGXQoLDB["ShowMinimapIcon"] 		= RGXQoLLC["ShowMinimapIcon"]
+			RGXQoLDB["UseEnglishLanguage"] 	= RGXQoLLC["UseEnglishLanguage"]
+			RGXQoLDB["PlusPanelScale"] 		= RGXQoLLC["PlusPanelScale"]
+			RGXQoLDB["PlusPanelAlpha"] 		= RGXQoLLC["PlusPanelAlpha"]
 
 			-- Panel position
-			RGXQoLDB["MainPanelA"]				= LeaPlusLC["MainPanelA"]
-			RGXQoLDB["MainPanelR"]				= LeaPlusLC["MainPanelR"]
-			RGXQoLDB["MainPanelX"]				= LeaPlusLC["MainPanelX"]
-			RGXQoLDB["MainPanelY"]				= LeaPlusLC["MainPanelY"]
+			RGXQoLDB["MainPanelA"]				= RGXQoLLC["MainPanelA"]
+			RGXQoLDB["MainPanelR"]				= RGXQoLLC["MainPanelR"]
+			RGXQoLDB["MainPanelX"]				= RGXQoLLC["MainPanelX"]
+			RGXQoLDB["MainPanelY"]				= RGXQoLLC["MainPanelY"]
 
 			-- Start page
-			RGXQoLDB["LeaStartPage"]			= LeaPlusLC["LeaStartPage"]
+			RGXQoLDB["RGXQoLStartPage"]			= RGXQoLLC["RGXQoLStartPage"]
 
-			-- Mute game sounds (LeaPlusLC["MuteGameSounds"])
-			for k, v in pairs(LeaPlusLC["muteTable"]) do
-				RGXQoLDB[k] = LeaPlusLC[k]
+			-- Mute game sounds (RGXQoLLC["MuteGameSounds"])
+			for k, v in pairs(RGXQoLLC["muteTable"]) do
+				RGXQoLDB[k] = RGXQoLLC[k]
 			end
 
-			-- Mute mount sounds (LeaPlusLC["MuteMountSounds"])
-			for k, v in pairs(LeaPlusLC["mountTable"]) do
-				RGXQoLDB[k] = LeaPlusLC[k]
+			-- Mute mount sounds (RGXQoLLC["MuteMountSounds"])
+			for k, v in pairs(RGXQoLLC["mountTable"]) do
+				RGXQoLDB[k] = RGXQoLLC[k]
 			end
 
 		end
@@ -12431,50 +12431,50 @@
 	end
 
 --	Register event handler
-	LpEvt:SetScript("OnEvent", eventHandler);
+	RGXQoLEvt:SetScript("OnEvent", eventHandler);
 
 ----------------------------------------------------------------------
 --	L70: Player logout
 ----------------------------------------------------------------------
 
 	-- Player Logout
-	function LeaPlusLC:PlayerLogout(wipe)
+	function RGXQoLLC:PlayerLogout(wipe)
 
 		----------------------------------------------------------------------
 		-- Restore default values for options that do not require reloads
 		----------------------------------------------------------------------
 
-		-- Disable screen glow (LeaPlusLC["NoScreenGlow"])
+		-- Disable screen glow (RGXQoLLC["NoScreenGlow"])
 		if wipe then
 
-			-- Disable screen glow (LeaPlusLC["NoScreenGlow"])
+			-- Disable screen glow (RGXQoLLC["NoScreenGlow"])
 			SetCVar("ffxGlow", "1")
 
-			-- Disable screen effects (LeaPlusLC["NoScreenEffects"])
+			-- Disable screen effects (RGXQoLLC["NoScreenEffects"])
 			SetCVar("ffxDeath", "1")
 			SetCVar("ffxNether", "1")
 
-			-- Set weather density (LeaPlusLC["SetWeatherDensity"])
+			-- Set weather density (RGXQoLLC["SetWeatherDensity"])
 			SetCVar("WeatherDensity", "3")
 			SetCVar("RAIDweatherDensity", "3")
 
-			-- Max camera zoom (LeaPlusLC["MaxCameraZoom"])
+			-- Max camera zoom (RGXQoLLC["MaxCameraZoom"])
 			SetCVar("cameraDistanceMaxZoomFactor", 1.9)
 
-			-- Universal group color (LeaPlusLC["UnivGroupColor"])
+			-- Universal group color (RGXQoLLC["UnivGroupColor"])
 			ChangeChatColor("RAID", 1, 0.50, 0)
 			ChangeChatColor("RAID_LEADER", 1, 0.28, 0.04)
 
-			-- Mute game sounds (LeaPlusLC["MuteGameSounds"])
-			for k, v in pairs(LeaPlusLC["muteTable"]) do
+			-- Mute game sounds (RGXQoLLC["MuteGameSounds"])
+			for k, v in pairs(RGXQoLLC["muteTable"]) do
 				for i, e in pairs(v) do
 					local file, soundID = e:match("([^,]+)%#([^,]+)")
 					UnmuteSoundFile(soundID)
 				end
 			end
 
-			-- Mute mount sounds (LeaPlusLC["MuteMountSounds"])
-			for k, v in pairs(LeaPlusLC["mountTable"]) do
+			-- Mute mount sounds (RGXQoLLC["MuteMountSounds"])
+			for k, v in pairs(RGXQoLLC["mountTable"]) do
 				for i, e in pairs(v) do
 					local file, soundID = e:match("([^,]+)%#([^,]+)")
 					UnmuteSoundFile(soundID)
@@ -12488,8 +12488,8 @@
 		----------------------------------------------------------------------
 
 		-- Use class colors in chat
-		if RGXQoLDB["ClassColorsInChat"] == "On" and not LeaLockList["ClassColorsInChat"] then
-			if wipe or (not wipe and LeaPlusLC["ClassColorsInChat"] == "Off") then
+		if RGXQoLDB["ClassColorsInChat"] == "On" and not RGXQoLLockList["ClassColorsInChat"] then
+			if wipe or (not wipe and RGXQoLLC["ClassColorsInChat"] == "Off") then
 				SetCVar("chatClassColorOverride", "1")
 				for void, v in ipairs({"SAY", "EMOTE", "YELL", "GUILD", "OFFICER", "WHISPER", "PARTY", "PARTY_LEADER", "RAID", "RAID_LEADER", "RAID_WARNING", "INSTANCE_CHAT", "INSTANCE_CHAT_LEADER", "VOICE_TEXT"}) do
 					SetChatColorNameByClass(v, false)
@@ -12501,29 +12501,29 @@
 		end
 
 		-- Enhance minimap restore round minimap if wipe or enhance minimap is toggled off
-		if RGXQoLDB["MinimapModder"] == "On" and RGXQoLDB["SquareMinimap"] == "On" and not LeaLockList["MinimapModder"] then
-			if wipe or (not wipe and LeaPlusLC["MinimapModder"] == "Off") then
+		if RGXQoLDB["MinimapModder"] == "On" and RGXQoLDB["SquareMinimap"] == "On" and not RGXQoLLockList["MinimapModder"] then
+			if wipe or (not wipe and RGXQoLLC["MinimapModder"] == "Off") then
 				Minimap:SetMaskTexture([[Interface\CharacterFrame\TempPortraitAlphaMask]])
 			end
 		end
 
 		-- Silence rested emotes
 		if RGXQoLDB["NoRestedEmotes"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["NoRestedEmotes"] == "Off") then
+			if wipe or (not wipe and RGXQoLLC["NoRestedEmotes"] == "Off") then
 				SetCVar("Sound_EnableEmoteSounds", "1")
 			end
 		end
 
 		-- Show free bag slos
-		if RGXQoLDB["ShowFreeBagSlots"] == "On" and not LeaLockList["ShowFreeBagSlots"] then
-			if wipe or (not wipe and LeaPlusLC["ShowFreeBagSlots"] == "Off") then
+		if RGXQoLDB["ShowFreeBagSlots"] == "On" and not RGXQoLLockList["ShowFreeBagSlots"] then
+			if wipe or (not wipe and RGXQoLLC["ShowFreeBagSlots"] == "Off") then
 				SetCVar("displayFreeBagSlots", "0")
 			end
 		end
 
 		-- More font sizes
-		if RGXQoLDB["MoreFontSizes"] == "On" and not LeaLockList["MoreFontSizes"] then
-			if wipe or (not wipe and LeaPlusLC["MoreFontSizes"] == "Off") then
+		if RGXQoLDB["MoreFontSizes"] == "On" and not RGXQoLLockList["MoreFontSizes"] then
+			if wipe or (not wipe and RGXQoLLC["MoreFontSizes"] == "Off") then
 				RunScript('for i = 1, 50 do if _G["ChatFrame" .. i] then local void, fontSize = FCF_GetChatWindowInfo(i); if fontSize and fontSize ~= 12 and fontSize ~= 14 and fontSize ~= 16 and fontSize ~= 18 then FCF_SetChatWindowFontSize(self, _G["ChatFrame" .. i], CHAT_FRAME_DEFAULT_FONT_SIZE) end end end')
 			end
 		end
@@ -12548,7 +12548,7 @@
 ----------------------------------------------------------------------
 
 	-- Function to add textures to panels
-	function LeaPlusLC:CreateBar(name, parent, width, height, anchor, r, g, b, alp, tex)
+	function RGXQoLLC:CreateBar(name, parent, width, height, anchor, r, g, b, alp, tex)
 		local ft = parent:CreateTexture(nil, "BORDER")
 		ft:SetTexture(tex)
 		ft:SetSize(width, height)
@@ -12560,7 +12560,7 @@
 	end
 
 	-- Create a configuration panel
-	function LeaPlusLC:CreatePanel(title, globref, scrolling)
+	function RGXQoLLC:CreatePanel(title, globref, scrolling)
 
 		-- Create the panel
 		local Side = CreateFrame("Frame", nil, UIParent)
@@ -12570,11 +12570,11 @@
 		table.insert(UISpecialFrames, "LeaPlusGlobalPanel_" .. globref)
 
 		-- Store it in the configuration panel table
-		tinsert(LeaConfigList, Side)
+		tinsert(RGXQoLConfigList, Side)
 
 		-- Set frame parameters
 		Side:Hide();
-		Side:SetSize(570, LeaPlusLC.MainPanelHeight)
+		Side:SetSize(570, RGXQoLLC.MainPanelHeight)
 		Side:SetClampedToScreen(true)
 		Side:SetClampRectInsets(500, -500, -300, 300)
 		Side:SetFrameStrata("FULLSCREEN_DIALOG")
@@ -12591,9 +12591,9 @@
 		Side.c:SetScript("OnClick", function() Side:Hide() end)
 
 		-- Add reset, help and back buttons
-		Side.r = LeaPlusLC:CreateButton("ResetButton", Side, "Reset", "BOTTOMLEFT", 16, 53, 0, 25, true, "Click to reset the settings on this page.")
-		Side.h = LeaPlusLC:CreateButton("HelpButton", Side, "Help", "BOTTOMLEFT", 76, 53, 0, 25, true, "No help is available for this page.")
-		Side.b = LeaPlusLC:CreateButton("BackButton", Side, "Back to Main Menu", "BOTTOMRIGHT", -16, 53, 0, 25, true, "Click to return to the main menu.")
+		Side.r = RGXQoLLC:CreateButton("ResetButton", Side, "Reset", "BOTTOMLEFT", 16, 53, 0, 25, true, "Click to reset the settings on this page.")
+		Side.h = RGXQoLLC:CreateButton("HelpButton", Side, "Help", "BOTTOMLEFT", 76, 53, 0, 25, true, "No help is available for this page.")
+		Side.b = RGXQoLLC:CreateButton("BackButton", Side, "Back to Main Menu", "BOTTOMRIGHT", -16, 53, 0, 25, true, "Click to return to the main menu.")
 
 		-- Reposition help button so it doesn't overlap reset button
 		Side.h:ClearAllPoints()
@@ -12603,29 +12603,29 @@
 		Side.h:SetPushedTextOffset(0, 0)
 
 		-- Add a reload button and syncronise it with the main panel reload button
-		local reloadb = LeaPlusLC:CreateButton("ConfigReload", Side, "Reload", "BOTTOMRIGHT", -16, 10, 0, 25, true, LeaPlusCB["ReloadUIButton"].tiptext)
-		LeaPlusLC:LockItem(reloadb,true)
+		local reloadb = RGXQoLLC:CreateButton("ConfigReload", Side, "Reload", "BOTTOMRIGHT", -16, 10, 0, 25, true, RGXQoLCB["ReloadUIButton"].tiptext)
+		RGXQoLLC:LockItem(reloadb,true)
 		reloadb:SetScript("OnClick", ReloadUI)
 
 		reloadb.f = reloadb:CreateFontString(nil, 'ARTWORK', 'GameFontNormalSmall')
 		reloadb.f:SetHeight(32);
 		reloadb.f:SetPoint('RIGHT', reloadb, 'LEFT', -10, 0)
-		reloadb.f:SetText(LeaPlusCB["ReloadUIButton"].f:GetText())
+		reloadb.f:SetText(RGXQoLCB["ReloadUIButton"].f:GetText())
 		reloadb.f:Hide()
 
-		LeaPlusCB["ReloadUIButton"]:HookScript("OnEnable", function()
-			LeaPlusLC:LockItem(reloadb, false)
+		RGXQoLCB["ReloadUIButton"]:HookScript("OnEnable", function()
+			RGXQoLLC:LockItem(reloadb, false)
 			reloadb.f:Show()
 		end)
 
-		LeaPlusCB["ReloadUIButton"]:HookScript("OnDisable", function()
-			LeaPlusLC:LockItem(reloadb, true)
+		RGXQoLCB["ReloadUIButton"]:HookScript("OnDisable", function()
+			RGXQoLLC:LockItem(reloadb, true)
 			reloadb.f:Hide()
 		end)
 
 		-- Set textures
-		LeaPlusLC:CreateBar("FootTexture", Side, 570, 48, "BOTTOM", 0.5, 0.5, 0.5, 1.0, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
-		LeaPlusLC:CreateBar("MainTexture", Side, 570, LeaPlusLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+		RGXQoLLC:CreateBar("FootTexture", Side, 570, 48, "BOTTOM", 0.5, 0.5, 0.5, 1.0, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+		RGXQoLLC:CreateBar("MainTexture", Side, 570, RGXQoLLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
 
 		-- Allow movement
 		Side:EnableMouse(true)
@@ -12636,15 +12636,15 @@
 			Side:StopMovingOrSizing();
 			Side:SetUserPlaced(false);
 			-- Save panel position
-			LeaPlusLC["MainPanelA"], void, LeaPlusLC["MainPanelR"], LeaPlusLC["MainPanelX"], LeaPlusLC["MainPanelY"] = Side:GetPoint()
+			RGXQoLLC["MainPanelA"], void, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"] = Side:GetPoint()
 		end)
 
 		-- Set panel attributes when shown
 		Side:SetScript("OnShow", function()
 			Side:ClearAllPoints()
-			Side:SetPoint(LeaPlusLC["MainPanelA"], UIParent, LeaPlusLC["MainPanelR"], LeaPlusLC["MainPanelX"], LeaPlusLC["MainPanelY"])
-			Side:SetScale(LeaPlusLC["PlusPanelScale"])
-			Side.t:SetAlpha(1 - LeaPlusLC["PlusPanelAlpha"])
+			Side:SetPoint(RGXQoLLC["MainPanelA"], UIParent, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"])
+			Side:SetScale(RGXQoLLC["PlusPanelScale"])
+			Side.t:SetAlpha(1 - RGXQoLLC["PlusPanelAlpha"])
 		end)
 
 		-- Add title
@@ -12661,8 +12661,8 @@
 		Side.v:SetText(L["Configuration Panel"])
 
 		-- Prevent options panel from showing while side panel is showing
-		LeaPlusLC["PageF"]:HookScript("OnShow", function()
-			if Side:IsShown() then LeaPlusLC["PageF"]:Hide(); end
+		RGXQoLLC["PageF"]:HookScript("OnShow", function()
+			if Side:IsShown() then RGXQoLLC["PageF"]:Hide(); end
 		end)
 
 		-- Create scroll frame if needed
@@ -12692,12 +12692,12 @@
 			end)
 
 			-- Add scroll for more message
-			local footMessage = LeaPlusLC:MakeTx(Side, "(scroll the list for more)", 16, 0)
+			local footMessage = RGXQoLLC:MakeTx(Side, "(scroll the list for more)", 16, 0)
 			footMessage:ClearAllPoints()
 			footMessage:SetPoint("TOPRIGHT", Side.scrollFrame, "TOPRIGHT", 28, 24)
 
-			-- Give child a file level scope (it's used in LeaPlusLC.TipSee)
-			LeaPlusLC[globref .. "ScrollChild"] = Side.scrollChild
+			-- Give child a file level scope (it's used in RGXQoLLC.TipSee)
+			RGXQoLLC[globref .. "ScrollChild"] = Side.scrollChild
 
 		end
 
@@ -12707,7 +12707,7 @@
 	end
 
 	-- Define subheadings
-	function LeaPlusLC:MakeTx(frame, title, x, y)
+	function RGXQoLLC:MakeTx(frame, title, x, y)
 		local text = frame:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
 		text:SetPoint("TOPLEFT", x, y)
 		text:SetText(L[title])
@@ -12715,7 +12715,7 @@
 	end
 
 	-- Define text
-	function LeaPlusLC:MakeWD(frame, title, x, y)
+	function RGXQoLLC:MakeWD(frame, title, x, y)
 		local text = frame:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
 		text:SetPoint("TOPLEFT", x, y)
 		text:SetText(L[title])
@@ -12724,11 +12724,11 @@
 	end
 
 	-- Create a slider control (uses standard template)
-	function LeaPlusLC:MakeSL(frame, field, caption, low, high, step, x, y, form)
+	function RGXQoLLC:MakeSL(frame, field, caption, low, high, step, x, y, form)
 
 		-- Create slider control
 		local Slider = CreateFrame("Slider", nil, frame, "RGXQoLConfigurationPanelSliderTemplate") -- Old is UISliderTemplate
-		LeaPlusCB[field] = Slider
+		RGXQoLCB[field] = Slider
 		Slider:SetMinMaxValues(low, high)
 		Slider:SetValueStep(step)
 		Slider:EnableMouseWheel(true)
@@ -12737,7 +12737,7 @@
 		Slider:SetHeight(20)
 		Slider:SetHitRectInsets(0, 0, 0, 0)
 		Slider.tiptext = L[caption]
-		Slider:SetScript("OnEnter", LeaPlusLC.TipSee)
+		Slider:SetScript("OnEnter", RGXQoLLC.TipSee)
 		Slider:SetScript("OnLeave", GameTooltip_Hide)
 
 		-- Create slider label
@@ -12763,24 +12763,24 @@
 		Slider:SetScript("OnValueChanged", function(self, value)
 			local value = floor((value - low) / step + 0.5) * step + low
 			Slider.f:SetFormattedText(form, value)
-			LeaPlusLC[field] = value
+			RGXQoLLC[field] = value
 		end)
 
 		-- Set slider value when shown
 		Slider:SetScript("OnShow", function(self)
-			self:SetValue(LeaPlusLC[field])
+			self:SetValue(RGXQoLLC[field])
 		end)
 
 	end
 
 	-- Create a checkbox control (uses standard template)
-	function LeaPlusLC:MakeCB(parent, field, caption, x, y, reload, tip, tipstyle)
+	function RGXQoLLC:MakeCB(parent, field, caption, x, y, reload, tip, tipstyle)
 
 		-- Create the checkbox
 		local Cbox = CreateFrame('CheckButton', nil, parent, "ChatConfigCheckButtonTemplate")
-		LeaPlusCB[field] = Cbox
+		RGXQoLCB[field] = Cbox
 		Cbox:SetPoint("TOPLEFT",x, y)
-		Cbox:SetScript("OnEnter", LeaPlusLC.TipSee)
+		Cbox:SetScript("OnEnter", RGXQoLLC.TipSee)
 		Cbox:SetScript("OnLeave", GameTooltip_Hide)
 
 		-- Add label and tooltip
@@ -12801,12 +12801,12 @@
 		Cbox.f:SetWordWrap(false)
 
 		-- Set maximum label width
-		if parent:GetParent() == LeaPlusLC["PageF"] then
+		if parent:GetParent() == RGXQoLLC["PageF"] then
 			-- Main panel checkbox labels
 			if Cbox.f:GetWidth() > 152 then
 				Cbox.f:SetWidth(152)
-				LeaPlusLC["TruncatedLabelsList"] = LeaPlusLC["TruncatedLabelsList"] or {}
-				LeaPlusLC["TruncatedLabelsList"][Cbox.f] = L[caption]
+				RGXQoLLC["TruncatedLabelsList"] = RGXQoLLC["TruncatedLabelsList"] or {}
+				RGXQoLLC["TruncatedLabelsList"][Cbox.f] = L[caption]
 			end
 			-- Set checkbox click width
 			if Cbox.f:GetStringWidth() > 152 then
@@ -12818,8 +12818,8 @@
 			-- Configuration panel checkbox labels (other checkboxes either have custom functions or blank labels)
 			if Cbox.f:GetWidth() > 302 then
 				Cbox.f:SetWidth(302)
-				LeaPlusLC["TruncatedLabelsList"] = LeaPlusLC["TruncatedLabelsList"] or {}
-				LeaPlusLC["TruncatedLabelsList"][Cbox.f] = L[caption]
+				RGXQoLLC["TruncatedLabelsList"] = RGXQoLLC["TruncatedLabelsList"] or {}
+				RGXQoLLC["TruncatedLabelsList"][Cbox.f] = L[caption]
 			end
 			-- Set checkbox click width
 			if Cbox.f:GetStringWidth() > 302 then
@@ -12831,7 +12831,7 @@
 
 		-- Set default checkbox state and click area
 		Cbox:SetScript('OnShow', function(self)
-			if LeaPlusLC[field] == "On" then
+			if RGXQoLLC[field] == "On" then
 				self:SetChecked(true)
 			else
 				self:SetChecked(false)
@@ -12841,21 +12841,21 @@
 		-- Process clicks
 		Cbox:SetScript('OnClick', function()
 			if Cbox:GetChecked() then
-				LeaPlusLC[field] = "On"
+				RGXQoLLC[field] = "On"
 			else
-				LeaPlusLC[field] = "Off"
+				RGXQoLLC[field] = "Off"
 			end
-			LeaPlusLC:SetDim(); -- Lock invalid options
-			LeaPlusLC:ReloadCheck(); -- Show reload button if needed
+			RGXQoLLC:SetDim(); -- Lock invalid options
+			RGXQoLLC:ReloadCheck(); -- Show reload button if needed
 		end)
 	end
 
 	-- Create an editbox (uses standard template)
-	function LeaPlusLC:CreateEditBox(frame, parent, width, maxchars, anchor, x, y, tab, shifttab)
+	function RGXQoLLC:CreateEditBox(frame, parent, width, maxchars, anchor, x, y, tab, shifttab)
 
 		-- Create editbox
         local eb = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
-		LeaPlusCB[frame] = eb
+		RGXQoLCB[frame] = eb
 		eb:SetPoint(anchor, x, y)
 		eb:SetWidth(width)
 		eb:SetHeight(24)
@@ -12878,9 +12878,9 @@
 		eb:SetScript("OnTabPressed", function(self)
 			self:ClearFocus()
 			if IsShiftKeyDown() then
-				LeaPlusCB[shifttab]:SetFocus()
+				RGXQoLCB[shifttab]:SetFocus()
 			else
-				LeaPlusCB[tab]:SetFocus()
+				RGXQoLCB[tab]:SetFocus()
 			end
 		end)
 
@@ -12889,9 +12889,9 @@
 	end
 
 	-- Create a standard button (using standard button template)
-	function LeaPlusLC:CreateButton(name, frame, label, anchor, x, y, width, height, reskin, tip, naked)
+	function RGXQoLLC:CreateButton(name, frame, label, anchor, x, y, width, height, reskin, tip, naked)
 		local mbtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-		LeaPlusCB[name] = mbtn
+		RGXQoLCB[name] = mbtn
 		mbtn:SetSize(width, height)
 		mbtn:SetPoint(anchor, x, y)
 		mbtn:SetHitRectInsets(0, 0, 0, 0)
@@ -12910,7 +12910,7 @@
 
 		-- Tooltip handler
 		mbtn.tiptext = L[tip]
-		mbtn:SetScript("OnEnter", LeaPlusLC.TipSee)
+		mbtn:SetScript("OnEnter", RGXQoLLC.TipSee)
 		mbtn:SetScript("OnLeave", GameTooltip_Hide)
 
 		-- Texture the button
@@ -12918,10 +12918,10 @@
 
 			-- Set skinned button textures
 			if not naked then
-				mbtn:SetNormalTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus.blp")
+				mbtn:SetNormalTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
 				mbtn:GetNormalTexture():SetTexCoord(0.125, 0.25, 0.21875, 0.25)
 			end
-			mbtn:SetHighlightTexture("Interface\\AddOns\\Leatrix_Plus\\Leatrix_Plus.blp")
+			mbtn:SetHighlightTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
 			mbtn:GetHighlightTexture():SetTexCoord(0, 0.125, 0.21875, 0.25)
 
 			-- Hide the default textures
@@ -12937,19 +12937,19 @@
 	end
 
 	-- Create a dropdown menu (using standard dropdown template)
-	function LeaPlusLC:CreateDropdown(frame, label, width, anchor, parent, relative, x, y, items)
+	function RGXQoLLC:CreateDropdown(frame, label, width, anchor, parent, relative, x, y, items)
 
 		local RadioDropdown = CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
-		LeaPlusCB[frame] = RadioDropdown
+		RGXQoLCB[frame] = RadioDropdown
 		RadioDropdown:SetPoint(anchor, parent, relative, x, y)
 		RadioDropdown:SetWidth(width)
 
 		local function IsSelected(value)
-			return value == LeaPlusLC[frame]
+			return value == RGXQoLLC[frame]
 		end
 
 		local function SetSelected(value)
-			LeaPlusLC[frame] = value
+			RGXQoLLC[frame] = value
 		end
 
 		MenuUtil.CreateRadioMenu(RadioDropdown, IsSelected, SetSelected, unpack(items))
@@ -12962,7 +12962,7 @@
 -- 	Create main options panel frame
 ----------------------------------------------------------------------
 
-	function LeaPlusLC:CreateMainPanel()
+	function RGXQoLLC:CreateMainPanel()
 
 		-- Create the panel
 		local PageF = CreateFrame("Frame", nil, UIParent);
@@ -12972,8 +12972,8 @@
 		table.insert(UISpecialFrames, "LeaPlusGlobalPanel")
 
 		-- Set frame parameters
-		LeaPlusLC["PageF"] = PageF
-		PageF:SetSize(570, LeaPlusLC.MainPanelHeight)
+		RGXQoLLC["PageF"] = PageF
+		PageF:SetSize(570, RGXQoLLC.MainPanelHeight)
 		PageF:Hide();
 		PageF:SetFrameStrata("FULLSCREEN_DIALOG")
 		PageF:SetClampedToScreen(true)
@@ -12986,7 +12986,7 @@
 			PageF:StopMovingOrSizing();
 			PageF:SetUserPlaced(false);
 			-- Save panel position
-			LeaPlusLC["MainPanelA"], void, LeaPlusLC["MainPanelR"], LeaPlusLC["MainPanelX"], LeaPlusLC["MainPanelY"] = PageF:GetPoint()
+			RGXQoLLC["MainPanelA"], void, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"] = PageF:GetPoint()
 		end)
 
 		-- Add background color
@@ -12995,14 +12995,14 @@
 		PageF.t:SetColorTexture(0.05, 0.05, 0.05, 0.9)
 
 		-- Add textures
-		LeaPlusLC:CreateBar("FootTexture", PageF, 570, 48, "BOTTOM", 0.5, 0.5, 0.5, 1.0, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
-		LeaPlusLC:CreateBar("MainTexture", PageF, 440, LeaPlusLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
-		LeaPlusLC:CreateBar("MenuTexture", PageF, 130, LeaPlusLC.MainPanelHeight - 47, "TOPLEFT", 0.7, 0.7, 0.7, 0.7, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+		RGXQoLLC:CreateBar("FootTexture", PageF, 570, 48, "BOTTOM", 0.5, 0.5, 0.5, 1.0, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+		RGXQoLLC:CreateBar("MainTexture", PageF, 440, RGXQoLLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+		RGXQoLLC:CreateBar("MenuTexture", PageF, 130, RGXQoLLC.MainPanelHeight - 47, "TOPLEFT", 0.7, 0.7, 0.7, 0.7, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
 
 		-- Set panel position when shown
 		PageF:SetScript("OnShow", function()
 			PageF:ClearAllPoints()
-			PageF:SetPoint(LeaPlusLC["MainPanelA"], UIParent, LeaPlusLC["MainPanelR"], LeaPlusLC["MainPanelX"], LeaPlusLC["MainPanelY"])
+			PageF:SetPoint(RGXQoLLC["MainPanelA"], UIParent, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"])
 		end)
 
 		-- Add main title (shown above menu in the corner)
@@ -13016,11 +13016,11 @@
 		PageF.v:SetPoint('TOPLEFT', PageF.mt, 'BOTTOMLEFT', 0, -8);
 		PageF.v:SetPoint('RIGHT', PageF, -32, 0)
 		PageF.v:SetJustifyH('LEFT'); PageF.v:SetJustifyV('TOP');
-		PageF.v:SetNonSpaceWrap(true); PageF.v:SetText(L["Classic"] .. " " .. LeaPlusLC["AddonVer"])
+		PageF.v:SetNonSpaceWrap(true); PageF.v:SetText(L["Classic"] .. " " .. RGXQoLLC["AddonVer"])
 
 		-- Add reload UI Button
-		local reloadb = LeaPlusLC:CreateButton("ReloadUIButton", PageF, "Reload", "BOTTOMRIGHT", -16, 10, 0, 25, true, "Your UI needs to be reloaded for some of the changes to take effect.|n|nYou don't have to click the reload button immediately but you do need to click it when you are done making changes and you want the changes to take effect.")
-		LeaPlusLC:LockItem(reloadb,true)
+		local reloadb = RGXQoLLC:CreateButton("ReloadUIButton", PageF, "Reload", "BOTTOMRIGHT", -16, 10, 0, 25, true, "Your UI needs to be reloaded for some of the changes to take effect.|n|nYou don't have to click the reload button immediately but you do need to click it when you are done making changes and you want the changes to take effect.")
+		RGXQoLLC:LockItem(reloadb,true)
 		reloadb:SetScript("OnClick", ReloadUI)
 
 		reloadb.f = reloadb:CreateFontString(nil, 'ARTWORK', 'GameFontNormalSmall')
@@ -13033,66 +13033,66 @@
 		local CloseB = CreateFrame("Button", nil, PageF, "UIPanelCloseButton")
 		CloseB:SetSize(30, 30)
 		CloseB:SetPoint("TOPRIGHT", 0, 0)
-		CloseB:SetScript("OnClick", LeaPlusLC.HideFrames)
+		CloseB:SetScript("OnClick", RGXQoLLC.HideFrames)
 
 		-- Add web link Button
-		local PageFAlertButton = LeaPlusLC:CreateButton("PageFAlertButton", PageF, "You should keybind web link!", "BOTTOMLEFT", 16, 10, 0, 25, true, "You should set a keybind for the web link feature.  It's very useful.|n|nOpen the key bindings window (accessible from the game menu) and click Leatrix Plus.|n|nSet a keybind for Show web link.|n|nNow when your pointer is over an item, NPC or spell (and more), press your keybind to get a web link.", true)
+		local PageFAlertButton = RGXQoLLC:CreateButton("PageFAlertButton", PageF, "You should keybind web link!", "BOTTOMLEFT", 16, 10, 0, 25, true, "You should set a keybind for the web link feature.  It's very useful.|n|nOpen the key bindings window (accessible from the game menu) and click Leatrix Plus.|n|nSet a keybind for Show web link.|n|nNow when your pointer is over an item, NPC or spell (and more), press your keybind to get a web link.", true)
 		PageFAlertButton:SetPushedTextOffset(0, 0)
 		PageF:HookScript("OnShow", function()
-			if GetBindingKey("LEATRIX_PLUS_GLOBAL_WEBLINK") then PageFAlertButton:Hide() else PageFAlertButton:Show() end
+			if GetBindingKey("RGXQO_GLOBAL_WEBLINK") then PageFAlertButton:Hide() else PageFAlertButton:Show() end
 		end)
 
 		-- Release memory
-		LeaPlusLC.CreateMainPanel = nil
+		RGXQoLLC.CreateMainPanel = nil
 
 	end
 
-	LeaPlusLC:CreateMainPanel();
+	RGXQoLLC:CreateMainPanel();
 
 ----------------------------------------------------------------------
 -- 	L80: Commands
 ----------------------------------------------------------------------
 
 	-- Slash command function
-	function LeaPlusLC:SlashFunc(str)
+	function RGXQoLLC:SlashFunc(str)
 		if str and str ~= "" then
 			-- Get parameters in lower case with duplicate spaces removed
 			local str, arg1, arg2, arg3 = strsplit(" ", string.lower(str:gsub("%s+", " ")))
 			-- Traverse parameters
 			if str == "wipe" then
 				-- Wipe settings
-				LeaPlusLC:PlayerLogout(true) -- Run logout function with wipe parameter
+				RGXQoLLC:PlayerLogout(true) -- Run logout function with wipe parameter
 				wipe(RGXQoLDB)
-				LpEvt:UnregisterAllEvents(); -- Don't save any settings
+				RGXQoLEvt:UnregisterAllEvents(); -- Don't save any settings
 				ReloadUI();
 			elseif str == "nosave" then
 				-- Prevent Leatrix Plus from overwriting RGXQoLDB at next logout
-				LpEvt:UnregisterEvent("PLAYER_LOGOUT")
-				LeaPlusLC:Print("Leatrix Plus will not overwrite RGXQoLDB at next logout.")
+				RGXQoLEvt:UnregisterEvent("PLAYER_LOGOUT")
+				RGXQoLLC:Print("Leatrix Plus will not overwrite RGXQoLDB at next logout.")
 				return
 			elseif str == "reset" then
 				-- Reset panel positions
-				LeaPlusLC["MainPanelA"], LeaPlusLC["MainPanelR"], LeaPlusLC["MainPanelX"], LeaPlusLC["MainPanelY"] = "CENTER", "CENTER", 0, 0
-				LeaPlusLC["PlusPanelScale"] = 1
-				LeaPlusLC["PlusPanelAlpha"] = 0
-				LeaPlusLC["PageF"]:SetScale(1)
-				LeaPlusLC["PageF"].t:SetAlpha(1 - LeaPlusLC["PlusPanelAlpha"])
+				RGXQoLLC["MainPanelA"], RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"] = "CENTER", "CENTER", 0, 0
+				RGXQoLLC["PlusPanelScale"] = 1
+				RGXQoLLC["PlusPanelAlpha"] = 0
+				RGXQoLLC["PageF"]:SetScale(1)
+				RGXQoLLC["PageF"].t:SetAlpha(1 - RGXQoLLC["PlusPanelAlpha"])
 				-- Refresh panels
-				LeaPlusLC["PageF"]:ClearAllPoints()
-				LeaPlusLC["PageF"]:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+				RGXQoLLC["PageF"]:ClearAllPoints()
+				RGXQoLLC["PageF"]:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 				-- Reset currently showing configuration panel
-				for k, v in pairs(LeaConfigList) do
+				for k, v in pairs(RGXQoLConfigList) do
 					if v:IsShown() then
 						v:ClearAllPoints()
 						v:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 						v:SetScale(1)
-						v.t:SetAlpha(1 - LeaPlusLC["PlusPanelAlpha"])
+						v.t:SetAlpha(1 - RGXQoLLC["PlusPanelAlpha"])
 					end
 				end
 				-- Refresh Leatrix Plus settings menu only
-				if LeaPlusLC["Page8"]:IsShown() then
-					LeaPlusLC["Page8"]:Hide()
-					LeaPlusLC["Page8"]:Show()
+				if RGXQoLLC["Page8"]:IsShown() then
+					RGXQoLLC["Page8"]:Hide()
+					RGXQoLLC["Page8"]:Show()
 				end
 				return
 			elseif str == "taint" then
@@ -13103,28 +13103,28 @@
 						if arg1 == 0 then
 							-- Disable taint log
 							ConsoleExec("taintLog 0")
-							LeaPlusLC:Print("Taint level: Disabled (0).")
+							RGXQoLLC:Print("Taint level: Disabled (0).")
 						elseif arg1 == 1 then
 							-- Basic taint log
 							ConsoleExec("taintLog 1")
-							LeaPlusLC:Print("Taint level: Basic (1).")
+							RGXQoLLC:Print("Taint level: Basic (1).")
 						elseif arg1 == 2 then
 							-- Full taint log
 							ConsoleExec("taintLog 2")
-							LeaPlusLC:Print("Taint level: Full (2).")
+							RGXQoLLC:Print("Taint level: Full (2).")
 						end
 					else
-						LeaPlusLC:Print("Invalid taint level.")
+						RGXQoLLC:Print("Invalid taint level.")
 					end
 				else
 					-- Show current taint level
 					local taintCurrent = GetCVar("taintLog")
 					if taintCurrent == "0" then
-						LeaPlusLC:Print("Taint level: Disabled (0).")
+						RGXQoLLC:Print("Taint level: Disabled (0).")
 					elseif taintCurrent == "1" then
-						LeaPlusLC:Print("Taint level: Basic (1).")
+						RGXQoLLC:Print("Taint level: Basic (1).")
 					elseif taintCurrent == "2" then
-						LeaPlusLC:Print("Taint level: Full (2).")
+						RGXQoLLC:Print("Taint level: Full (2).")
 					end
 				end
 				return
@@ -13138,7 +13138,7 @@
 							SetAbandonQuest()
 							AbandonQuest()
 						end
-						LeaPlusLC:Print(L["Quest log wiped."])
+						RGXQoLLC:Print(L["Quest log wiped."])
 						return
 					elseif tonumber(arg1) and tonumber(arg1) < 999999999 then
 						-- Show quest information
@@ -13147,25 +13147,25 @@
 						C_Timer.After(0.5, function()
 							local questTitle = C_QuestLog.GetQuestInfo(arg1) or L["Unknown"]
 							if questCompleted then
-								LeaPlusLC:Print(questTitle .. " (" .. arg1 .. "):" .. "|cffffffff " .. L["Completed."])
+								RGXQoLLC:Print(questTitle .. " (" .. arg1 .. "):" .. "|cffffffff " .. L["Completed."])
 							else
-								LeaPlusLC:Print(questTitle .. " (" .. arg1 .. "):" .. "|cffffffff " .. L["Not completed."])
+								RGXQoLLC:Print(questTitle .. " (" .. arg1 .. "):" .. "|cffffffff " .. L["Not completed."])
 							end
 						end)
 					else
-						LeaPlusLC:Print("Invalid quest ID.")
+						RGXQoLLC:Print("Invalid quest ID.")
 					end
 				else
-					LeaPlusLC:Print("Missing quest ID.")
+					RGXQoLLC:Print("Missing quest ID.")
 				end
 				return
 			elseif str == "rest" then
 				-- Show rested bubbles
-				LeaPlusLC:Print(L["Rested bubbles"] .. ": |cffffffff" .. (math.floor(20 * (GetXPExhaustion() or 0) / UnitXPMax("player") + 0.5)))
+				RGXQoLLC:Print(L["Rested bubbles"] .. ": |cffffffff" .. (math.floor(20 * (GetXPExhaustion() or 0) / UnitXPMax("player") + 0.5)))
 				return
 			elseif str == "zygor" then
 				-- Toggle Zygor addon
-				LeaPlusLC:ZygorToggle()
+				RGXQoLLC:ZygorToggle()
 				return
 			elseif str == "npcid" then
 				-- Print NPC ID
@@ -13174,25 +13174,25 @@
 				if npcName and npcGuid then
 					local void, void, void, void, void, npcID = strsplit("-", npcGuid)
 					if npcID then
-						LeaPlusLC:Print(npcName .. ": |cffffffff" .. npcID)
+						RGXQoLLC:Print(npcName .. ": |cffffffff" .. npcID)
 					end
 				end
 				return
 			elseif str == "id" then
 				-- Show web link
-				if not LeaPlusLC.WowheadLock then
+				if not RGXQoLLC.WowheadLock then
 					-- Set Wowhead link prefix
-						if GameLocale == "deDE" then LeaPlusLC.WowheadLock = "de.classic.wowhead.com"
-					elseif GameLocale == "esMX" then LeaPlusLC.WowheadLock = "mx.classic.wowhead.com"
-					elseif GameLocale == "esES" then LeaPlusLC.WowheadLock = "es.classic.wowhead.com"
-					elseif GameLocale == "frFR" then LeaPlusLC.WowheadLock = "fr.classic.wowhead.com"
-					elseif GameLocale == "itIT" then LeaPlusLC.WowheadLock = "it.classic.wowhead.com"
-					elseif GameLocale == "ptBR" then LeaPlusLC.WowheadLock = "pt.classic.wowhead.com"
-					elseif GameLocale == "ruRU" then LeaPlusLC.WowheadLock = "ru.classic.wowhead.com"
-					elseif GameLocale == "koKR" then LeaPlusLC.WowheadLock = "ko.classic.wowhead.com"
-					elseif GameLocale == "zhCN" then LeaPlusLC.WowheadLock = "cn.classic.wowhead.com"
-					elseif GameLocale == "zhTW" then LeaPlusLC.WowheadLock = "tw.classic.wowhead.com"
-					else							 LeaPlusLC.WowheadLock = "classic.wowhead.com"
+						if GameLocale == "deDE" then RGXQoLLC.WowheadLock = "de.classic.wowhead.com"
+					elseif GameLocale == "esMX" then RGXQoLLC.WowheadLock = "mx.classic.wowhead.com"
+					elseif GameLocale == "esES" then RGXQoLLC.WowheadLock = "es.classic.wowhead.com"
+					elseif GameLocale == "frFR" then RGXQoLLC.WowheadLock = "fr.classic.wowhead.com"
+					elseif GameLocale == "itIT" then RGXQoLLC.WowheadLock = "it.classic.wowhead.com"
+					elseif GameLocale == "ptBR" then RGXQoLLC.WowheadLock = "pt.classic.wowhead.com"
+					elseif GameLocale == "ruRU" then RGXQoLLC.WowheadLock = "ru.classic.wowhead.com"
+					elseif GameLocale == "koKR" then RGXQoLLC.WowheadLock = "ko.classic.wowhead.com"
+					elseif GameLocale == "zhCN" then RGXQoLLC.WowheadLock = "cn.classic.wowhead.com"
+					elseif GameLocale == "zhTW" then RGXQoLLC.WowheadLock = "tw.classic.wowhead.com"
+					else							 RGXQoLLC.WowheadLock = "classic.wowhead.com"
 					end
 				end
 				-- Store frame under mouse
@@ -13207,16 +13207,16 @@
 					if itemLink then
 						local itemID = GetItemInfoFromHyperlink(itemLink)
 						if itemID then
-							LeaPlusLC:ShowSystemEditBox("https://" .. LeaPlusLC.WowheadLock .. "/item=" .. itemID, false)
-							LeaPlusLC.FactoryEditBox.f:SetText(L["Item"] .. ": " .. itemLink .. " (" .. itemID .. ")")
+							RGXQoLLC:ShowSystemEditBox("https://" .. RGXQoLLC.WowheadLock .. "/item=" .. itemID, false)
+							RGXQoLLC.FactoryEditBox.f:SetText(L["Item"] .. ": " .. itemLink .. " (" .. itemID .. ")")
 							return
 						end
 					end
 					-- Spell
 					local name, spellID = tooltip:GetSpell()
 					if name and spellID then
-						LeaPlusLC:ShowSystemEditBox("https://" .. LeaPlusLC.WowheadLock .. "/spell=" .. spellID, false)
-						LeaPlusLC.FactoryEditBox.f:SetText(L["Spell"] .. ": " .. name .. " (" .. spellID .. ")")
+						RGXQoLLC:ShowSystemEditBox("https://" .. RGXQoLLC.WowheadLock .. "/spell=" .. spellID, false)
+						RGXQoLLC.FactoryEditBox.f:SetText(L["Spell"] .. ": " .. name .. " (" .. spellID .. ")")
 						return
 					end
 					-- NPC
@@ -13225,8 +13225,8 @@
 					if npcName and npcGuid then
 						local void, void, void, void, void, npcID = strsplit("-", npcGuid)
 						if npcID then
-							LeaPlusLC:ShowSystemEditBox("https://" .. LeaPlusLC.WowheadLock .. "/npc=" .. npcID, false)
-							LeaPlusLC.FactoryEditBox.f:SetText(L["NPC"] .. ": " .. npcName .. " (" .. npcID .. ")")
+							RGXQoLLC:ShowSystemEditBox("https://" .. RGXQoLLC.WowheadLock .. "/npc=" .. npcID, false)
+							RGXQoLLC.FactoryEditBox.f:SetText(L["NPC"] .. ": " .. npcName .. " (" .. npcID .. ")")
 							return
 						end
 					end
@@ -13238,8 +13238,8 @@
 								local spellName = BuffData.name
 								local spellID = BuffData.spellId
 								if spellName and spellID then
-									LeaPlusLC:ShowSystemEditBox("https://" .. LeaPlusLC.WowheadLock .. "/spell=" .. spellID, false)
-									LeaPlusLC.FactoryEditBox.f:SetText(L["Spell"] .. ": " .. spellName .. " (" .. spellID .. ")")
+									RGXQoLLC:ShowSystemEditBox("https://" .. RGXQoLLC.WowheadLock .. "/spell=" .. spellID, false)
+									RGXQoLLC.FactoryEditBox.f:SetText(L["Spell"] .. ": " .. spellName .. " (" .. spellID .. ")")
 								end
 							end
 							return
@@ -13252,8 +13252,8 @@
 								local spellName = DebuffData.name
 								local spellID = DebuffData.spellId
 								if spellName and spellID then
-									LeaPlusLC:ShowSystemEditBox("https://" .. LeaPlusLC.WowheadLock .. "/spell=" .. spellID, false)
-									LeaPlusLC.FactoryEditBox.f:SetText(L["Spell"] .. ": " .. spellName .. " (" .. spellID .. ")")
+									RGXQoLLC:ShowSystemEditBox("https://" .. RGXQoLLC.WowheadLock .. "/spell=" .. spellID, false)
+									RGXQoLLC.FactoryEditBox.f:SetText(L["Spell"] .. ": " .. spellName .. " (" .. spellID .. ")")
 								end
 							end
 							return
@@ -13267,8 +13267,8 @@
 						if mouseFocus == WorldFrame then unitFocus = "mouseover" else unitFocus = select(2, GameTooltip:GetUnit()) end
 						if not unitFocus or not UnitIsPlayer(unitFocus) then
 							tipTitle = tipTitle:gsub("|c%x%x%x%x%x%x%x%x", "") -- Remove color tag
-							LeaPlusLC:ShowSystemEditBox("https://" .. LeaPlusLC.WowheadLock .. "/search?q=" .. tipTitle, false)
-							LeaPlusLC.FactoryEditBox.f:SetText("|cffff0000" .. L["Link will search Wowhead"])
+							RGXQoLLC:ShowSystemEditBox("https://" .. RGXQoLLC.WowheadLock .. "/search?q=" .. tipTitle, false)
+							RGXQoLLC.FactoryEditBox.f:SetText("|cffff0000" .. L["Link will search Wowhead"])
 							return
 						end
 					end
@@ -13289,17 +13289,17 @@
 				end)
 			elseif str == "rsnd" then
 				-- Restart sound system
-				if LeaPlusCB["StopMusicBtn"] then LeaPlusCB["StopMusicBtn"]:Click() end
+				if RGXQoLCB["StopMusicBtn"] then RGXQoLCB["StopMusicBtn"]:Click() end
 				Sound_GameSystem_RestartSoundSystem()
-				LeaPlusLC:Print("Sound system restarted.")
+				RGXQoLLC:Print("Sound system restarted.")
 				return
 			elseif str == "event" then
 				-- List events (used for debug)
-				LeaPlusLC["DbF"] = LeaPlusLC["DbF"] or CreateFrame("FRAME")
-				if not LeaPlusLC["DbF"]:GetScript("OnEvent") then
-					LeaPlusLC:Print("Tracing started.")
-					LeaPlusLC["DbF"]:RegisterAllEvents()
-					LeaPlusLC["DbF"]:SetScript("OnEvent", function(self, event)
+				RGXQoLLC["DbF"] = RGXQoLLC["DbF"] or CreateFrame("FRAME")
+				if not RGXQoLLC["DbF"]:GetScript("OnEvent") then
+					RGXQoLLC:Print("Tracing started.")
+					RGXQoLLC["DbF"]:RegisterAllEvents()
+					RGXQoLLC["DbF"]:SetScript("OnEvent", function(self, event)
 						if event == "ACTIONBAR_UPDATE_COOLDOWN"
 						or event == "BAG_UPDATE_COOLDOWN"
 						or event == "CHAT_MSG_TRADESKILLS"
@@ -13314,32 +13314,32 @@
 						end
 					end)
 				else
-					LeaPlusLC["DbF"]:UnregisterAllEvents()
-					LeaPlusLC["DbF"]:SetScript("OnEvent", nil)
-					LeaPlusLC:Print("Tracing stopped.")
+					RGXQoLLC["DbF"]:UnregisterAllEvents()
+					RGXQoLLC["DbF"]:SetScript("OnEvent", nil)
+					RGXQoLLC:Print("Tracing stopped.")
 				end
 				return
 			elseif str == "game" then
 				-- Show game build
 				local version, build, gdate, tocversion = GetBuildInfo()
-				LeaPlusLC:Print(L["World of Warcraft"] .. ": |cffffffff" .. version .. "." .. build .. " (" .. gdate .. ") (" .. tocversion .. ")")
+				RGXQoLLC:Print(L["World of Warcraft"] .. ": |cffffffff" .. version .. "." .. build .. " (" .. gdate .. ") (" .. tocversion .. ")")
 				return
 			elseif str == "config" then
 				-- Show maximum camera distance
-				LeaPlusLC:Print(L["Camera distance"] .. ": |cffffffff" .. GetCVar("cameraDistanceMaxZoomFactor"))
+				RGXQoLLC:Print(L["Camera distance"] .. ": |cffffffff" .. GetCVar("cameraDistanceMaxZoomFactor"))
 				-- Show screen effects
-				LeaPlusLC:Print(L["Shaders"] .. ": |cffffffff" .. GetCVar("ffxGlow") .. ", " .. GetCVar("ffxDeath") .. ", " .. GetCVar("ffxNether"))
+				RGXQoLLC:Print(L["Shaders"] .. ": |cffffffff" .. GetCVar("ffxGlow") .. ", " .. GetCVar("ffxDeath") .. ", " .. GetCVar("ffxNether"))
 				-- Show particle density
-				LeaPlusLC:Print(L["Particle density"] .. ": |cffffffff" .. GetCVar("particleDensity"))
-				LeaPlusLC:Print(L["Weather density"] .. ": |cffffffff" .. GetCVar("weatherDensity"))
+				RGXQoLLC:Print(L["Particle density"] .. ": |cffffffff" .. GetCVar("particleDensity"))
+				RGXQoLLC:Print(L["Weather density"] .. ": |cffffffff" .. GetCVar("weatherDensity"))
 				-- Show config
-				LeaPlusLC:Print("SynchroniseConfig: |cffffffff" .. GetCVar("synchronizeConfig"))
+				RGXQoLLC:Print("SynchroniseConfig: |cffffffff" .. GetCVar("synchronizeConfig"))
 				-- Show raid restrictions
 				local unRaid = GetAllowLowLevelRaid()
 				if unRaid and unRaid == true then
-					LeaPlusLC:Print("GetAllowLowLevelRaid: |cffffffff" .. "True")
+					RGXQoLLC:Print("GetAllowLowLevelRaid: |cffffffff" .. "True")
 				else
-					LeaPlusLC:Print("GetAllowLowLevelRaid: |cffffffff" .. "False")
+					RGXQoLLC:Print("GetAllowLowLevelRaid: |cffffffff" .. "False")
 				end
 				return
 			elseif str == "tipcol" then
@@ -13349,9 +13349,9 @@
 					r = r <= 1 and r >= 0 and r or 0
 					g = g <= 1 and g >= 0 and g or 0
 					b = b <= 1 and b >= 0 and b or 0
-					LeaPlusLC:Print(L["Tooltip title color"] .. ": " .. strupper(string.format("%02x%02x%02x", r * 255, g * 255, b * 255) .. "."))
+					RGXQoLLC:Print(L["Tooltip title color"] .. ": " .. strupper(string.format("%02x%02x%02x", r * 255, g * 255, b * 255) .. "."))
 				else
-					LeaPlusLC:Print("No tooltip showing.")
+					RGXQoLLC:Print("No tooltip showing.")
 				end
 				return
 			elseif str == "list" then
@@ -13359,23 +13359,23 @@
 				local frame = EnumerateFrames()
 				while frame do
 					if (frame:IsVisible() and MouseIsOver(frame)) then
-						LeaPlusLC:Print(frame:GetName() or string.format("[Unnamed Frame: %s]", tostring(frame)))
+						RGXQoLLC:Print(frame:GetName() or string.format("[Unnamed Frame: %s]", tostring(frame)))
 					end
 					frame = EnumerateFrames(frame)
 				end
 				return
 			elseif str == "grid" then
 				-- Toggle frame alignment grid
-				if LeaPlusLC.grid:IsShown() then LeaPlusLC.grid:Hide() else LeaPlusLC.grid:Show() end
+				if RGXQoLLC.grid:IsShown() then RGXQoLLC.grid:Hide() else RGXQoLLC.grid:Show() end
 				return
 			elseif str == "chk" then
 				-- List truncated checkbox labels
-				if LeaPlusLC["TruncatedLabelsList"] then
-					for i, v in pairs(LeaPlusLC["TruncatedLabelsList"]) do
-						LeaPlusLC:Print(LeaPlusLC["TruncatedLabelsList"][i])
+				if RGXQoLLC["TruncatedLabelsList"] then
+					for i, v in pairs(RGXQoLLC["TruncatedLabelsList"]) do
+						RGXQoLLC:Print(RGXQoLLC["TruncatedLabelsList"][i])
 					end
 				else
-					LeaPlusLC:Print("Checkbox labels are Ok.")
+					RGXQoLLC:Print("Checkbox labels are Ok.")
 				end
 				return
 			elseif str == "cv" then
@@ -13386,16 +13386,16 @@
 							if tonumber(arg2) then
 								SetCVar(arg1, arg2)
 							else
-								LeaPlusLC:Print("Value must be a number.")
+								RGXQoLLC:Print("Value must be a number.")
 								return
 							end
 						end
-						LeaPlusLC:Print(arg1 .. ": |cffffffff" .. GetCVar(arg1))
+						RGXQoLLC:Print(arg1 .. ": |cffffffff" .. GetCVar(arg1))
 					else
-						LeaPlusLC:Print("Invalid console variable.")
+						RGXQoLLC:Print("Invalid console variable.")
 					end
 				else
-					LeaPlusLC:Print("Missing console variable.")
+					RGXQoLLC:Print("Missing console variable.")
 				end
 				return
 			elseif str == "play" then
@@ -13403,23 +13403,23 @@
 				if arg1 and arg1 ~= "" then
 					if tonumber(arg1) then
 						-- Stop last played sound ID
-						if LeaPlusLC.SNDcanitHandle then
-							StopSound(LeaPlusLC.SNDcanitHandle)
+						if RGXQoLLC.SNDcanitHandle then
+							StopSound(RGXQoLLC.SNDcanitHandle)
 						end
 						-- Play sound ID
-						LeaPlusLC.SNDcanitPlay, LeaPlusLC.SNDcanitHandle = PlaySound(arg1, "Master", false, false)
-						if not LeaPlusLC.SNDcanitPlay then LeaPlusLC:Print(L["Invalid sound ID"] .. ": |cffffffff" .. arg1) end
+						RGXQoLLC.SNDcanitPlay, RGXQoLLC.SNDcanitHandle = PlaySound(arg1, "Master", false, false)
+						if not RGXQoLLC.SNDcanitPlay then RGXQoLLC:Print(L["Invalid sound ID"] .. ": |cffffffff" .. arg1) end
 					else
-						LeaPlusLC:Print(L["Invalid sound ID"] .. ": |cffffffff" .. arg1)
+						RGXQoLLC:Print(L["Invalid sound ID"] .. ": |cffffffff" .. arg1)
 					end
 				else
-					LeaPlusLC:Print("Missing sound ID.")
+					RGXQoLLC:Print("Missing sound ID.")
 				end
 				return
 			elseif str == "stop" then
 				-- Stop last played sound ID
-				if LeaPlusLC.SNDcanitHandle then
-					StopSound(LeaPlusLC.SNDcanitHandle)
+				if RGXQoLLC.SNDcanitHandle then
+					StopSound(RGXQoLLC.SNDcanitHandle)
 				end
 				return
 			elseif str == "wipecds" then
@@ -13463,7 +13463,7 @@
 					if IsMoviePlayable(arg1) then
 						MovieFrame_PlayMovie(MovieFrame, arg1)
 					else
-						LeaPlusLC:Print("Movie not playable.")
+						RGXQoLLC:Print("Movie not playable.")
 					end
 				else
 					-- List playable movie IDs
@@ -13474,7 +13474,7 @@
 							count = count + 1
 						end
 					end
-					LeaPlusLC:Print("Total movies: |cffffffff" .. count)
+					RGXQoLLC:Print("Total movies: |cffffffff" .. count)
 				end
 				return
 			elseif str == "cin" then
@@ -13487,54 +13487,54 @@
 				return
 			elseif str == "marker" then
 				-- Prevent showing raid target markers on self
-				if not LeaPlusLC.MarkerFrame then
-					LeaPlusLC.MarkerFrame = CreateFrame("FRAME")
-					LeaPlusLC.MarkerFrame:RegisterEvent("RAID_TARGET_UPDATE")
+				if not RGXQoLLC.MarkerFrame then
+					RGXQoLLC.MarkerFrame = CreateFrame("FRAME")
+					RGXQoLLC.MarkerFrame:RegisterEvent("RAID_TARGET_UPDATE")
 				end
-				LeaPlusLC.MarkerFrame.Update = true
-				if LeaPlusLC.MarkerFrame.Toggle == false then
+				RGXQoLLC.MarkerFrame.Update = true
+				if RGXQoLLC.MarkerFrame.Toggle == false then
 					-- Show markers
-					LeaPlusLC.MarkerFrame:SetScript("OnEvent", nil)
+					RGXQoLLC.MarkerFrame:SetScript("OnEvent", nil)
 					ActionStatus_DisplayMessage(L["Self Markers Allowed"], true)
-					LeaPlusLC.MarkerFrame.Toggle = true
+					RGXQoLLC.MarkerFrame.Toggle = true
 				else
 					-- Hide markers
 					SetRaidTarget("player", 0)
-					LeaPlusLC.MarkerFrame:SetScript("OnEvent", function()
-						if LeaPlusLC.MarkerFrame.Update == true then
-							LeaPlusLC.MarkerFrame.Update = false
+					RGXQoLLC.MarkerFrame:SetScript("OnEvent", function()
+						if RGXQoLLC.MarkerFrame.Update == true then
+							RGXQoLLC.MarkerFrame.Update = false
 							SetRaidTarget("player", 0)
 						end
-						LeaPlusLC.MarkerFrame.Update = true
+						RGXQoLLC.MarkerFrame.Update = true
 					end)
 					ActionStatus_DisplayMessage(L["Self Markers Blocked"], true)
-					LeaPlusLC.MarkerFrame.Toggle = false
+					RGXQoLLC.MarkerFrame.Toggle = false
 				end
 				return
 			elseif str == "af" then
 				-- Automatically follow player target using ticker
-				if LeaPlusLC.followTick then
+				if RGXQoLLC.followTick then
 					-- Existing ticker is active so cancel it
-					LeaPlusLC.followTick:Cancel()
-					LeaPlusLC.followTick = nil
+					RGXQoLLC.followTick:Cancel()
+					RGXQoLLC.followTick = nil
 					FollowUnit("player")
-					LeaPlusLC:Print("AutoFollow disabled.")
+					RGXQoLLC:Print("AutoFollow disabled.")
 				else
 					-- No ticker is active so create one
 					local targetName, targetRealm = UnitName("target")
 					if not targetName or not UnitIsPlayer("target") or UnitIsUnit("player", "target") then
-						LeaPlusLC:Print("Invalid target.")
+						RGXQoLLC:Print("Invalid target.")
 						return
 					end
 					if targetRealm then targetName = targetName .. "-" .. targetRealm end
-					if LeaPlusLC.followTick then
-						LeaPlusLC.followTick:Cancel()
+					if RGXQoLLC.followTick then
+						RGXQoLLC.followTick:Cancel()
 					end
 					FollowUnit(targetName, true)
-					LeaPlusLC.followTick = C_Timer.NewTicker(0.5, function()
+					RGXQoLLC.followTick = C_Timer.NewTicker(0.5, function()
 						FollowUnit(targetName, true)
 					end)
-					LeaPlusLC:Print(L["AutoFollow"] .. ": |cffffffff" .. targetName .. "|r.")
+					RGXQoLLC:Print(L["AutoFollow"] .. ": |cffffffff" .. targetName .. "|r.")
 				end
 				return
 			elseif str == "mapid" then
@@ -13545,7 +13545,7 @@
 					local artID = C_Map.GetMapArtID(mapID) or nil
 					local mapName = C_Map.GetMapInfo(mapID).name or nil
 					if mapID and artID and mapName then
-						LeaPlusLC:Print(mapID .. " (" .. artID .. "): " .. mapName .. " (map)")
+						RGXQoLLC:Print(mapID .. " (" .. artID .. "): " .. mapName .. " (map)")
 					end
 				else
 					-- Show character map ID
@@ -13553,7 +13553,7 @@
 					local artID = C_Map.GetMapArtID(mapID) or nil
 					local mapName = C_Map.GetMapInfo(mapID).name or nil
 					if mapID and artID and mapName then
-						LeaPlusLC:Print(mapID .. " (" .. artID .. "): " .. mapName .. " (player)")
+						RGXQoLLC:Print(mapID .. " (" .. artID .. "): " .. mapName .. " (player)")
 					end
 				end
 				return
@@ -13590,7 +13590,7 @@
 			elseif str == "mapref" then
 				-- Print map reveal structure code
 				if not WorldMapFrame:IsShown() then
-					LeaPlusLC:Print("Open the map first!")
+					RGXQoLLC:Print("Open the map first!")
 					return
 				end
 				ChatFrame1:Clear()
@@ -13628,8 +13628,8 @@
 				return
 			elseif str == "mk" then
 				-- Print a map key
-				if not arg1 then LeaPlusLC:Print("Key missing!") return end
-				if not tonumber(arg1) then LeaPlusLC:Print("Must be a number!") return end
+				if not arg1 then RGXQoLLC:Print("Key missing!") return end
+				if not tonumber(arg1) then RGXQoLLC:Print("Must be a number!") return end
 				local key = arg1
 				ChatFrame1:Clear()
 				print('"' .. mod(floor(key / 2^36), 2^12) .. ":" .. mod(floor(key / 2^24), 2^12) .. ":" .. mod(floor(key / 2^12), 2^12) .. ":" .. mod(key, 2^12) .. '"')
@@ -13644,7 +13644,7 @@
 						local artID = C_Map.GetMapArtID(mapID) or nil
 						local mapName = C_Map.GetMapInfo(mapID).name or nil
 						if mapID and artID and mapName then
-							LeaPlusLC:Print(mapID .. " (" .. artID .. "): " .. mapName .. " (map)")
+							RGXQoLLC:Print(mapID .. " (" .. artID .. "): " .. mapName .. " (map)")
 						end
 					else
 						-- Show character map ID
@@ -13652,13 +13652,13 @@
 						local artID = C_Map.GetMapArtID(mapID) or nil
 						local mapName = C_Map.GetMapInfo(mapID).name or nil
 						if mapID and artID and mapName then
-							LeaPlusLC:Print(mapID .. " (" .. artID .. "): " .. mapName .. " (player)")
+							RGXQoLLC:Print(mapID .. " (" .. artID .. "): " .. mapName .. " (player)")
 						end
 					end
 					return
 				elseif not tonumber(arg1) or not C_Map.GetMapInfo(arg1) then
 					-- Invalid map ID
-					LeaPlusLC:Print("Invalid map ID.")
+					RGXQoLLC:Print("Invalid map ID.")
 				else
 					-- Set map by ID
 					WorldMapFrame:SetMapID(tonumber(arg1))
@@ -13671,7 +13671,7 @@
 			elseif str == "al" then
 				-- Enable auto loot
 				SetCVar("autoLootDefault", "1")
-				LeaPlusLC:Print("Auto loot is now enabled.")
+				RGXQoLLC:Print("Auto loot is now enabled.")
 				return
 			elseif str == "realm" then
 				-- Show list of connected realms
@@ -13679,26 +13679,26 @@
 				local userRealm = GetNormalizedRealmName()
 				local connectedServers = GetAutoCompleteRealms()
 				if titleRealm and userRealm and connectedServers then
-					LeaPlusLC:Print(L["Connections for"] .. "|cffffffff " .. titleRealm)
+					RGXQoLLC:Print(L["Connections for"] .. "|cffffffff " .. titleRealm)
 					if #connectedServers > 0 then
 						local count = 1
 						for i = 1, #connectedServers do
 							if userRealm ~= connectedServers[i] then
-								LeaPlusLC:Print(count .. ".  " .. connectedServers[i])
+								RGXQoLLC:Print(count .. ".  " .. connectedServers[i])
 								count = count + 1
 							end
 						end
 					else
-						LeaPlusLC:Print("None")
+						RGXQoLLC:Print("None")
 					end
 				end
 				return
 			elseif str == "dup" then
 				-- Print music track duplicates
 				local found
-				for i, e in pairs(Leatrix_Plus["ZoneList"]) do
-					if Leatrix_Plus["ZoneList"][e] then
-						for a, b in pairs(Leatrix_Plus["ZoneList"][e]) do
+				for i, e in pairs(RGXQoLAddon["ZoneList"]) do
+					if RGXQoLAddon["ZoneList"][e] then
+						for a, b in pairs(RGXQoLAddon["ZoneList"][e]) do
 							local same = {}
 							if b.tracks then
 								for k, v in pairs(b.tracks) do
@@ -13715,12 +13715,12 @@
 					end
 				end
 				if not found then
-					LeaPlusLC:Print("No media duplicates found.")
+					RGXQoLLC:Print("No media duplicates found.")
 				end
 				return
 			elseif str == "help" then
 				-- Help panel
-				if not LeaPlusLC.HelpFrame then
+				if not RGXQoLLC.HelpFrame then
 					local frame = CreateFrame("FRAME", nil, UIParent)
 					frame:SetSize(570, 360); frame:SetFrameStrata("FULLSCREEN_DIALOG"); frame:SetFrameLevel(100)
 					frame.tex = frame:CreateTexture(nil, "BACKGROUND"); frame.tex:SetAllPoints(); frame.tex:SetColorTexture(0.05, 0.05, 0.05, 0.9)
@@ -13734,47 +13734,47 @@
 					frame:SetScript("OnDragStart", frame.StartMoving)
 					frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() frame:SetUserPlaced(false) end)
 					frame:Hide()
-					LeaPlusLC:CreateBar("HelpPanelMainTexture", frame, 570, 360, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+					RGXQoLLC:CreateBar("HelpPanelMainTexture", frame, 570, 360, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
 					-- Panel contents
 					local col1, col2, color1 = 10, 120, "|cffffffaa"
-					LeaPlusLC:MakeTx(frame, "Leatrix Plus Help", col1, -10)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp", col1, -30)
-					LeaPlusLC:MakeWD(frame, "Toggle opttions panel.", col2, -30)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp reset", col1, -50)
-					LeaPlusLC:MakeWD(frame, "Reset addon panel position and scale.", col2, -50)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp wipe", col1, -70)
-					LeaPlusLC:MakeWD(frame, "Wipe all addon settings (reloads UI).", col2, -70)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp realm", col1, -90)
-					LeaPlusLC:MakeWD(frame, "Show realms connected to yours.", col2, -90)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp rest", col1, -110)
-					LeaPlusLC:MakeWD(frame, "Show number of rested XP bubbles remaining.", col2, -110)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp quest <id>", col1, -130)
-					LeaPlusLC:MakeWD(frame, "Show quest completion status for <quest id>.", col2, -130)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp quest wipe", col1, -150)
-					LeaPlusLC:MakeWD(frame, "Wipe your quest log.", col2, -150)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp grid", col1, -170)
-					LeaPlusLC:MakeWD(frame, "Toggle a frame alignment grid.", col2, -170)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp id", col1, -190)
-					LeaPlusLC:MakeWD(frame, "Show a web link for whatever the pointer is over.", col2, -190)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp zygor", col1, -210)
-					LeaPlusLC:MakeWD(frame, "Toggle the Zygor addon (reloads UI).", col2, -210)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp movie <id>", col1, -230)
-					LeaPlusLC:MakeWD(frame, "Play a movie by its ID.", col2, -230)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp marker", col1, -250)
-					LeaPlusLC:MakeWD(frame, "Block target markers (toggle) (requires assistant or leader in raid).", col2, -250)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp rsnd", col1, -270)
-					LeaPlusLC:MakeWD(frame, "Restart the sound system.", col2, -270)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp ra", col1, -290)
-					LeaPlusLC:MakeWD(frame, "Announce target in General chat channel (useful for rares).", col2, -290)
-					LeaPlusLC:MakeWD(frame, color1 .. "/ltp con", col1, -310)
-					LeaPlusLC:MakeWD(frame, "Launch the developer console with a large font.", col2, -310)
-					LeaPlusLC:MakeWD(frame, color1 .. "/rl", col1, -330)
-					LeaPlusLC:MakeWD(frame, "Reload the UI.", col2, -330)
-					LeaPlusLC.HelpFrame = frame
+					RGXQoLLC:MakeTx(frame, "Leatrix Plus Help", col1, -10)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp", col1, -30)
+					RGXQoLLC:MakeWD(frame, "Toggle opttions panel.", col2, -30)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp reset", col1, -50)
+					RGXQoLLC:MakeWD(frame, "Reset addon panel position and scale.", col2, -50)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp wipe", col1, -70)
+					RGXQoLLC:MakeWD(frame, "Wipe all addon settings (reloads UI).", col2, -70)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp realm", col1, -90)
+					RGXQoLLC:MakeWD(frame, "Show realms connected to yours.", col2, -90)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp rest", col1, -110)
+					RGXQoLLC:MakeWD(frame, "Show number of rested XP bubbles remaining.", col2, -110)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp quest <id>", col1, -130)
+					RGXQoLLC:MakeWD(frame, "Show quest completion status for <quest id>.", col2, -130)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp quest wipe", col1, -150)
+					RGXQoLLC:MakeWD(frame, "Wipe your quest log.", col2, -150)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp grid", col1, -170)
+					RGXQoLLC:MakeWD(frame, "Toggle a frame alignment grid.", col2, -170)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp id", col1, -190)
+					RGXQoLLC:MakeWD(frame, "Show a web link for whatever the pointer is over.", col2, -190)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp zygor", col1, -210)
+					RGXQoLLC:MakeWD(frame, "Toggle the Zygor addon (reloads UI).", col2, -210)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp movie <id>", col1, -230)
+					RGXQoLLC:MakeWD(frame, "Play a movie by its ID.", col2, -230)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp marker", col1, -250)
+					RGXQoLLC:MakeWD(frame, "Block target markers (toggle) (requires assistant or leader in raid).", col2, -250)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp rsnd", col1, -270)
+					RGXQoLLC:MakeWD(frame, "Restart the sound system.", col2, -270)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp ra", col1, -290)
+					RGXQoLLC:MakeWD(frame, "Announce target in General chat channel (useful for rares).", col2, -290)
+					RGXQoLLC:MakeWD(frame, color1 .. "/ltp con", col1, -310)
+					RGXQoLLC:MakeWD(frame, "Launch the developer console with a large font.", col2, -310)
+					RGXQoLLC:MakeWD(frame, color1 .. "/rl", col1, -330)
+					RGXQoLLC:MakeWD(frame, "Reload the UI.", col2, -330)
+					RGXQoLLC.HelpFrame = frame
 					_G["LeaPlusGlobalHelpPanel"] = frame
 					table.insert(UISpecialFrames, "LeaPlusGlobalHelpPanel")
 				end
-				if LeaPlusLC.HelpFrame:IsShown() then LeaPlusLC.HelpFrame:Hide() else LeaPlusLC.HelpFrame:Show() end
+				if RGXQoLLC.HelpFrame:IsShown() then RGXQoLLC.HelpFrame:Hide() else RGXQoLLC.HelpFrame:Show() end
 				return
 			elseif str == "ra" then
 				-- Announce target name, health percentage, coordinates and map pin link in General chat channel
@@ -13809,36 +13809,36 @@
 								C_ChatInfo.SendChatMessage(format("%%t " .. unitTag .. "(%d%%)%s", uHealth / uHealthMax * 100, " " .. string.format("%.0f", pos.x * 100) .. ":" .. string.format("%.0f", pos.y * 100)), "CHANNEL", nil, index)
 								-- C_ChatInfo.SendChatMessage(format("%%t " .. unitTag .. "(%d%%)%s", uHealth / uHealthMax * 100, " " .. string.format("%.0f", pos.x * 100) .. ":" .. string.format("%.0f", pos.y * 100)), "WHISPER", nil, GetUnitName("player")) -- Debug
 							else
-								LeaPlusLC:Print("Invalid target.")
+								RGXQoLLC:Print("Invalid target.")
 							end
 						else
-							LeaPlusLC:Print("Cannot announce in this zone.")
+							RGXQoLLC:Print("Cannot announce in this zone.")
 						end
 					else
-						LeaPlusLC:Print("Cannot find General chat channel.")
+						RGXQoLLC:Print("Cannot find General chat channel.")
 					end
 				end
 				return
 			elseif str == "perf" then
 				-- Average FPS during combat
 				local fTab = {}
-				if not LeaPlusLC.perf then
-					LeaPlusLC.perf = CreateFrame("FRAME")
+				if not RGXQoLLC.perf then
+					RGXQoLLC.perf = CreateFrame("FRAME")
 				end
-				local fFrm = LeaPlusLC.perf
+				local fFrm = RGXQoLLC.perf
 				local k, startTime = 0, 0
 				if fFrm:IsEventRegistered("PLAYER_REGEN_DISABLED") then
 					fFrm:UnregisterAllEvents()
 					fFrm:SetScript("OnUpdate", nil)
-					LeaPlusLC:Print("PERF unloaded.")
+					RGXQoLLC:Print("PERF unloaded.")
 				else
 					fFrm:RegisterEvent("PLAYER_REGEN_DISABLED")
 					fFrm:RegisterEvent("PLAYER_REGEN_ENABLED")
-					LeaPlusLC:Print("Waiting for combat to start...")
+					RGXQoLLC:Print("Waiting for combat to start...")
 				end
 				fFrm:SetScript("OnEvent", function(self, event)
 					if event == "PLAYER_REGEN_DISABLED" then
-						LeaPlusLC:Print("Monitoring FPS during combat...")
+						RGXQoLLC:Print("Monitoring FPS during combat...")
 						fFrm:SetScript("OnUpdate", function()
 							k = k + 1
 							fTab[k] = GetFramerate()
@@ -13852,31 +13852,31 @@
 						end
 						local timeTaken = string.format("%.0f", GetTime() - startTime)
 						if tSum > 0 then
-							LeaPlusLC:Print("Average FPS for " .. timeTaken .. " seconds of combat: " .. string.format("%.0f", tSum / #fTab))
+							RGXQoLLC:Print("Average FPS for " .. timeTaken .. " seconds of combat: " .. string.format("%.0f", tSum / #fTab))
 						end
 					end
 				end)
 				return
 			elseif str == "col" then
 				-- Convert color values
-				LeaPlusLC:Print("|n")
+				RGXQoLLC:Print("|n")
 				local r, g, b = tonumber(arg1), tonumber(arg2), tonumber(arg3)
 				if r and g and b then
 					-- RGB source
-					LeaPlusLC:Print("Source: |cffffffff" .. r .. " " .. g .. " " .. b .. " ")
+					RGXQoLLC:Print("Source: |cffffffff" .. r .. " " .. g .. " " .. b .. " ")
 					-- RGB to Hex
 					if r > 1 and g > 1 and b > 1 then
 						-- RGB to Hex
-						LeaPlusLC:Print("Hex: |cffffffff" .. strupper(string.format("%02x%02x%02x", r, g, b)) .. " (from RGB)")
+						RGXQoLLC:Print("Hex: |cffffffff" .. strupper(string.format("%02x%02x%02x", r, g, b)) .. " (from RGB)")
 					else
 						-- Wow to Hex
-						LeaPlusLC:Print("Hex: |cffffffff" .. strupper(string.format("%02x%02x%02x", r * 255, g * 255, b * 255)) .. " (from Wow)")
+						RGXQoLLC:Print("Hex: |cffffffff" .. strupper(string.format("%02x%02x%02x", r * 255, g * 255, b * 255)) .. " (from Wow)")
 						-- Wow to RGB
 						local rwow = string.format("%.0f", r * 255)
 						local gwow = string.format("%.0f", g * 255)
 						local bwow = string.format("%.0f", b * 255)
 						if rwow ~= "0.0" and gwow ~= "0.0" and bwow ~= "0.0" then
-							LeaPlusLC:Print("RGB: |cffffffff" .. rwow .. " " .. gwow .. " " .. bwow .. " (from Wow)")
+							RGXQoLLC:Print("RGB: |cffffffff" .. rwow .. " " .. gwow .. " " .. bwow .. " (from Wow)")
 						end
 					end
 					-- RGB to Wow
@@ -13884,22 +13884,22 @@
 					local gwow = string.format("%.1f", g / 255)
 					local bwow = string.format("%.1f", b / 255)
 					if rwow ~= "0.0" and gwow ~= "0.0" and bwow ~= "0.0" then
-						LeaPlusLC:Print("Wow: |cffffffff" .. rwow .. " " .. gwow .. " " .. bwow)
+						RGXQoLLC:Print("Wow: |cffffffff" .. rwow .. " " .. gwow .. " " .. bwow)
 					end
-					LeaPlusLC:Print("|n")
+					RGXQoLLC:Print("|n")
 				elseif arg1 and strlen(arg1) == 6 and strmatch(arg1,"%x") and arg2 == nil and arg3 == nil then
 					-- Hex source
 					local rhex, ghex, bhex = string.sub(arg1, 1, 2), string.sub(arg1, 3, 4), string.sub(arg1, 5, 6)
 					if strmatch(rhex,"%x") and strmatch(ghex,"%x") and strmatch(bhex,"%x") then
-						LeaPlusLC:Print("Source: |cffffffff" .. strupper(arg1))
-						LeaPlusLC:Print("Wow: |cffffffff" .. string.format("%.1f", tonumber(rhex, 16) / 255) ..  "  " .. string.format("%.1f", tonumber(ghex, 16) / 255) .. "  " .. string.format("%.1f", tonumber(bhex, 16) / 255))
-						LeaPlusLC:Print("RGB: |cffffffff" .. tonumber(rhex, 16) .. "  " .. tonumber(ghex, 16) .. "  " .. tonumber(bhex, 16))
+						RGXQoLLC:Print("Source: |cffffffff" .. strupper(arg1))
+						RGXQoLLC:Print("Wow: |cffffffff" .. string.format("%.1f", tonumber(rhex, 16) / 255) ..  "  " .. string.format("%.1f", tonumber(ghex, 16) / 255) .. "  " .. string.format("%.1f", tonumber(bhex, 16) / 255))
+						RGXQoLLC:Print("RGB: |cffffffff" .. tonumber(rhex, 16) .. "  " .. tonumber(ghex, 16) .. "  " .. tonumber(bhex, 16))
 					else
-						LeaPlusLC:Print("Invalid arguments.")
+						RGXQoLLC:Print("Invalid arguments.")
 					end
-					LeaPlusLC:Print("|n")
+					RGXQoLLC:Print("|n")
 				else
-					LeaPlusLC:Print("Invalid arguments.")
+					RGXQoLLC:Print("Invalid arguments.")
 				end
 				return
 			elseif str == "click" then
@@ -13915,7 +13915,7 @@
 							frame:Click()
 						end
 					else
-						LeaPlusLC:Print("Hover the pointer over a button.")
+						RGXQoLLC:Print("Hover the pointer over a button.")
 					end
 					return
 				end
@@ -13931,10 +13931,10 @@
 						if issecure then issecure = "Yes" else issecure = "No" end
 						if tainted then tainted = "Yes" else tainted = "No" end
 						if fname then
-							LeaPlusLC:Print("Name: |cffffffff" .. fname)
-							LeaPlusLC:Print("Type: |cffffffff" .. ftype)
-							LeaPlusLC:Print("Secure: |cffffffff" .. issecure)
-							LeaPlusLC:Print("Tainted: |cffffffff" .. tainted)
+							RGXQoLLC:Print("Name: |cffffffff" .. fname)
+							RGXQoLLC:Print("Type: |cffffffff" .. ftype)
+							RGXQoLLC:Print("Secure: |cffffffff" .. issecure)
+							RGXQoLLC:Print("Tainted: |cffffffff" .. tainted)
 						end
 					end
 				end
@@ -13997,7 +13997,7 @@
 				return
 			elseif str == "dis" then
 				-- Disband group
-				if not LeaPlusLC:IsInLFGQueue() and not IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
+				if not RGXQoLLC:IsInLFGQueue() and not IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
 					local x = GetNumGroupMembers() or 0
 					for i = x, 1, -1 do
 						if GetNumGroupMembers() > 0 then
@@ -14008,12 +14008,12 @@
 						end
 					end
 				else
-					LeaPlusLC:Print("You cannot do that while in group finder.")
+					RGXQoLLC:Print("You cannot do that while in group finder.")
 				end
 				return
 			elseif str == "reinv" then
 				-- Disband and reinvite raid
-				if not LeaPlusLC:IsInLFGQueue() then
+				if not RGXQoLLC:IsInLFGQueue() then
 					if UnitIsGroupLeader("player") then
 						-- Disband
 						local groupNames = {}
@@ -14034,15 +14034,15 @@
 							end
 						end)
 					else
-						LeaPlusLC:Print("You need to be group leader.")
+						RGXQoLLC:Print("You need to be group leader.")
 					end
 				else
-					LeaPlusLC:Print("You cannot do that while in group finder.")
+					RGXQoLLC:Print("You cannot do that while in group finder.")
 				end
 				return
 			elseif str == "limit" then
 				-- Sound Limit
-				if not LeaPlusLC.MuteFrame then
+				if not RGXQoLLC.MuteFrame then
 					-- Panel frame
 					local frame = CreateFrame("FRAME", nil, UIParent)
 					frame:SetSize(294, 86); frame:SetFrameStrata("FULLSCREEN_DIALOG"); frame:SetFrameLevel(100); frame:SetScale(2)
@@ -14059,15 +14059,15 @@
 					frame:SetScript("OnDragStart", frame.StartMoving)
 					frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() frame:SetUserPlaced(false) end)
 					frame:Hide()
-					LeaPlusLC:CreateBar("MutePanelMainTexture", frame, 294, 86, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+					RGXQoLLC:CreateBar("MutePanelMainTexture", frame, 294, 86, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
 					-- Panel contents
-					LeaPlusLC:MakeTx(frame, "Sound Limit", 16, -12)
-					local endBox = LeaPlusLC:CreateEditBox("SoundEndBox", frame, 116, 10, "TOPLEFT", 16, -32, "SoundEndBox", "SoundEndBox")
+					RGXQoLLC:MakeTx(frame, "Sound Limit", 16, -12)
+					local endBox = RGXQoLLC:CreateEditBox("SoundEndBox", frame, 116, 10, "TOPLEFT", 16, -32, "SoundEndBox", "SoundEndBox")
 					endBox:SetText(9000000)
 					endBox:SetScript("OnMouseWheel", function(self, delta)
 						local endSound = tonumber(endBox:GetText())
 						if endSound then
-							if delta == 1 then endSound = endSound + LeaPlusLC.SoundByte else endSound = endSound - LeaPlusLC.SoundByte end
+							if delta == 1 then endSound = endSound + RGXQoLLC.SoundByte else endSound = endSound - RGXQoLLC.SoundByte end
 							if endSound < 1 then endSound = 1 elseif endSound >= 9000000 then endSound = 9000000 end
 							endBox:SetText(endSound)
 						else
@@ -14076,7 +14076,7 @@
 						end
 					end)
 					-- Set limit button
-					frame.btn = LeaPlusLC:CreateButton("muteRangeButton", frame, "SET LIMIT", "TOPLEFT", 16, -72, 0, 25, true, "Click to set the sound file limit.  Use the mousewheel on the editbox along with the step buttons below to adjust the sound limit.  Acceptable range is from 1 to 9000000.  Sound files higher than this limit will be muted.")
+					frame.btn = RGXQoLLC:CreateButton("muteRangeButton", frame, "SET LIMIT", "TOPLEFT", 16, -72, 0, 25, true, "Click to set the sound file limit.  Use the mousewheel on the editbox along with the step buttons below to adjust the sound limit.  Acceptable range is from 1 to 9000000.  Sound files higher than this limit will be muted.")
 					frame.btn:ClearAllPoints()
 					frame.btn:SetPoint("LEFT", endBox, "RIGHT", 10, 0)
 					frame.btn:SetScript("OnClick", function()
@@ -14104,7 +14104,7 @@
 						end
 					end)
 					-- Mute all button
-					frame.MuteAllBtn = LeaPlusLC:CreateButton("muteMuteAllButton", frame, "MUTE ALL", "TOPLEFT", 16, -92, 0, 25, true, "Click to mute every sound in the game.")
+					frame.MuteAllBtn = RGXQoLLC:CreateButton("muteMuteAllButton", frame, "MUTE ALL", "TOPLEFT", 16, -92, 0, 25, true, "Click to mute every sound in the game.")
 					frame.MuteAllBtn:SetScale(0.5)
 					frame.MuteAllBtn:ClearAllPoints()
 					frame.MuteAllBtn:SetPoint("TOPLEFT", frame.btn, "TOPRIGHT", 20, 0)
@@ -14120,7 +14120,7 @@
 						return
 					end)
 					-- Unmute all button
-					frame.UnmuteAllBtn = LeaPlusLC:CreateButton("muteUnmuteAllButton", frame, "UNMUTE ALL", "TOPLEFT", 16, -92, 0, 25, true, "Click to unmute every sound in the game.")
+					frame.UnmuteAllBtn = RGXQoLLC:CreateButton("muteUnmuteAllButton", frame, "UNMUTE ALL", "TOPLEFT", 16, -92, 0, 25, true, "Click to unmute every sound in the game.")
 					frame.UnmuteAllBtn:SetScale(0.5)
 					frame.UnmuteAllBtn:ClearAllPoints()
 					frame.UnmuteAllBtn:SetPoint("TOPLEFT", frame.MuteAllBtn, "BOTTOMLEFT", 0, -10)
@@ -14136,35 +14136,35 @@
 						return
 					end)
 					-- Step buttons
-					frame.millionBtn = LeaPlusLC:CreateButton("SoundMillionButton", frame, "1000000", "TOPLEFT", 26, -122, 0, 25, true, "Set the editbox step value to 1000000.")
+					frame.millionBtn = RGXQoLLC:CreateButton("SoundMillionButton", frame, "1000000", "TOPLEFT", 26, -122, 0, 25, true, "Set the editbox step value to 1000000.")
 					frame.millionBtn:SetScale(0.5)
 
-					frame.hundredThousandBtn = LeaPlusLC:CreateButton("SoundHundredThousandButton", frame, "100000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 100000.")
+					frame.hundredThousandBtn = RGXQoLLC:CreateButton("SoundHundredThousandButton", frame, "100000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 100000.")
 					frame.hundredThousandBtn:ClearAllPoints()
 					frame.hundredThousandBtn:SetPoint("LEFT", frame.millionBtn, "RIGHT", 10, 0)
 					frame.hundredThousandBtn:SetScale(0.5)
 
-					frame.tenThousandBtn = LeaPlusLC:CreateButton("SoundTenThousandButton", frame, "10000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 10000.")
+					frame.tenThousandBtn = RGXQoLLC:CreateButton("SoundTenThousandButton", frame, "10000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 10000.")
 					frame.tenThousandBtn:ClearAllPoints()
 					frame.tenThousandBtn:SetPoint("LEFT", frame.hundredThousandBtn, "RIGHT", 10, 0)
 					frame.tenThousandBtn:SetScale(0.5)
 
-					frame.thousandBtn = LeaPlusLC:CreateButton("SoundThousandButton", frame, "1000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 1000.")
+					frame.thousandBtn = RGXQoLLC:CreateButton("SoundThousandButton", frame, "1000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 1000.")
 					frame.thousandBtn:ClearAllPoints()
 					frame.thousandBtn:SetPoint("LEFT", frame.tenThousandBtn, "RIGHT", 10, 0)
 					frame.thousandBtn:SetScale(0.5)
 
-					frame.hundredBtn = LeaPlusLC:CreateButton("SoundHundredButton", frame, "100", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 100.")
+					frame.hundredBtn = RGXQoLLC:CreateButton("SoundHundredButton", frame, "100", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 100.")
 					frame.hundredBtn:ClearAllPoints()
 					frame.hundredBtn:SetPoint("LEFT", frame.thousandBtn, "RIGHT", 10, 0)
 					frame.hundredBtn:SetScale(0.5)
 
-					frame.tenBtn = LeaPlusLC:CreateButton("SoundTenButton", frame, "10", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 10.")
+					frame.tenBtn = RGXQoLLC:CreateButton("SoundTenButton", frame, "10", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 10.")
 					frame.tenBtn:ClearAllPoints()
 					frame.tenBtn:SetPoint("LEFT", frame.hundredBtn, "RIGHT", 10, 0)
 					frame.tenBtn:SetScale(0.5)
 
-					frame.oneBtn = LeaPlusLC:CreateButton("SoundTenButton", frame, "1", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 1.")
+					frame.oneBtn = RGXQoLLC:CreateButton("SoundTenButton", frame, "1", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 1.")
 					frame.oneBtn:ClearAllPoints()
 					frame.oneBtn:SetPoint("LEFT", frame.tenBtn, "RIGHT", 10, 0)
 					frame.oneBtn:SetScale(0.5)
@@ -14179,78 +14179,78 @@
 						frame.oneBtn:SetAlpha(0.3)
 					end
 
-					LeaPlusLC.SoundByte = 1000000
+					RGXQoLLC.SoundByte = 1000000
 					DimAllBoxes()
 					frame.millionBtn:SetAlpha(1)
 
 					-- Step button handlers
 					frame.millionBtn:SetScript("OnClick", function()
-						LeaPlusLC.SoundByte = 1000000
+						RGXQoLLC.SoundByte = 1000000
 						DimAllBoxes()
 						frame.millionBtn:SetAlpha(1)
 					end)
 
 					frame.hundredThousandBtn:SetScript("OnClick", function()
-						LeaPlusLC.SoundByte = 100000
+						RGXQoLLC.SoundByte = 100000
 						DimAllBoxes()
 						frame.hundredThousandBtn:SetAlpha(1)
 					end)
 
 					frame.tenThousandBtn:SetScript("OnClick", function()
-						LeaPlusLC.SoundByte = 10000
+						RGXQoLLC.SoundByte = 10000
 						DimAllBoxes()
 						frame.tenThousandBtn:SetAlpha(1)
 					end)
 
 					frame.thousandBtn:SetScript("OnClick", function()
-						LeaPlusLC.SoundByte = 1000
+						RGXQoLLC.SoundByte = 1000
 						DimAllBoxes()
 						frame.thousandBtn:SetAlpha(1)
 					end)
 
 					frame.hundredBtn:SetScript("OnClick", function()
-						LeaPlusLC.SoundByte = 100
+						RGXQoLLC.SoundByte = 100
 						DimAllBoxes()
 						frame.hundredBtn:SetAlpha(1)
 					end)
 
 					frame.tenBtn:SetScript("OnClick", function()
-						LeaPlusLC.SoundByte = 10
+						RGXQoLLC.SoundByte = 10
 						DimAllBoxes()
 						frame.tenBtn:SetAlpha(1)
 					end)
 
 					frame.oneBtn:SetScript("OnClick", function()
-						LeaPlusLC.SoundByte = 1
+						RGXQoLLC.SoundByte = 1
 						DimAllBoxes()
 						frame.oneBtn:SetAlpha(1)
 					end)
 
 					-- Final code
-					LeaPlusLC.MuteFrame = frame
+					RGXQoLLC.MuteFrame = frame
 					_G["LeaPlusGlobalMutePanel"] = frame
 					table.insert(UISpecialFrames, "LeaPlusGlobalMutePanel")
 				end
-				if LeaPlusLC.MuteFrame:IsShown() then LeaPlusLC.MuteFrame:Hide() else LeaPlusLC.MuteFrame:Show() end
+				if RGXQoLLC.MuteFrame:IsShown() then RGXQoLLC.MuteFrame:Hide() else RGXQoLLC.MuteFrame:Show() end
 				return
 			elseif str == "mem" or str == "m" then
 				-- Show addon panel with memory usage
-				if LeaPlusLC.ShowMemoryUsage then
-					LeaPlusLC:ShowMemoryUsage(LeaPlusLC["Page8"], "TOPLEFT", 146, -262)
+				if RGXQoLLC.ShowMemoryUsage then
+					RGXQoLLC:ShowMemoryUsage(RGXQoLLC["Page8"], "TOPLEFT", 146, -262)
 				end
 				-- Prevent options panel from showing if a chat configuration panel is showing
 				if ChatConfigFrame:IsShown() then return end
 				-- Prevent options panel from showing if Blizzard Store is showing
 				if StoreFrame and StoreFrame:GetAttribute("isshown") then return end
 				-- Toggle the options panel if game options panel is not showing
-				if LeaPlusLC:IsPlusShowing() then
-					LeaPlusLC:HideFrames()
-					LeaPlusLC:HideConfigPanels()
+				if RGXQoLLC:IsPlusShowing() then
+					RGXQoLLC:HideFrames()
+					RGXQoLLC:HideConfigPanels()
 				else
-					LeaPlusLC:HideFrames()
-					LeaPlusLC["PageF"]:Show()
+					RGXQoLLC:HideFrames()
+					RGXQoLLC["PageF"]:Show()
 				end
-				LeaPlusLC["Page"..LeaPlusLC["LeaStartPage"]]:Show()
+				RGXQoLLC["Page"..RGXQoLLC["RGXQoLStartPage"]]:Show()
 				return
 			elseif str == "gossinfo" then
 				-- Print gossip frame information
@@ -14260,62 +14260,62 @@
 					if npcName and npcGuid then
 						local void, void, void, void, void, npcID = strsplit("-", npcGuid)
 						if npcID then
-							LeaPlusLC:Print(npcName .. ": |cffffffff" .. npcID)
+							RGXQoLLC:Print(npcName .. ": |cffffffff" .. npcID)
 						end
 					end
-					LeaPlusLC:Print("Available quests: |cffffffff" .. C_GossipInfo.GetNumAvailableQuests())
-					LeaPlusLC:Print("Active quests: |cffffffff" .. C_GossipInfo.GetNumActiveQuests())
+					RGXQoLLC:Print("Available quests: |cffffffff" .. C_GossipInfo.GetNumAvailableQuests())
+					RGXQoLLC:Print("Active quests: |cffffffff" .. C_GossipInfo.GetNumActiveQuests())
 					local gossipInfoTable = C_GossipInfo.GetOptions()
 					if gossipInfoTable and gossipInfoTable[1] and gossipInfoTable[1].name then
-						LeaPlusLC:Print("Gossip count: |cffffffff" .. #gossipInfoTable)
-						LeaPlusLC:Print("Gossip name: |cffffffff" .. gossipInfoTable[1].name)
+						RGXQoLLC:Print("Gossip count: |cffffffff" .. #gossipInfoTable)
+						RGXQoLLC:Print("Gossip name: |cffffffff" .. gossipInfoTable[1].name)
 					else
-						LeaPlusLC:Print("Gossip info: |cffffffff" .. "Nil")
+						RGXQoLLC:Print("Gossip info: |cffffffff" .. "Nil")
 					end
 					if GossipTitleButton1 and GossipTitleButton1:GetText() then
-						LeaPlusLC:Print("First option: |cffffffff" .. GossipTitleButton1:GetText())
+						RGXQoLLC:Print("First option: |cffffffff" .. GossipTitleButton1:GetText())
 					end
-					-- LeaPlusLC:Print("Gossip text: |cffffffff" .. GetGossipText())
+					-- RGXQoLLC:Print("Gossip text: |cffffffff" .. GetGossipText())
 					if not IsShiftKeyDown() then
 						SelectGossipOption(1)
 					end
 				else
-					LeaPlusLC:Print("Gossip frame not open.")
+					RGXQoLLC:Print("Gossip frame not open.")
 				end
 				return
 			elseif str == "svars" then
 				-- Print saved variables
-				LeaPlusLC:Print(L["Saved Variables"] .. "|n")
-				LeaPlusLC:Print(L["The following list shows option label, setting name and currently saved value.  Enable |cffffffffIncrease chat history|r (chat) and |cffffffffRecent chat window|r (chat) to make it easier."] .. "|n")
-				LeaPlusLC:Print(L["Modifying saved variables must start with |cffffffff/ltp nosave|r to prevent your changes from being reverted during reload or logout."] .. "|n")
-				LeaPlusLC:Print(L['Syntax is |cffffffff/run RGXQoLDB[' .. '"' .. 'setting name' .. '"' .. '] = ' .. '"' .. 'value' .. '" |r(case sensitive).'])
-				LeaPlusLC:Print(L["When done, |cffffffff/reload|r to save your changes."] .. "|n")
+				RGXQoLLC:Print(L["Saved Variables"] .. "|n")
+				RGXQoLLC:Print(L["The following list shows option label, setting name and currently saved value.  Enable |cffffffffIncrease chat history|r (chat) and |cffffffffRecent chat window|r (chat) to make it easier."] .. "|n")
+				RGXQoLLC:Print(L["Modifying saved variables must start with |cffffffff/ltp nosave|r to prevent your changes from being reverted during reload or logout."] .. "|n")
+				RGXQoLLC:Print(L['Syntax is |cffffffff/run RGXQoLDB[' .. '"' .. 'setting name' .. '"' .. '] = ' .. '"' .. 'value' .. '" |r(case sensitive).'])
+				RGXQoLLC:Print(L["When done, |cffffffff/reload|r to save your changes."] .. "|n")
 				-- Checkboxes
-				LeaPlusLC:Print(L["Checkboxes"] .. "|n")
-				LeaPlusLC:Print(L["Checkboxes can be set to On or Off."] .. "|n")
+				RGXQoLLC:Print(L["Checkboxes"] .. "|n")
+				RGXQoLLC:Print(L["Checkboxes can be set to On or Off."] .. "|n")
 				for key, value in pairs(RGXQoLDB) do
-					if LeaPlusCB[key] and LeaPlusCB[key].f then
-						if LeaPlusCB[key]:GetObjectType() ~= "Slider" and LeaPlusCB[key]:GetObjectType() ~= "Button" then
-							LeaPlusLC:Print(string.gsub(LeaPlusCB[key].f:GetText(), "%*$", "") .. ": |cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r")
+					if RGXQoLCB[key] and RGXQoLCB[key].f then
+						if RGXQoLCB[key]:GetObjectType() ~= "Slider" and RGXQoLCB[key]:GetObjectType() ~= "Button" then
+							RGXQoLLC:Print(string.gsub(RGXQoLCB[key].f:GetText(), "%*$", "") .. ": |cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r")
 						end
 					end
 				end
 				-- Sliders
-				LeaPlusLC:Print("|n" .. L["Sliders"] .. "|n")
-				LeaPlusLC:Print(L["Sliders can be set to a numeric value which must be in the range supported by the slider."] .. "|n")
+				RGXQoLLC:Print("|n" .. L["Sliders"] .. "|n")
+				RGXQoLLC:Print(L["Sliders can be set to a numeric value which must be in the range supported by the slider."] .. "|n")
 				for key, value in pairs(RGXQoLDB) do
-					if LeaPlusCB[key] and LeaPlusCB[key].f then
-						if LeaPlusCB[key]:GetObjectType() == "Slider" then
-							LeaPlusLC:Print("Slider: " .. "|cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r" .. " (" .. string.gsub(LeaPlusCB[key].f:GetText(), "%*$", "") .. ")" )
+					if RGXQoLCB[key] and RGXQoLCB[key].f then
+						if RGXQoLCB[key]:GetObjectType() == "Slider" then
+							RGXQoLLC:Print("Slider: " .. "|cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r" .. " (" .. string.gsub(RGXQoLCB[key].f:GetText(), "%*$", "") .. ")" )
 						end
 					end
 				end
 				-- Dropdowns
-				LeaPlusLC:Print("|n" .. L["Dropdowns"] .. "|n")
-				LeaPlusLC:Print(L["Dropdowns can be set to a numeric value which must be in the range supported by the dropdown."] .. "|n")
+				RGXQoLLC:Print("|n" .. L["Dropdowns"] .. "|n")
+				RGXQoLLC:Print(L["Dropdowns can be set to a numeric value which must be in the range supported by the dropdown."] .. "|n")
 				for key, value in pairs(RGXQoLDB) do
-					if LeaPlusCB[key] and LeaPlusCB[key]:GetObjectType() == "Button" and LeaPlusLC[key] then
-						LeaPlusLC:Print("Dropdown: " .. "|cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r")
+					if RGXQoLCB[key] and RGXQoLCB[key]:GetObjectType() == "Button" and RGXQoLLC[key] then
+						RGXQoLLC:Print("Dropdown: " .. "|cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r")
 					end
 				end
 				return
@@ -14325,13 +14325,13 @@
 				return
 			elseif str == "taintmap" then
 				-- TaintMap
-				if LeaPlusLC.TaintMap then
-					LeaPlusLC.TaintMap:Cancel()
-					LeaPlusLC.TaintMap = nil
-					LeaPlusLC:Print("TaintMap stopped.")
+				if RGXQoLLC.TaintMap then
+					RGXQoLLC.TaintMap:Cancel()
+					RGXQoLLC.TaintMap = nil
+					RGXQoLLC:Print("TaintMap stopped.")
 					return
 				end
-				LeaPlusLC.TaintMap = C_Timer.NewTicker(1, function()
+				RGXQoLLC.TaintMap = C_Timer.NewTicker(1, function()
 					for k,v in pairs(WorldMapFrame) do
 						local ok, who = issecurevariable(WorldMapFrame, k)
 						if not ok then
@@ -14339,13 +14339,13 @@
 						end
 					end
 				end)
-				LeaPlusLC:Print("TaintMap started.")
+				RGXQoLLC:Print("TaintMap started.")
 				return
 			elseif str == "admin" then
 				-- Preset profile (used for testing)
-				LpEvt:UnregisterAllEvents()						-- Prevent changes
+				RGXQoLEvt:UnregisterAllEvents()						-- Prevent changes
 				wipe(RGXQoLDB)									-- Wipe settings
-				LeaPlusLC:PlayerLogout(true)					-- Reset permanent settings
+				RGXQoLLC:PlayerLogout(true)					-- Reset permanent settings
 				-- Automation
 				RGXQoLDB["AutomateQuests"] = "On"				-- Automate quests
 				RGXQoLDB["AutoQuestShift"] = "Off"				-- Automate quests requires shift
@@ -14410,7 +14410,7 @@
 				RGXQoLDB["MinimapModder"] = "On"				-- Enhance minimap
 				RGXQoLDB["SquareMinimap"] = "On"				-- Square minimap
 				RGXQoLDB["MinimapButtonBag"] = "Off"			-- Minimap button bag
-				RGXQoLDB["MiniExcludeList"] = "BugSack, Leatrix_Plus" -- Excluded addon list
+				RGXQoLDB["MiniExcludeList"] = "BugSack, RGXQoL" -- Excluded addon list
 				RGXQoLDB["MinimapSize"] = 180					-- Minimap size slider
 				RGXQoLDB["MinimapBorderWidth"] = 3				-- Minimap border width
 				RGXQoLDB["HideMiniZoneText"] = "On"			-- Hide zone text bar
@@ -14545,14 +14545,14 @@
 				setIcon("WARLOCK", 		1, --[[1]] 0, 0, 		--[[2]] 0, 0, 		--[[3]] 0, 0, 		--[[4]] 0, 0, 		--[[5]] 0, 0)
 				setIcon("PRIEST", 		1, --[[1]] 17, 0, 		--[[2]] 0, 0, 		--[[3]] 0, 0, 		--[[4]] 0, 0, 		--[[5]] 0, 0) -- Power Word: Shield
 
-				-- Mute game sounds (LeaPlusLC["MuteGameSounds"])
-				for k, v in pairs(LeaPlusLC["muteTable"]) do
+				-- Mute game sounds (RGXQoLLC["MuteGameSounds"])
+				for k, v in pairs(RGXQoLLC["muteTable"]) do
 					RGXQoLDB[k] = "On"
 				end
 				RGXQoLDB["MuteReady"] = "Off"	-- Mute ready check
 
-				-- Mute mount sounds (LeaPlusLC["MuteMountSounds"])
-				for k, v in pairs(LeaPlusLC["mountTable"]) do
+				-- Mute mount sounds (RGXQoLLC["MuteMountSounds"])
+				for k, v in pairs(RGXQoLLC["mountTable"]) do
 					RGXQoLDB[k] = "On"
 				end
 
@@ -14562,7 +14562,7 @@
 				-- Reload
 				ReloadUI()
 			else
-				LeaPlusLC:Print("Invalid parameter.")
+				RGXQoLLC:Print("Invalid parameter.")
 			end
 			return
 		else
@@ -14571,14 +14571,14 @@
 			-- Prevent options panel from showing if Blizzard Store is showing
 			if StoreFrame and StoreFrame:GetAttribute("isshown") then return end
 			-- Toggle the options panel if game options panel is not showing
-			if LeaPlusLC:IsPlusShowing() then
-				LeaPlusLC:HideFrames()
-				LeaPlusLC:HideConfigPanels()
+			if RGXQoLLC:IsPlusShowing() then
+				RGXQoLLC:HideFrames()
+				RGXQoLLC:HideConfigPanels()
 			else
-				LeaPlusLC:HideFrames()
-				LeaPlusLC["PageF"]:Show()
+				RGXQoLLC:HideFrames()
+				RGXQoLLC["PageF"]:Show()
 			end
-			LeaPlusLC["Page"..LeaPlusLC["LeaStartPage"]]:Show()
+			RGXQoLLC["Page"..RGXQoLLC["RGXQoLStartPage"]]:Show()
 		end
 	end
 
@@ -14587,7 +14587,7 @@
 	_G.SLASH_RGXQoL2 = "/qol"
 	SlashCmdList["RGXQoL"] = function(self)
 		-- Run slash command function
-		LeaPlusLC:SlashFunc(self)
+		RGXQoLLC:SlashFunc(self)
 		-- Redirect tainted variables
 		RunScript('ACTIVE_CHAT_EDIT_BOX = ACTIVE_CHAT_EDIT_BOX')
 		RunScript('LAST_ACTIVE_CHAT_EDIT_BOX = LAST_ACTIVE_CHAT_EDIT_BOX')
@@ -14604,10 +14604,10 @@
 ----------------------------------------------------------------------
 
 	-- Function to add menu button
-	function LeaPlusLC:MakeMN(name, text, parent, anchor, x, y, width, height)
+	function RGXQoLLC:MakeMN(name, text, parent, anchor, x, y, width, height)
 
 		local mbtn = CreateFrame("Button", nil, parent)
-		LeaPlusLC[name] = mbtn
+		RGXQoLLC[name] = mbtn
 		mbtn:Show();
 		mbtn:SetSize(width, height)
 		mbtn:SetAlpha(1.0)
@@ -14641,12 +14641,12 @@
 	end
 
 	-- Function to create individual options panel pages
-	function LeaPlusLC:MakePage(name, title, menu, menuname, menuparent, menuanchor, menux, menuy, menuwidth, menuheight)
+	function RGXQoLLC:MakePage(name, title, menu, menuname, menuparent, menuanchor, menux, menuy, menuwidth, menuheight)
 
 		-- Create frame
-		local oPage = CreateFrame("Frame", nil, LeaPlusLC["PageF"]);
-		LeaPlusLC[name] = oPage
-		oPage:SetAllPoints(LeaPlusLC["PageF"])
+		local oPage = CreateFrame("Frame", nil, RGXQoLLC["PageF"]);
+		RGXQoLLC[name] = oPage
+		oPage:SetAllPoints(RGXQoLLC["PageF"])
 		oPage:Hide();
 
 		-- Add page title
@@ -14656,9 +14656,9 @@
 
 		-- Add menu item if needed
 		if menu then
-			LeaPlusLC[menu], LeaPlusLC[menu .. ".s"] = LeaPlusLC:MakeMN(menu, menuname, menuparent, menuanchor, menux, menuy, menuwidth, menuheight)
-			LeaPlusLC[name]:SetScript("OnShow", function() LeaPlusLC[menu .. ".s"]:Show(); end)
-			LeaPlusLC[name]:SetScript("OnHide", function() LeaPlusLC[menu .. ".s"]:Hide(); end)
+			RGXQoLLC[menu], RGXQoLLC[menu .. ".s"] = RGXQoLLC:MakeMN(menu, menuname, menuparent, menuanchor, menux, menuy, menuwidth, menuheight)
+			RGXQoLLC[name]:SetScript("OnShow", function() RGXQoLLC[menu .. ".s"]:Show(); end)
+			RGXQoLLC[name]:SetScript("OnHide", function() RGXQoLLC[menu .. ".s"]:Hide(); end)
 		end
 
 		return oPage;
@@ -14666,24 +14666,24 @@
 	end
 
 	-- Create options pages
-	LeaPlusLC["Page0"] = LeaPlusLC:MakePage("Page0", "Home"			, "LeaPlusNav0", "Home"			, LeaPlusLC["PageF"], "TOPLEFT", 16, -72, 112, 20)
-	LeaPlusLC["Page1"] = LeaPlusLC:MakePage("Page1", "Automation"	, "LeaPlusNav1", "Automation"	, LeaPlusLC["PageF"], "TOPLEFT", 16, -112, 112, 20)
-	LeaPlusLC["Page2"] = LeaPlusLC:MakePage("Page2", "Social"		, "LeaPlusNav2", "Social"		, LeaPlusLC["PageF"], "TOPLEFT", 16, -132, 112, 20)
-	LeaPlusLC["Page3"] = LeaPlusLC:MakePage("Page3", "Chat"			, "LeaPlusNav3", "Chat"			, LeaPlusLC["PageF"], "TOPLEFT", 16, -152, 112, 20)
-	LeaPlusLC["Page4"] = LeaPlusLC:MakePage("Page4", "Text"			, "LeaPlusNav4", "Text"			, LeaPlusLC["PageF"], "TOPLEFT", 16, -172, 112, 20)
-	LeaPlusLC["Page5"] = LeaPlusLC:MakePage("Page5", "Interface"	, "LeaPlusNav5", "Interface"	, LeaPlusLC["PageF"], "TOPLEFT", 16, -192, 112, 20)
-	LeaPlusLC["Page6"] = LeaPlusLC:MakePage("Page6", "Frames"		, "LeaPlusNav6", "Frames"		, LeaPlusLC["PageF"], "TOPLEFT", 16, -212, 112, 20)
-	LeaPlusLC["Page7"] = LeaPlusLC:MakePage("Page7", "System"		, "LeaPlusNav7", "System"		, LeaPlusLC["PageF"], "TOPLEFT", 16, -232, 112, 20)
-	LeaPlusLC["Page8"] = LeaPlusLC:MakePage("Page8", "Settings"		, "LeaPlusNav8", "Settings"		, LeaPlusLC["PageF"], "TOPLEFT", 16, -272, 112, 20)
-	LeaPlusLC["Page9"] = LeaPlusLC:MakePage("Page9", "Media"		, "LeaPlusNav9", "Media"		, LeaPlusLC["PageF"], "TOPLEFT", 16, -292, 112, 20)
+	RGXQoLLC["Page0"] = RGXQoLLC:MakePage("Page0", "Home"			, "LeaPlusNav0", "Home"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -72, 112, 20)
+	RGXQoLLC["Page1"] = RGXQoLLC:MakePage("Page1", "Automation"	, "LeaPlusNav1", "Automation"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -112, 112, 20)
+	RGXQoLLC["Page2"] = RGXQoLLC:MakePage("Page2", "Social"		, "LeaPlusNav2", "Social"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -132, 112, 20)
+	RGXQoLLC["Page3"] = RGXQoLLC:MakePage("Page3", "Chat"			, "LeaPlusNav3", "Chat"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -152, 112, 20)
+	RGXQoLLC["Page4"] = RGXQoLLC:MakePage("Page4", "Text"			, "LeaPlusNav4", "Text"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -172, 112, 20)
+	RGXQoLLC["Page5"] = RGXQoLLC:MakePage("Page5", "Interface"	, "LeaPlusNav5", "Interface"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -192, 112, 20)
+	RGXQoLLC["Page6"] = RGXQoLLC:MakePage("Page6", "Frames"		, "LeaPlusNav6", "Frames"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -212, 112, 20)
+	RGXQoLLC["Page7"] = RGXQoLLC:MakePage("Page7", "System"		, "LeaPlusNav7", "System"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -232, 112, 20)
+	RGXQoLLC["Page8"] = RGXQoLLC:MakePage("Page8", "Settings"		, "LeaPlusNav8", "Settings"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -272, 112, 20)
+	RGXQoLLC["Page9"] = RGXQoLLC:MakePage("Page9", "Media"		, "LeaPlusNav9", "Media"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -292, 112, 20)
 
 	-- Page navigation mechanism
-	for i = 0, LeaPlusLC["NumberOfPages"] do
-		LeaPlusLC["LeaPlusNav"..i]:SetScript("OnClick", function()
-			LeaPlusLC:HideFrames()
-			LeaPlusLC["PageF"]:Show();
-			LeaPlusLC["Page"..i]:Show();
-			LeaPlusLC["LeaStartPage"] = i
+	for i = 0, RGXQoLLC["NumberOfPages"] do
+		RGXQoLLC["LeaPlusNav"..i]:SetScript("OnClick", function()
+			RGXQoLLC:HideFrames()
+			RGXQoLLC["PageF"]:Show();
+			RGXQoLLC["Page"..i]:Show();
+			RGXQoLLC["RGXQoLStartPage"] = i
 		end)
 	end
 
@@ -14696,11 +14696,11 @@
 
 	pg = "Page0";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Welcome to Leatrix Plus.", 146, -72);
-	LeaPlusLC:MakeWD(LeaPlusLC[pg], "To begin, choose an options page.", 146, -92);
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Welcome to Leatrix Plus.", 146, -72);
+	RGXQoLLC:MakeWD(RGXQoLLC[pg], "To begin, choose an options page.", 146, -92);
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Support", 146, -132);
-	LeaPlusLC:MakeWD(LeaPlusLC[pg], "curseforge.com/wow/addons/leatrix-plus", 146, -152);
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Support", 146, -132);
+	RGXQoLLC:MakeWD(RGXQoLLC[pg], "curseforge.com/wow/addons/leatrix-plus", 146, -152);
 
 ----------------------------------------------------------------------
 -- 	LC1: Automation
@@ -14708,22 +14708,22 @@
 
 	pg = "Page1";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Character"					, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutomateQuests"			,	"Automate quests"				,	146, -92, 	false,	"If checked, quests will be selected, accepted and turned-in automatically.|n|nQuests which have a gold requirement will not be turned-in automatically.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutomateGossip"			,	"Automate gossip"				,	146, -112, 	false,	"If checked, you can hold down the alt key while opening a gossip window to automatically select a single gossip item.|n|nIf the gossip item type is banker, taxi, trainer, vendor or battlemaster, gossip will be skipped without needing to hold the alt key.  You can hold the shift key down to prevent this.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoAcceptSummon"			,	"Accept summon"					, 	146, -132, 	false,	"If checked, summon requests will be accepted automatically unless you are in combat.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoAcceptRes"				,	"Accept resurrection"			, 	146, -152, 	false,	"If checked, resurrection requests will be accepted automatically.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoReleasePvP"			,	"Release in PvP"				, 	146, -172, 	false,	"If checked, you will release automatically after you die in a battleground.|n|nYou will not release automatically if you have the ability to self-resurrect.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Character"					, 	146, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutomateQuests"			,	"Automate quests"				,	146, -92, 	false,	"If checked, quests will be selected, accepted and turned-in automatically.|n|nQuests which have a gold requirement will not be turned-in automatically.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutomateGossip"			,	"Automate gossip"				,	146, -112, 	false,	"If checked, you can hold down the alt key while opening a gossip window to automatically select a single gossip item.|n|nIf the gossip item type is banker, taxi, trainer, vendor or battlemaster, gossip will be skipped without needing to hold the alt key.  You can hold the shift key down to prevent this.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoAcceptSummon"			,	"Accept summon"					, 	146, -132, 	false,	"If checked, summon requests will be accepted automatically unless you are in combat.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoAcceptRes"				,	"Accept resurrection"			, 	146, -152, 	false,	"If checked, resurrection requests will be accepted automatically.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoReleasePvP"			,	"Release in PvP"				, 	146, -172, 	false,	"If checked, you will release automatically after you die in a battleground.|n|nYou will not release automatically if you have the ability to self-resurrect.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Vendors"					, 	340, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoSellJunk"				,	"Sell junk automatically"		,	340, -92, 	false,	"If checked, all grey items in your bags will be sold automatically when you visit a merchant.|n|nYou can hold the shift key down when you talk to a merchant to override this setting.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoRepairGear"			, 	"Repair automatically"			,	340, -112, 	false,	"If checked, your gear will be repaired automatically when you visit a suitable merchant.|n|nYou can hold the shift key down when you talk to a merchant to override this setting.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Vendors"					, 	340, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoSellJunk"				,	"Sell junk automatically"		,	340, -92, 	false,	"If checked, all grey items in your bags will be sold automatically when you visit a merchant.|n|nYou can hold the shift key down when you talk to a merchant to override this setting.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoRepairGear"			, 	"Repair automatically"			,	340, -112, 	false,	"If checked, your gear will be repaired automatically when you visit a suitable merchant.|n|nYou can hold the shift key down when you talk to a merchant to override this setting.")
 
-	LeaPlusLC:CfgBtn("AutomateQuestsBtn", LeaPlusCB["AutomateQuests"])
-	LeaPlusLC:CfgBtn("AutoAcceptResBtn", LeaPlusCB["AutoAcceptRes"])
-	LeaPlusLC:CfgBtn("AutoReleasePvPBtn", LeaPlusCB["AutoReleasePvP"])
-	LeaPlusLC:CfgBtn("AutoSellJunkBtn", LeaPlusCB["AutoSellJunk"])
-	LeaPlusLC:CfgBtn("AutoRepairBtn", LeaPlusCB["AutoRepairGear"])
+	RGXQoLLC:CfgBtn("AutomateQuestsBtn", RGXQoLCB["AutomateQuests"])
+	RGXQoLLC:CfgBtn("AutoAcceptResBtn", RGXQoLCB["AutoAcceptRes"])
+	RGXQoLLC:CfgBtn("AutoReleasePvPBtn", RGXQoLCB["AutoReleasePvP"])
+	RGXQoLLC:CfgBtn("AutoSellJunkBtn", RGXQoLCB["AutoSellJunk"])
+	RGXQoLLC:CfgBtn("AutoRepairBtn", RGXQoLCB["AutoRepairGear"])
 
 ----------------------------------------------------------------------
 -- 	LC2: Social
@@ -14731,26 +14731,26 @@
 
 	pg = "Page2";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Blocks"					, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoDuelRequests"			, 	"Block duels"					,	146, -92, 	false,	"If checked, duel requests will be blocked unless the player requesting the duel is a friend.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoPartyInvites"			, 	"Block party invites"			, 	146, -112, 	false,	"If checked, party invitations will be blocked unless the player inviting you is a friend.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoFriendRequests"			, 	"Block friend requests"			, 	146, -132, 	false,	"If checked, BattleTag and Real ID friend requests will be automatically declined.|n|nEnabling this option will automatically decline any pending requests.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoSharedQuests"			, 	"Block shared quests"			, 	146, -152, 	false,	"If checked, shared quests will be declined unless the player sharing the quest is a friend.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Blocks"					, 	146, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoDuelRequests"			, 	"Block duels"					,	146, -92, 	false,	"If checked, duel requests will be blocked unless the player requesting the duel is a friend.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoPartyInvites"			, 	"Block party invites"			, 	146, -112, 	false,	"If checked, party invitations will be blocked unless the player inviting you is a friend.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoFriendRequests"			, 	"Block friend requests"			, 	146, -132, 	false,	"If checked, BattleTag and Real ID friend requests will be automatically declined.|n|nEnabling this option will automatically decline any pending requests.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoSharedQuests"			, 	"Block shared quests"			, 	146, -152, 	false,	"If checked, shared quests will be declined unless the player sharing the quest is a friend.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Groups"					, 	340, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AcceptPartyFriends"		, 	"Party from friends"			, 	340, -92, 	false,	"If checked, party invitations from friends will be automatically accepted unless you are queued for a battleground or the Looking for Group feature.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "InviteFromWhisper"			,   "Invite from whispers"			,	340, -112,	false,	L["If checked, a group invite will be sent to anyone who whispers you with a set keyword as long as you are ungrouped, group leader or raid assistant and not queued for a battleground or the Looking for Group feature.|n|nFriends who message the keyword using Battle.net will not be sent a group invite if they are appearing offline.  They need to either change their online status or use character whispers."] .. "|n|n" .. L["Keyword"] .. ": |cffffffff" .. "dummy" .. "|r")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Groups"					, 	340, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AcceptPartyFriends"		, 	"Party from friends"			, 	340, -92, 	false,	"If checked, party invitations from friends will be automatically accepted unless you are queued for a battleground or the Looking for Group feature.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "InviteFromWhisper"			,   "Invite from whispers"			,	340, -112,	false,	L["If checked, a group invite will be sent to anyone who whispers you with a set keyword as long as you are ungrouped, group leader or raid assistant and not queued for a battleground or the Looking for Group feature.|n|nFriends who message the keyword using Battle.net will not be sent a group invite if they are appearing offline.  They need to either change their online status or use character whispers."] .. "|n|n" .. L["Keyword"] .. ": |cffffffff" .. "dummy" .. "|r")
 
-	local FriendlyGuildFooter = LeaPlusLC:MakeFT(LeaPlusLC[pg], "For all of the social options above, you can treat guild members as friends too.", 146, 380)
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "FriendlyGuild"				, 	"Guild"							, 	146, -282, 	false,	"If checked, members of your guild will be treated as friends for all of the options on this page.")
-	LeaPlusCB["FriendlyGuild"]:ClearAllPoints()
-	LeaPlusCB["FriendlyGuild"]:SetPoint("TOPLEFT", FriendlyGuildFooter, "BOTTOMLEFT", 0, -10)
-	if LeaPlusCB["FriendlyGuild"].f:GetStringWidth() > 90 then
-		LeaPlusCB["FriendlyGuild"].f:SetWidth(90)
-		LeaPlusCB["FriendlyGuild"]:SetHitRectInsets(0, -84, 0, 0)
+	local FriendlyGuildFooter = RGXQoLLC:MakeFT(RGXQoLLC[pg], "For all of the social options above, you can treat guild members as friends too.", 146, 380)
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "FriendlyGuild"				, 	"Guild"							, 	146, -282, 	false,	"If checked, members of your guild will be treated as friends for all of the options on this page.")
+	RGXQoLCB["FriendlyGuild"]:ClearAllPoints()
+	RGXQoLCB["FriendlyGuild"]:SetPoint("TOPLEFT", FriendlyGuildFooter, "BOTTOMLEFT", 0, -10)
+	if RGXQoLCB["FriendlyGuild"].f:GetStringWidth() > 90 then
+		RGXQoLCB["FriendlyGuild"].f:SetWidth(90)
+		RGXQoLCB["FriendlyGuild"]:SetHitRectInsets(0, -84, 0, 0)
 	end
 
-	LeaPlusLC:CfgBtn("InvWhisperBtn", LeaPlusCB["InviteFromWhisper"])
+	RGXQoLLC:CfgBtn("InvWhisperBtn", RGXQoLCB["InviteFromWhisper"])
 
 ----------------------------------------------------------------------
 -- 	LC3: Chat
@@ -14758,26 +14758,26 @@
 
 	pg = "Page3";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Chat Frame"				, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "UseEasyChatResizing"		,	"Use easy resizing"				,	146, -92,	true,	"If checked, dragging the General chat tab while the chat frame is locked will expand the chat frame upwards.|n|nIf the chat frame is unlocked, dragging the General chat tab will move the chat frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoCombatLogTab" 			, 	"Hide the combat log"			, 	146, -112, 	true,	"If checked, the combat log will be hidden.|n|nThe combat log must be docked in order for this option to work.|n|nIf the combat log is undocked, you can dock it by dragging the tab (and reloading your UI) or by resetting the chat windows (from the chat menu).")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoChatButtons"				,	"Hide chat buttons"				,	146, -132,	true,	"If checked, chat frame buttons will be hidden.|n|nClicking chat tabs will automatically show the latest messages.|n|nUse the mouse wheel to scroll through the chat history.  Hold down SHIFT for page jump or CTRL to jump to the top or bottom of the chat history.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "UnclampChat"				,	"Unclamp chat frame"			,	146, -152,	true,	"If checked, you will be able to drag the chat frame to the edge of the screen.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MoveChatEditBoxToTop" 		, 	"Move editbox to top"			,	146, -172, 	true,	"If checked, the editbox will be moved to the top of the chat frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MoreFontSizes"		 		, 	"More font sizes"				,	146, -192, 	true,	"If checked, additional font sizes will be available in the chat frame font size menu.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Chat Frame"				, 	146, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UseEasyChatResizing"		,	"Use easy resizing"				,	146, -92,	true,	"If checked, dragging the General chat tab while the chat frame is locked will expand the chat frame upwards.|n|nIf the chat frame is unlocked, dragging the General chat tab will move the chat frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoCombatLogTab" 			, 	"Hide the combat log"			, 	146, -112, 	true,	"If checked, the combat log will be hidden.|n|nThe combat log must be docked in order for this option to work.|n|nIf the combat log is undocked, you can dock it by dragging the tab (and reloading your UI) or by resetting the chat windows (from the chat menu).")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoChatButtons"				,	"Hide chat buttons"				,	146, -132,	true,	"If checked, chat frame buttons will be hidden.|n|nClicking chat tabs will automatically show the latest messages.|n|nUse the mouse wheel to scroll through the chat history.  Hold down SHIFT for page jump or CTRL to jump to the top or bottom of the chat history.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UnclampChat"				,	"Unclamp chat frame"			,	146, -152,	true,	"If checked, you will be able to drag the chat frame to the edge of the screen.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MoveChatEditBoxToTop" 		, 	"Move editbox to top"			,	146, -172, 	true,	"If checked, the editbox will be moved to the top of the chat frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MoreFontSizes"		 		, 	"More font sizes"				,	146, -192, 	true,	"If checked, additional font sizes will be available in the chat frame font size menu.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Mechanics"					, 	340, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoStickyChat"				, 	"Disable sticky chat"			,	340, -92,	true,	"If checked, sticky chat will be disabled.|n|nNote that this does not apply to temporary chat windows.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "UseArrowKeysInChat"		, 	"Use arrow keys in chat"		, 	340, -112, 	true,	"If checked, you can press the arrow keys to move the insertion point left and right in the chat frame.|n|nIf unchecked, the arrow keys will use the default keybind setting.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoChatFade"				, 	"Disable chat fade"				, 	340, -132, 	true,	"If checked, chat text will not fade out after a time period.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "UnivGroupColor"			,	"Universal group color"			,	340, -152,	false,	"If checked, raid chat will be colored blue (to match the default party chat color).")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ClassColorsInChat"			,	"Use class colors in chat"		,	340, -172,	true,	"If checked, class colors will be used in the chat frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "RecentChatWindow"			,	"Recent chat window"			, 	340, -192, 	true,	"If checked, you can hold down the control key and click a chat tab to view recent chat in a copy-friendly window.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MaxChatHstory"				,	"Increase chat history"			, 	340, -212, 	true,	"If checked, your chat history will increase to 4096 lines.  If unchecked, the default will be used (128 lines).|n|nEnabling this option may prevent some chat text from showing during login.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "FilterChatMessages"		, 	"Filter chat messages"			,	340, -232, 	true,	"If checked, you can block drunken spam and duel spam.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "RestoreChatMessages"		, 	"Restore chat messages"			,	340, -252, 	true,	"If checked, recent chat will be restored when you reload your interface.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Mechanics"					, 	340, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoStickyChat"				, 	"Disable sticky chat"			,	340, -92,	true,	"If checked, sticky chat will be disabled.|n|nNote that this does not apply to temporary chat windows.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UseArrowKeysInChat"		, 	"Use arrow keys in chat"		, 	340, -112, 	true,	"If checked, you can press the arrow keys to move the insertion point left and right in the chat frame.|n|nIf unchecked, the arrow keys will use the default keybind setting.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoChatFade"				, 	"Disable chat fade"				, 	340, -132, 	true,	"If checked, chat text will not fade out after a time period.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UnivGroupColor"			,	"Universal group color"			,	340, -152,	false,	"If checked, raid chat will be colored blue (to match the default party chat color).")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ClassColorsInChat"			,	"Use class colors in chat"		,	340, -172,	true,	"If checked, class colors will be used in the chat frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "RecentChatWindow"			,	"Recent chat window"			, 	340, -192, 	true,	"If checked, you can hold down the control key and click a chat tab to view recent chat in a copy-friendly window.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MaxChatHstory"				,	"Increase chat history"			, 	340, -212, 	true,	"If checked, your chat history will increase to 4096 lines.  If unchecked, the default will be used (128 lines).|n|nEnabling this option may prevent some chat text from showing during login.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "FilterChatMessages"		, 	"Filter chat messages"			,	340, -232, 	true,	"If checked, you can block drunken spam and duel spam.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "RestoreChatMessages"		, 	"Restore chat messages"			,	340, -252, 	true,	"If checked, recent chat will be restored when you reload your interface.")
 
-	LeaPlusLC:CfgBtn("FilterChatMessagesBtn", LeaPlusCB["FilterChatMessages"])
+	RGXQoLLC:CfgBtn("FilterChatMessagesBtn", RGXQoLCB["FilterChatMessages"])
 
 ----------------------------------------------------------------------
 -- 	LC4: Text
@@ -14785,22 +14785,22 @@
 
 	pg = "Page4";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Visibility"				, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideErrorMessages"			, 	"Hide error messages"			,	146, -92, 	true,	"If checked, most error messages (such as 'Not enough rage') will not be shown.  Some important errors are excluded.|n|nIf you have the minimap button enabled, you can hold down the alt key and click it to toggle error messages without affecting this setting.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoHitIndicators"			, 	"Hide portrait numbers"			,	146, -112, 	true,	"If checked, damage and healing numbers in the player and pet portrait frames will be hidden.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideZoneText"				,	"Hide zone text"				,	146, -132, 	true,	"If checked, zone text will not be shown (eg. 'Ironforge').")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideKeybindText"			,	"Hide keybind text"				,	146, -152, 	true,	"If checked, keybind text will not be shown on action buttons.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideMacroText"				,	"Hide macro text"				,	146, -172, 	true,	"If checked, macro text will not be shown on action buttons.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "HideRaidGroupLabels"		,	"Hide raid group labels"		,	146, -192, 	true,	"If checked, the player frame group indicator and the group labels displayed above the compact raid frames and the pullout raid frames will be hidden.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Visibility"				, 	146, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "HideErrorMessages"			, 	"Hide error messages"			,	146, -92, 	true,	"If checked, most error messages (such as 'Not enough rage') will not be shown.  Some important errors are excluded.|n|nIf you have the minimap button enabled, you can hold down the alt key and click it to toggle error messages without affecting this setting.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoHitIndicators"			, 	"Hide portrait numbers"			,	146, -112, 	true,	"If checked, damage and healing numbers in the player and pet portrait frames will be hidden.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "HideZoneText"				,	"Hide zone text"				,	146, -132, 	true,	"If checked, zone text will not be shown (eg. 'Ironforge').")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "HideKeybindText"			,	"Hide keybind text"				,	146, -152, 	true,	"If checked, keybind text will not be shown on action buttons.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "HideMacroText"				,	"Hide macro text"				,	146, -172, 	true,	"If checked, macro text will not be shown on action buttons.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "HideRaidGroupLabels"		,	"Hide raid group labels"		,	146, -192, 	true,	"If checked, the player frame group indicator and the group labels displayed above the compact raid frames and the pullout raid frames will be hidden.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Text Size"					, 	340, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MailFontChange"			,	"Resize mail text"				, 	340, -92, 	true,	"If checked, you will be able to change the font size of standard mail text.|n|nThis does not affect mail created using templates (such as auction house invoices).")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "QuestFontChange"			,	"Resize quest text"				, 	340, -112, 	true,	"If checked, you will be able to change the font size of quest text.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "BookFontChange"			,	"Resize book text"				, 	340, -132, 	true,	"If checked, you will be able to change the font size of book text.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Text Size"					, 	340, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MailFontChange"			,	"Resize mail text"				, 	340, -92, 	true,	"If checked, you will be able to change the font size of standard mail text.|n|nThis does not affect mail created using templates (such as auction house invoices).")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "QuestFontChange"			,	"Resize quest text"				, 	340, -112, 	true,	"If checked, you will be able to change the font size of quest text.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "BookFontChange"			,	"Resize book text"				, 	340, -132, 	true,	"If checked, you will be able to change the font size of book text.")
 
-	LeaPlusLC:CfgBtn("MailTextBtn", LeaPlusCB["MailFontChange"])
-	LeaPlusLC:CfgBtn("QuestTextBtn", LeaPlusCB["QuestFontChange"])
-	LeaPlusLC:CfgBtn("BookTextBtn", LeaPlusCB["BookFontChange"])
+	RGXQoLLC:CfgBtn("MailTextBtn", RGXQoLCB["MailFontChange"])
+	RGXQoLLC:CfgBtn("QuestTextBtn", RGXQoLCB["QuestFontChange"])
+	RGXQoLLC:CfgBtn("BookTextBtn", RGXQoLCB["BookFontChange"])
 
 ----------------------------------------------------------------------
 -- 	LC5: Interface
@@ -14808,43 +14808,43 @@
 
 	pg = "Page5";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Enhancements"				, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MinimapModder"				,	"Enhance minimap"				, 	146, -92, 	true,	"If checked, you will be able to customise the minimap.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "TipModEnable"				,	"Enhance tooltip"				,	146, -112, 	true,	"If checked, the tooltip will be color coded and you will be able to modify the tooltip layout and scale.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "EnhanceDressup"			, 	"Enhance dressup"				,	146, -132, 	true,	"If checked, you will be able to pan (right-button) and zoom (mousewheel) in the character frame, dressup frame and inspect frame.|n|nA toggle stats button will be shown in the character frame.  You can also middle-click the character model to toggle stats.|n|nModel rotation controls will be hidden.  Buttons to toggle gear will be added to the dressup frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "EnhanceQuestLog"			, 	"Enhance quest log"				,	146, -152, 	true,	"If checked, the quest log frame will be larger and feature a world map button and quest levels.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "EnhanceProfessions"		, 	"Enhance professions"			,	146, -172, 	true,	"If checked, the professions frame will be larger.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "EnhanceTrainers"			, 	"Enhance trainers"				,	146, -192, 	true,	"If checked, the skill trainer frame will be larger and feature a train all skills button.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "EnhanceFlightMap"			, 	"Enhance flight map"			,	146, -212, 	true,	"If checked, you will be able to customise the flight map.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Enhancements"				, 	146, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MinimapModder"				,	"Enhance minimap"				, 	146, -92, 	true,	"If checked, you will be able to customise the minimap.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "TipModEnable"				,	"Enhance tooltip"				,	146, -112, 	true,	"If checked, the tooltip will be color coded and you will be able to modify the tooltip layout and scale.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "EnhanceDressup"			, 	"Enhance dressup"				,	146, -132, 	true,	"If checked, you will be able to pan (right-button) and zoom (mousewheel) in the character frame, dressup frame and inspect frame.|n|nA toggle stats button will be shown in the character frame.  You can also middle-click the character model to toggle stats.|n|nModel rotation controls will be hidden.  Buttons to toggle gear will be added to the dressup frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "EnhanceQuestLog"			, 	"Enhance quest log"				,	146, -152, 	true,	"If checked, the quest log frame will be larger and feature a world map button and quest levels.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "EnhanceProfessions"		, 	"Enhance professions"			,	146, -172, 	true,	"If checked, the professions frame will be larger.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "EnhanceTrainers"			, 	"Enhance trainers"				,	146, -192, 	true,	"If checked, the skill trainer frame will be larger and feature a train all skills button.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "EnhanceFlightMap"			, 	"Enhance flight map"			,	146, -212, 	true,	"If checked, you will be able to customise the flight map.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Extras"					, 	146, -252);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowVolume"				, 	"Show volume slider"			, 	146, -272, 	true,	"If checked, a master volume slider will be shown in the character frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AhExtras"					, 	"Show auction controls"			, 	146, -292, 	true,	"If checked, additional functionality will be added to the auction house.|n|nBuyout only - create buyout auctions without filling in the starting price.|n|nGold only - set the copper and silver prices at 99 to speed up new auctions.|n|nFind item - search the auction house for the item you are selling.|n|nIn addition, the auction duration setting will be saved account-wide.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Extras"					, 	146, -252);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowVolume"				, 	"Show volume slider"			, 	146, -272, 	true,	"If checked, a master volume slider will be shown in the character frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AhExtras"					, 	"Show auction controls"			, 	146, -292, 	true,	"If checked, additional functionality will be added to the auction house.|n|nBuyout only - create buyout auctions without filling in the starting price.|n|nGold only - set the copper and silver prices at 99 to speed up new auctions.|n|nFind item - search the auction house for the item you are selling.|n|nIn addition, the auction duration setting will be saved account-wide.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Extras"					, 	340, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowCooldowns"				, 	"Show cooldowns"				, 	340, -92, 	true,	"If checked, you will be able to place up to five beneficial cooldown icons above the target frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "DurabilityStatus"			, 	"Show durability status"		, 	340, -112, 	true,	"If checked, a button will be added to the character frame which will show your equipped item durability when you hover the pointer over it.|n|nIn addition, an overall percentage will be shown in the chat frame when you die.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowVanityControls"		, 	"Show vanity controls"			, 	340, -132, 	true,	"If checked, helm and cloak toggle checkboxes will be shown in the character frame.|n|nYou can hold shift and right-click the checkboxes to switch layouts.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowBagSearchBox"			, 	"Show bag search box"			, 	340, -152, 	true,	"If checked, a bag search box will be shown in the backpack frame and the bank frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowFreeBagSlots"			, 	"Show free bag slots"			, 	340, -172, 	true,	"If checked, the number of free bag slots will be shown in the backpack button icon and tooltip.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowRaidToggle"			, 	"Show raid button"				,	340, -192, 	true,	"If checked, the button to toggle the raid container frame will be shown just above the raid management frame (left side of the screen) instead of in the raid management frame itself.|n|nThis allows you to toggle the raid container frame without needing to open the raid management frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowBorders"				,	"Show borders"					,	340, -212, 	true,	"If checked, you will be able to show customisable borders around the edges of the screen.|n|nThe borders are placed on top of the game world but under the UI so you can place UI elements over them.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowPlayerChain"			, 	"Show player chain"				,	340, -232, 	true,	"If checked, you will be able to show a rare, elite or rare elite chain around the player frame.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowDruidPowerBar"			, 	"Show druid power bar"			,	340, -252, 	true,	"If checked, a power bar will be shown in the player frame when you are playing a shapeshifted druid.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowReadyTimer"			, 	"Show ready timer"				,	340, -272, 	true,	"If checked, a timer will be shown under the PvP encounter ready frame so that you know how long you have left to click the enter button.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowWowheadLinks"			, 	"Show Wowhead links"			, 	340, -292, 	true,	"If checked, Wowhead links will be shown above the quest log frame.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Extras"					, 	340, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowCooldowns"				, 	"Show cooldowns"				, 	340, -92, 	true,	"If checked, you will be able to place up to five beneficial cooldown icons above the target frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "DurabilityStatus"			, 	"Show durability status"		, 	340, -112, 	true,	"If checked, a button will be added to the character frame which will show your equipped item durability when you hover the pointer over it.|n|nIn addition, an overall percentage will be shown in the chat frame when you die.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowVanityControls"		, 	"Show vanity controls"			, 	340, -132, 	true,	"If checked, helm and cloak toggle checkboxes will be shown in the character frame.|n|nYou can hold shift and right-click the checkboxes to switch layouts.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowBagSearchBox"			, 	"Show bag search box"			, 	340, -152, 	true,	"If checked, a bag search box will be shown in the backpack frame and the bank frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowFreeBagSlots"			, 	"Show free bag slots"			, 	340, -172, 	true,	"If checked, the number of free bag slots will be shown in the backpack button icon and tooltip.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowRaidToggle"			, 	"Show raid button"				,	340, -192, 	true,	"If checked, the button to toggle the raid container frame will be shown just above the raid management frame (left side of the screen) instead of in the raid management frame itself.|n|nThis allows you to toggle the raid container frame without needing to open the raid management frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowBorders"				,	"Show borders"					,	340, -212, 	true,	"If checked, you will be able to show customisable borders around the edges of the screen.|n|nThe borders are placed on top of the game world but under the UI so you can place UI elements over them.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowPlayerChain"			, 	"Show player chain"				,	340, -232, 	true,	"If checked, you will be able to show a rare, elite or rare elite chain around the player frame.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowDruidPowerBar"			, 	"Show druid power bar"			,	340, -252, 	true,	"If checked, a power bar will be shown in the player frame when you are playing a shapeshifted druid.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowReadyTimer"			, 	"Show ready timer"				,	340, -272, 	true,	"If checked, a timer will be shown under the PvP encounter ready frame so that you know how long you have left to click the enter button.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowWowheadLinks"			, 	"Show Wowhead links"			, 	340, -292, 	true,	"If checked, Wowhead links will be shown above the quest log frame.")
 
-	LeaPlusLC:CfgBtn("ModMinimapBtn", LeaPlusCB["MinimapModder"])
-	LeaPlusLC:CfgBtn("MoveTooltipButton", LeaPlusCB["TipModEnable"])
-	LeaPlusLC:CfgBtn("EnhanceDressupBtn", LeaPlusCB["EnhanceDressup"])
-	LeaPlusLC:CfgBtn("EnhanceQuestLogBtn", LeaPlusCB["EnhanceQuestLog"])
-	LeaPlusLC:CfgBtn("EnhanceTrainersBtn", LeaPlusCB["EnhanceTrainers"])
-	LeaPlusLC:CfgBtn("EnhanceFlightMapBtn", LeaPlusCB["EnhanceFlightMap"])
-	LeaPlusLC:CfgBtn("CooldownsButton", LeaPlusCB["ShowCooldowns"])
-	LeaPlusLC:CfgBtn("ModBordersBtn", LeaPlusCB["ShowBorders"])
-	LeaPlusLC:CfgBtn("ModPlayerChain", LeaPlusCB["ShowPlayerChain"])
-	LeaPlusLC:CfgBtn("ShowDruidPowerBarBtn", LeaPlusCB["ShowDruidPowerBar"])
-	LeaPlusLC:CfgBtn("ShowWowheadLinksBtn", LeaPlusCB["ShowWowheadLinks"])
+	RGXQoLLC:CfgBtn("ModMinimapBtn", RGXQoLCB["MinimapModder"])
+	RGXQoLLC:CfgBtn("MoveTooltipButton", RGXQoLCB["TipModEnable"])
+	RGXQoLLC:CfgBtn("EnhanceDressupBtn", RGXQoLCB["EnhanceDressup"])
+	RGXQoLLC:CfgBtn("EnhanceQuestLogBtn", RGXQoLCB["EnhanceQuestLog"])
+	RGXQoLLC:CfgBtn("EnhanceTrainersBtn", RGXQoLCB["EnhanceTrainers"])
+	RGXQoLLC:CfgBtn("EnhanceFlightMapBtn", RGXQoLCB["EnhanceFlightMap"])
+	RGXQoLLC:CfgBtn("CooldownsButton", RGXQoLCB["ShowCooldowns"])
+	RGXQoLLC:CfgBtn("ModBordersBtn", RGXQoLCB["ShowBorders"])
+	RGXQoLLC:CfgBtn("ModPlayerChain", RGXQoLCB["ShowPlayerChain"])
+	RGXQoLLC:CfgBtn("ShowDruidPowerBarBtn", RGXQoLCB["ShowDruidPowerBar"])
+	RGXQoLLC:CfgBtn("ShowWowheadLinksBtn", RGXQoLCB["ShowWowheadLinks"])
 
 ----------------------------------------------------------------------
 -- 	LC6: Frames
@@ -14852,18 +14852,18 @@
 
 	pg = "Page6";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Features"					, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ManageWidget"				,	"Manage widget"					, 	146, -92, 	true,	"If checked, you will be able to change the position and scale of the widget frame.|n|nThe widget frame is commonly used for showing PvP scores and tracking objectives.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ManageTimer"				,	"Manage timer"					, 	146, -112, 	true,	"If checked, you will be able to change the position and scale of the timer bar.|n|nThe timer bar is used for showing remaining breath when underwater as well as other things.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ClassColFrames"			, 	"Class colored frames"			,	146, -132, 	true,	"If checked, class coloring will be used in the player frame and target frame.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Features"					, 	146, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ManageWidget"				,	"Manage widget"					, 	146, -92, 	true,	"If checked, you will be able to change the position and scale of the widget frame.|n|nThe widget frame is commonly used for showing PvP scores and tracking objectives.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ManageTimer"				,	"Manage timer"					, 	146, -112, 	true,	"If checked, you will be able to change the position and scale of the timer bar.|n|nThe timer bar is used for showing remaining breath when underwater as well as other things.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ClassColFrames"			, 	"Class colored frames"			,	146, -132, 	true,	"If checked, class coloring will be used in the player frame and target frame.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Visibility"				, 	340, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoGryphons"				,	"Hide gryphons"					, 	340, -92, 	true,	"If checked, the main bar gryphons will not be shown.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoClassBar"				,	"Hide stance bar"				, 	340, -112, 	true,	"If checked, the stance bar will not be shown.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Visibility"				, 	340, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoGryphons"				,	"Hide gryphons"					, 	340, -92, 	true,	"If checked, the main bar gryphons will not be shown.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoClassBar"				,	"Hide stance bar"				, 	340, -112, 	true,	"If checked, the stance bar will not be shown.")
 
-	LeaPlusLC:CfgBtn("ManageWidgetButton", LeaPlusCB["ManageWidget"])
-	LeaPlusLC:CfgBtn("ManageTimerButton", LeaPlusCB["ManageTimer"])
-	LeaPlusLC:CfgBtn("ClassColFramesBtn", LeaPlusCB["ClassColFrames"])
+	RGXQoLLC:CfgBtn("ManageWidgetButton", RGXQoLCB["ManageWidget"])
+	RGXQoLLC:CfgBtn("ManageTimerButton", RGXQoLCB["ManageTimer"])
+	RGXQoLLC:CfgBtn("ClassColFramesBtn", RGXQoLCB["ClassColFrames"])
 
 ----------------------------------------------------------------------
 -- 	LC7: System
@@ -14871,34 +14871,34 @@
 
 	pg = "Page7";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Graphics and Sound"		, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoScreenGlow"				, 	"Disable screen glow"			, 	146, -92, 	false,	"If checked, the screen glow will be disabled.|n|nEnabling this option will also disable the drunken haze effect.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoScreenEffects"			, 	"Disable screen effects"		, 	146, -112, 	false,	"If checked, the grey screen of death and the netherworld effect will be disabled.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "SetWeatherDensity"			, 	"Set weather density"			, 	146, -132, 	false,	"If checked, you will be able to set the density of weather effects.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MaxCameraZoom"				, 	"Max camera zoom"				, 	146, -152, 	false,	"If checked, you will be able to zoom out to a greater distance.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoRestedEmotes"			, 	"Silence rested emotes"			,	146, -172, 	true,	"If checked, emote sounds will be silenced while your character is resting or at the Grim Guzzler.|n|nEmote sounds will be enabled at all other times.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "KeepAudioSynced"			, 	"Keep audio synced"				,	146, -192, 	true,	"If checked, when you change the audio output device in your operating system, the game audio output device will change automatically as long as a cinematic is not playing at the time.|n|nFor this to work, the game audio output device will be set to system default.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MuteGameSounds"			, 	"Mute game sounds"				,	146, -212, 	false,	"If checked, you will be able to mute a selection of game sounds.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MuteMountSounds"			, 	"Mute mount sounds"				,	146, -232, 	false,	"If checked, you will be able to mute a selection of mount sounds.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "MuteCustomSounds"			, 	"Mute custom sounds"			,	146, -252, 	false,	"If checked, you will be able to mute your own choice of sounds.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Graphics and Sound"		, 	146, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoScreenGlow"				, 	"Disable screen glow"			, 	146, -92, 	false,	"If checked, the screen glow will be disabled.|n|nEnabling this option will also disable the drunken haze effect.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoScreenEffects"			, 	"Disable screen effects"		, 	146, -112, 	false,	"If checked, the grey screen of death and the netherworld effect will be disabled.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "SetWeatherDensity"			, 	"Set weather density"			, 	146, -132, 	false,	"If checked, you will be able to set the density of weather effects.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MaxCameraZoom"				, 	"Max camera zoom"				, 	146, -152, 	false,	"If checked, you will be able to zoom out to a greater distance.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoRestedEmotes"			, 	"Silence rested emotes"			,	146, -172, 	true,	"If checked, emote sounds will be silenced while your character is resting or at the Grim Guzzler.|n|nEmote sounds will be enabled at all other times.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "KeepAudioSynced"			, 	"Keep audio synced"				,	146, -192, 	true,	"If checked, when you change the audio output device in your operating system, the game audio output device will change automatically as long as a cinematic is not playing at the time.|n|nFor this to work, the game audio output device will be set to system default.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MuteGameSounds"			, 	"Mute game sounds"				,	146, -212, 	false,	"If checked, you will be able to mute a selection of game sounds.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MuteMountSounds"			, 	"Mute mount sounds"				,	146, -232, 	false,	"If checked, you will be able to mute a selection of mount sounds.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MuteCustomSounds"			, 	"Mute custom sounds"			,	146, -252, 	false,	"If checked, you will be able to mute your own choice of sounds.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Game Options"				, 	340, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoBagAutomation"			, 	"Disable bag automation"		, 	340, -92, 	true,	"If checked, your bags will not be opened or closed automatically when you interact with a merchant, bank or mailbox.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "NoConfirmLoot"				, 	"Disable loot warnings"			,	340, -112, 	false,	"If checked, confirmations will no longer appear when you choose a loot roll option or attempt to sell or mail a tradable item.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "FasterLooting"				, 	"Faster auto loot"				,	340, -132, 	true,	"If checked, the amount of time it takes to auto loot creatures will be significantly reduced.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "FasterMovieSkip"			, 	"Faster movie skip"				,	340, -152, 	true,	"If checked, you will be able to cancel cinematics without being prompted for confirmation.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "StandAndDismount"			, 	"Dismount me"					,	340, -172, 	true,	"If checked, you will be able to set some additional rules for when your character is automatically dismounted.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowVendorPrice"			, 	"Show vendor price"				,	340, -192, 	true,	"If checked, the vendor price will be shown in item tooltips.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "CombatPlates"				, 	"Combat plates"					,	340, -212, 	true,	"If checked, enemy nameplates will be shown during combat and hidden when combat ends.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "EasyItemDestroy"			, 	"Easy item destroy"				,	340, -232, 	true,	"If checked, you will no longer need to type delete when destroying a superior quality item.|n|nIn addition, item links will be shown in all item destroy confirmation windows.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowFlightTimes"			, 	"Show flight times"				, 	340, -252, 	true,	"If checked, flight times will be shown in the flight map and when you take a flight.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Game Options"				, 	340, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoBagAutomation"			, 	"Disable bag automation"		, 	340, -92, 	true,	"If checked, your bags will not be opened or closed automatically when you interact with a merchant, bank or mailbox.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoConfirmLoot"				, 	"Disable loot warnings"			,	340, -112, 	false,	"If checked, confirmations will no longer appear when you choose a loot roll option or attempt to sell or mail a tradable item.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "FasterLooting"				, 	"Faster auto loot"				,	340, -132, 	true,	"If checked, the amount of time it takes to auto loot creatures will be significantly reduced.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "FasterMovieSkip"			, 	"Faster movie skip"				,	340, -152, 	true,	"If checked, you will be able to cancel cinematics without being prompted for confirmation.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "StandAndDismount"			, 	"Dismount me"					,	340, -172, 	true,	"If checked, you will be able to set some additional rules for when your character is automatically dismounted.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowVendorPrice"			, 	"Show vendor price"				,	340, -192, 	true,	"If checked, the vendor price will be shown in item tooltips.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "CombatPlates"				, 	"Combat plates"					,	340, -212, 	true,	"If checked, enemy nameplates will be shown during combat and hidden when combat ends.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "EasyItemDestroy"			, 	"Easy item destroy"				,	340, -232, 	true,	"If checked, you will no longer need to type delete when destroying a superior quality item.|n|nIn addition, item links will be shown in all item destroy confirmation windows.")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowFlightTimes"			, 	"Show flight times"				, 	340, -252, 	true,	"If checked, flight times will be shown in the flight map and when you take a flight.")
 
-	LeaPlusLC:CfgBtn("SetWeatherDensityBtn", LeaPlusCB["SetWeatherDensity"])
-	LeaPlusLC:CfgBtn("MuteGameSoundsBtn", LeaPlusCB["MuteGameSounds"])
-	LeaPlusLC:CfgBtn("MuteMountSoundsBtn", LeaPlusCB["MuteMountSounds"])
-	LeaPlusLC:CfgBtn("MuteCustomSoundsBtn", LeaPlusCB["MuteCustomSounds"])
-	LeaPlusLC:CfgBtn("DismountBtn", LeaPlusCB["StandAndDismount"])
-	LeaPlusLC:CfgBtn("ShowFlightTimesBtn", LeaPlusCB["ShowFlightTimes"])
+	RGXQoLLC:CfgBtn("SetWeatherDensityBtn", RGXQoLCB["SetWeatherDensity"])
+	RGXQoLLC:CfgBtn("MuteGameSoundsBtn", RGXQoLCB["MuteGameSounds"])
+	RGXQoLLC:CfgBtn("MuteMountSoundsBtn", RGXQoLCB["MuteMountSounds"])
+	RGXQoLLC:CfgBtn("MuteCustomSoundsBtn", RGXQoLCB["MuteCustomSounds"])
+	RGXQoLLC:CfgBtn("DismountBtn", RGXQoLCB["StandAndDismount"])
+	RGXQoLLC:CfgBtn("ShowFlightTimesBtn", RGXQoLCB["ShowFlightTimes"])
 
 ----------------------------------------------------------------------
 -- 	LC8: Settings
@@ -14906,12 +14906,12 @@
 
 	pg = "Page8";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Addon"						, 146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowMinimapIcon"			, "Show minimap button"				, 146, -92,		false,	"If checked, a minimap button will be available.|n|nClick - Toggle options panel.|n|nSHIFT-click - Toggle music.|n|nALT-click - Toggle errors (if enabled).|n|nCTRL/SHIFT-click - Toggle windowed mode.|n|nCTRL/ALT-click - Toggle Zygor (if installed).")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "UseEnglishLanguage"		, "Use English language"			, 146, -112,	true,	"If checked, text used throughout the addon will be shown in English regardless of your game locale.")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Addon"						, 146, -72);
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowMinimapIcon"			, "Show minimap button"				, 146, -92,		false,	"If checked, a minimap button will be available.|n|nClick - Toggle options panel.|n|nSHIFT-click - Toggle music.|n|nALT-click - Toggle errors (if enabled).|n|nCTRL/SHIFT-click - Toggle windowed mode.|n|nCTRL/ALT-click - Toggle Zygor (if installed).")
+	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UseEnglishLanguage"		, "Use English language"			, 146, -112,	true,	"If checked, text used throughout the addon will be shown in English regardless of your game locale.")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Scale", 340, -72);
-	LeaPlusLC:MakeSL(LeaPlusLC[pg], "PlusPanelScale", "Drag to set the scale of the Leatrix Plus panel.", 1, 2, 0.1, 340, -92, "%.1f")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Scale", 340, -72);
+	RGXQoLLC:MakeSL(RGXQoLLC[pg], "PlusPanelScale", "Drag to set the scale of the Leatrix Plus panel.", 1, 2, 0.1, 340, -92, "%.1f")
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Transparency", 340, -132);
-	LeaPlusLC:MakeSL(LeaPlusLC[pg], "PlusPanelAlpha", "Drag to set the transparency of the Leatrix Plus panel.", 0, 1, 0.1, 340, -152, "%.1f")
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Transparency", 340, -132);
+	RGXQoLLC:MakeSL(RGXQoLLC[pg], "PlusPanelAlpha", "Drag to set the transparency of the Leatrix Plus panel.", 0, 1, 0.1, 340, -152, "%.1f")

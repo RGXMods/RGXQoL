@@ -1,10 +1,10 @@
-﻿
+
 	----------------------------------------------------------------------
 	-- Leatrix Plus Mute for Classic Era
 	----------------------------------------------------------------------
 
-	local void, Leatrix_Plus = ...
-	local L = Leatrix_Plus.L
+	local void, RGXQoLAddon = ...
+	local L = RGXQoLAddon.L
 
 	----------------------------------------------------------------------
 	-- Mute game sounds

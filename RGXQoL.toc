@@ -9,7 +9,7 @@
 ## LoadSavedVariablesFirst: true
 ## RequiredDeps: RGX-Framework
 
-## IconTexture: Interface\HELPFRAME\ReportLagIcon-Movement
+## IconTexture: Interface\AddOns\RGX-Framework\media\logo.tga
 ## OptionalDeps: ElvUI
 
 ## X-License: See Changelog.txt for Leatrix Plus attribution

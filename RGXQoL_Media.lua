@@ -1,14 +1,14 @@
-﻿
+
 	----------------------------------------------------------------------
 	-- Leatrix Plus Media for Classic Era
 	----------------------------------------------------------------------
 
 	-- Create locals
-	local LeaPlusLC = {}
+	local RGXQoLLC = {}
 
 	-- Get locale table
-	local void, Leatrix_Plus = ...
-	local L = Leatrix_Plus.L
+	local void, RGXQoLAddon = ...
+	local L = RGXQoLAddon.L
 
 	-- Check Wow version is valid
 	do
@@ -21,7 +21,7 @@
 			return
 		end
 		if gametocversion and gametocversion == 20505 then
-			LeaPlusLC.NewPatch = true
+			RGXQoLLC.NewPatch = true
 		end
 	end
 

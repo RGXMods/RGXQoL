@@ -1,4 +1,4 @@
-﻿----------------------------------------------------------------------
+----------------------------------------------------------------------
 -- L00: Leatrix Plus Library for Classic Era
 ----------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
 -- LibCandyBar 12.0.1:
 -- 16: LibCandyBar: (?s)-- LibCandyBarStart\R?\K.*?(?=-- LibCandyBarEnd)
 
-local void, Leatrix_Plus = ...
+local void, RGXQoLAddon = ...
 
 ----------------------------------------------------------------------
 -- L11: LibDBIcon: LibStub
@@ -1125,7 +1125,7 @@ LeaLibDBIcon()
 -- L15: LibChatAnims (load on demand)
 ----------------------------------------------------------------------
 
-function Leatrix_Plus:LeaPlusLCA()
+function Leatrix_Plus:RGXQoLLCA()
 
 -- LibChatAnimsStart
 --@curseforge-project-slug: libchatanims@
