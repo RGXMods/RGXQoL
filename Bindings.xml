@@ -1,0 +1,18 @@
+<Bindings>
+
+	<!-- Toggle panel -->
+	<Binding name="RGXQO_GLOBAL_TOGGLE" category = "RGX QoL">
+		SlashCmdList["RGXQoL"]()
+	</Binding>
+
+	<!-- Show web link -->
+	<Binding name="RGXQO_GLOBAL_WEBLINK" category = "RGX QoL">
+		SlashCmdList["RGXQoL"]("id")
+	</Binding>
+
+	<!-- Announce rare -->
+	<Binding name="RGXQO_GLOBAL_RARE" category = "RGX QoL">
+		SlashCmdList["RGXQoL"]("ra")
+	</Binding>
+
+</Bindings>

@@ -1,0 +1,24 @@
+## Interface: 11509,16001
+
+## Title: |cff8B1538RGX|r |cffffffffQoL|r
+## Notes: Quality of life enhancements for WoW Forever.
+
+## Version: 1.0.0
+## Author: RealmGX, derived from Leatrix Plus by Leatrix
+## SavedVariables: RGXQoLDB
+## LoadSavedVariablesFirst: true
+## RequiredDeps: RGX-Framework
+
+## IconTexture: Interface\HELPFRAME\ReportLagIcon-Movement
+## OptionalDeps: ElvUI
+
+## X-License: See Changelog.txt for Leatrix Plus attribution
+
+RGXQoL_Library.lua
+RGXQoL_Locale.lua
+RGXQoL_Media.lua
+RGXQoL_Flight_Alliance.lua
+RGXQoL_Flight_Horde.lua
+RGXQoL_Mute.lua
+RGXQoL.xml
+RGXQoL.lua
