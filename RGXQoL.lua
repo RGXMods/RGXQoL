@@ -2569,7 +2569,7 @@
 				if SoldCount == 0 or SellJunkTicker and SellJunkTicker._remainingIterations == 1 then
 					StopSelling()
 					if totalPrice > 0 and RGXQoLLC["AutoSellShowSummary"] == "On" then
-						RGXQoLLC:Print(L["Sold junk for"] .. " " .. GetCoinText(totalPrice) .. ".")
+						RGXQoLLC:Print(L["Sold junk for"] .. " " .. (GetCoinText or GetMoneyString or function(v) return tostring(v) end)(totalPrice) .. ".")
 					end
 				end
 
