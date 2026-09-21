@@ -12774,7 +12774,7 @@
 	end
 
 	-- Create a checkbox control (uses standard template)
-	function RGXQoLLC:MakeCB(parent, field, caption, x, y, reload, tip, tipstyle)
+ 	function RGXQoLLC:MakeCB(parent, field, caption, x, y, reload, tip, tipstyle)
 
 		-- Create the checkbox
 		local Cbox = CreateFrame('CheckButton', nil, parent, "ChatConfigCheckButtonTemplate")
@@ -12786,6 +12786,13 @@
 		-- Add label and tooltip
 		Cbox.f = Cbox:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
 		Cbox.f:SetPoint('LEFT', 20, 0)
+
+		-- RGXDesign: theme the checkbox label
+		local Design = _G.RGXDesign
+		if Design then
+			Cbox.f:SetTextColor(Design:Unpack("text"))
+		end
+
 		if reload then
 			-- Checkbox requires UI reload
 			Cbox.f:SetText(L[caption] .. "*")
@@ -12989,10 +12996,23 @@
 			RGXQoLLC["MainPanelA"], void, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"] = PageF:GetPoint()
 		end)
 
-		-- Add background color
+		-- Add background color (RGXDesign themed)
+		local Design = _G.RGXDesign
 		PageF.t = PageF:CreateTexture(nil, "BACKGROUND")
 		PageF.t:SetAllPoints()
-		PageF.t:SetColorTexture(0.05, 0.05, 0.05, 0.9)
+		if Design then
+			PageF.t:SetColorTexture(Design:Unpack("surface"))
+			local border = CreateFrame("Frame", nil, PageF, "BackdropTemplate")
+			border:SetAllPoints()
+			border:SetBackdrop({
+				edgeFile = "Interface\\Buttons\\WHITE8x8",
+				edgeSize = 1,
+			})
+			border:SetBackdropBorderColor(Design:Unpack("border"))
+			border:SetFrameLevel(0)
+		else
+			PageF.t:SetColorTexture(0.05, 0.05, 0.05, 0.9)
+		end
 
 		-- Add textures
 		RGXQoLLC:CreateBar("FootTexture", PageF, 570, 48, "BOTTOM", 0.5, 0.5, 0.5, 1.0, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
@@ -13009,6 +13029,13 @@
 		PageF.mt = PageF:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
 		PageF.mt:SetPoint('TOPLEFT', 16, -16)
 		PageF.mt:SetText("RGX QoL")
+
+		-- RGXDesign: theme the title with the framework accent color
+		local Design = _G.RGXDesign
+		if Design then
+			PageF.mt:SetTextColor(Design:Unpack("primary"))
+			PageF.v:SetTextColor(Design:Unpack("subtext"))
+		end
 
 		-- Add version text (shown underneath main title)
 		PageF.v = PageF:CreateFontString(nil, 'ARTWORK', 'GameFontHighlightSmall')
@@ -14610,34 +14637,49 @@
 		RGXQoLLC[name] = mbtn
 		mbtn:Show();
 		mbtn:SetSize(width, height)
-		mbtn:SetAlpha(1.0)
 		mbtn:SetPoint(anchor, x, y)
 
-		mbtn.t = mbtn:CreateTexture(nil, "BACKGROUND")
-		mbtn.t:SetAllPoints()
-		mbtn.t:SetColorTexture(0.3, 0.3, 0.00, 0.8)
-		mbtn.t:SetAlpha(0.7)
-		mbtn.t:Hide()
+		-- RGXDesign: theme the nav button
+		local Design = _G.RGXDesign
+		if Design then
+			local bg = mbtn:CreateTexture(nil, "BACKGROUND")
+			bg:SetAllPoints()
+			bg:SetColorTexture(Design:Unpack("surface"))
+			mbtn.bg = bg
 
-		mbtn.s = mbtn:CreateTexture(nil, "BACKGROUND")
-		mbtn.s:SetAllPoints()
-		mbtn.s:SetColorTexture(0.3, 0.3, 0.00, 0.8)
-		mbtn.s:Hide()
+			local border = CreateFrame("Frame", nil, mbtn, "BackdropTemplate")
+			border:SetAllPoints()
+			border:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1 })
+			border:SetBackdropBorderColor(Design:Unpack("border"))
+			mbtn.border = border
 
-		mbtn.f = mbtn:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-		mbtn.f:SetPoint('LEFT', 16, 0)
-		mbtn.f:SetText(L[text])
+			mbtn.f = mbtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+			mbtn.f:SetPoint("CENTER", 0, 0)
+			mbtn.f:SetText(L[text] or text)
+			mbtn.f:SetTextColor(Design:Unpack("text"))
 
-		mbtn:SetScript("OnEnter", function()
-			mbtn.t:Show()
-		end)
+			mbtn:SetScript("OnEnter", function(self)
+				self.bg:SetColorTexture(Design:Unpack("hover"))
+				self.f:SetTextColor(Design:Unpack("primary"))
+				self.border:SetBackdropBorderColor(Design:Unpack("primary"))
+			end)
 
-		mbtn:SetScript("OnLeave", function()
-			mbtn.t:Hide()
-		end)
+			mbtn:SetScript("OnLeave", function(self)
+				self.bg:SetColorTexture(Design:Unpack("surface"))
+				self.f:SetTextColor(Design:Unpack("text"))
+				self.border:SetBackdropBorderColor(Design:Unpack("border"))
+			end)
+		else
+			-- Fallback: plain button
+			mbtn.f = mbtn:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+			mbtn.f:SetPoint('LEFT', 16, 0)
+			mbtn.f:SetText(L[text])
+		end
 
+		mbtn:SetAlpha(1.0)
+
+		RGXQoLLC[name] = mbtn
 		return mbtn, mbtn.s
-
 	end
 
 	-- Function to create individual options panel pages
