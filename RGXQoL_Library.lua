@@ -1125,7 +1125,7 @@ LeaLibDBIcon()
 -- L15: LibChatAnims (load on demand)
 ----------------------------------------------------------------------
 
-function Leatrix_Plus:RGXQoLLCA()
+function RGXQoLAddon:RGXQoLLCA()
 
 -- LibChatAnimsStart
 --@curseforge-project-slug: libchatanims@
@@ -1441,7 +1441,7 @@ end
 -- L16: LibDBIcon: LibCandyBar
 ----------------------------------------------------------------------
 
-function Leatrix_Plus:LeaPlusCandyBar()
+function RGXQoLAddon:LeaPlusCandyBar()
 
 -- LibCandyBarStart
 --@curseforge-project-slug: libcandybar-3-0@

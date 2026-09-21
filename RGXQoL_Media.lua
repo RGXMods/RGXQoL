@@ -173,5 +173,5 @@
 	----------------------------------------------------------------------
 
 	-- Give zone table a file level scope (its used in search)
-	Leatrix_Plus["ZoneList"] = ZoneList
+	RGXQoLAddon["ZoneList"] = ZoneList
 

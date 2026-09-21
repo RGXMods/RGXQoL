@@ -147,5 +147,5 @@
 	-- End
 	----------------------------------------------------------------------
 
-	Leatrix_Plus["muteTable"] = muteTable
-	Leatrix_Plus["mountTable"] = mountTable
+	RGXQoLAddon["muteTable"] = muteTable
+	RGXQoLAddon["mountTable"] = mountTable

@@ -94,6 +94,7 @@
 
 	-- Lock and unlock an item
 	function RGXQoLLC:LockItem(item, lock)
+		if not item then return end
 		if lock then
 			item:Disable()
 			item:SetAlpha(0.3)
@@ -778,8 +779,10 @@
 		end
 
 		-- Set event status when option is clicked and on startup
-		RGXQoLCB["NoFriendRequests"]:HookScript("OnClick", ControlEvent)
-		ControlEvent()
+		if RGXQoLCB["NoFriendRequests"] then
+			RGXQoLCB["NoFriendRequests"]:HookScript("OnClick", ControlEvent)
+			ControlEvent()
+		end
 
 		----------------------------------------------------------------------
 		--	Block duels (no reload required)
@@ -13034,7 +13037,6 @@
 		local Design = _G.RGXDesign
 		if Design then
 			PageF.mt:SetTextColor(Design:Unpack("primary"))
-			PageF.v:SetTextColor(Design:Unpack("subtext"))
 		end
 
 		-- Add version text (shown underneath main title)
@@ -13044,6 +13046,11 @@
 		PageF.v:SetPoint('RIGHT', PageF, -32, 0)
 		PageF.v:SetJustifyH('LEFT'); PageF.v:SetJustifyV('TOP');
 		PageF.v:SetNonSpaceWrap(true); PageF.v:SetText(L["Classic"] .. " " .. RGXQoLLC["AddonVer"])
+
+		-- RGXDesign: theme the version text
+		if _G.RGXDesign then
+			PageF.v:SetTextColor(_G.RGXDesign:Unpack("subtext"))
+		end
 
 		-- Add reload UI Button
 		local reloadb = RGXQoLLC:CreateButton("ReloadUIButton", PageF, "Reload", "BOTTOMRIGHT", -16, 10, 0, 25, true, "Your UI needs to be reloaded for some of the changes to take effect.|n|nYou don't have to click the reload button immediately but you do need to click it when you are done making changes and you want the changes to take effect.")
