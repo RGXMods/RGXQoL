@@ -15,14 +15,14 @@
 	-- Create locals
 	local RGXQoLLC, RGXQoLCB, RGXQoLDropList, RGXQoLConfigList, RGXQoLLockList = {}, {}, {}, {}, {}
 
-	-- WoW Forever beta safety: skip secure hooks for functions this client
-	-- lacks (the beta exposes a mixed API surface)
-	local LeaPlusRawHook = hooksecurefunc
-	hooksecurefunc = function(name, func, ...)
+	-- WoW Forever beta safety: guarded hook helper for functions this
+	-- client may lack. Scopes to RGXQoL only -- does NOT replace the
+	-- global hooksecurefunc (that taints every addon's secure hooks).
+	local function SafeHookSecure(name, func)
 		if type(name) == "string" and _G[name] == nil then
 			return
 		end
-		return LeaPlusRawHook(name, func, ...)
+		return hooksecurefunc(name, func)
 	end
 	local ClientVersion = GetBuildInfo()
 	local GameLocale = GetLocale()
@@ -695,7 +695,7 @@
 		if RGXQoLLC["HideRaidGroupLabels"] == "On" then
 
 			-- Hide player frame group indiciator labels
-			hooksecurefunc("PlayerFrame_UpdateGroupIndicator", function()
+			SafeHookSecure("PlayerFrame_UpdateGroupIndicator", function()
 				if PlayerFrameGroupIndicator:IsShown() then
 					PlayerFrameGroupIndicator:Hide()
 				end
@@ -703,7 +703,7 @@
 
 			EventUtil.ContinueOnAddOnLoaded("Blizzard_RaidUI", function()
 				-- Hide raid pullout frame labels
-				hooksecurefunc("RaidPullout_Update", function(frame)
+				SafeHookSecure("RaidPullout_Update", function(frame)
 					if frame then
 						local frameName = frame:GetName()
 						if frameName then
@@ -725,7 +725,7 @@
 					end
 				end
 
-				hooksecurefunc("CompactRaidGroup_GenerateForGroup", function(index)
+				SafeHookSecure("CompactRaidGroup_GenerateForGroup", function(index)
 					HideRaidContainerGroupTitles(index)
 				end)
 
@@ -737,7 +737,7 @@
 
 			-- Hide compact party frame title
 			if CompactPartyFrame and CompactPartyFrame.title and CompactPartyFrame.title:IsShown() then CompactPartyFrame.title:Hide() end
-			hooksecurefunc("CompactPartyFrame_Generate", function()
+			SafeHookSecure("CompactPartyFrame_Generate", function()
 				if CompactPartyFrame and CompactPartyFrame.title and CompactPartyFrame.title:IsShown() then
 					CompactPartyFrame.title:Hide()
 				end
@@ -1562,7 +1562,7 @@
 			end
 
 			-- Set URL when quest is selected (this works with Questie, old method used QuestLog_SetSelection)
-			hooksecurefunc("SelectQuestLogEntry", function(questListID)
+			SafeHookSecure("SelectQuestLogEntry", function(questListID)
 				SetQuestInBox(questListID)
 			end)
 
@@ -1674,7 +1674,7 @@
 			end)
 
 			-- Show battleground name in battfield frame labels
-			hooksecurefunc("BattlefieldFrame_Update", function()
+			SafeHookSecure("BattlefieldFrame_Update", function()
 				if RGXQoLLC["AutomateGossip"] == "On" then
 					local localizedName = GetBattlegroundInfo()
 					if localizedName then
@@ -2725,7 +2725,7 @@
 				-- Set combat log attributes when chat windows are updated
 				frame:RegisterEvent("UPDATE_CHAT_WINDOWS")
 				-- Set combat log tab placement when tabs are assigned by the client
-				hooksecurefunc("FCF_SetTabPosition", function()
+				SafeHookSecure("FCF_SetTabPosition", function()
 					ChatFrame2Tab:SetPoint("BOTTOMLEFT", ChatFrame1Tab, "BOTTOMRIGHT", 0, 0)
 				end)
 				SetupCombatLogTab()
@@ -2822,7 +2822,7 @@
 						-- Set chain style when Easy Frames use a light texture checkbox is toggled
 						local SetLightTextureFunc = General.SetLightTexture
 						if SetLightTextureFunc then
-							hooksecurefunc(General, "SetLightTexture", SetChainStyle)
+							SafeHookSecure(General, "SetLightTexture", SetChainStyle)
 						end
 					end
 				end
@@ -2880,7 +2880,7 @@
 				cBackdrop:ApplyBackdrop()
 
 				-- Move the button (function runs after PLAYER_ENTERING_WORLD and PARTY_LEADER_CHANGED)
-				hooksecurefunc("CompactRaidFrameManager_UpdateOptionsFlowContainer", function()
+				SafeHookSecure("CompactRaidFrameManager_UpdateOptionsFlowContainer", function()
 					if CompactRaidFrameManager and CompactRaidFrameManagerDisplayFrameHiddenModeToggle then
 						local void, void, void, void, y = CompactRaidFrameManager:GetPoint()
 						CompactRaidFrameManagerDisplayFrameHiddenModeToggle:SetWidth(40)
@@ -2899,8 +2899,8 @@
 		----------------------------------------------------------------------
 
 		if RGXQoLLC["NoHitIndicators"] == "On" and not RGXQoLLockList["NoHitIndicators"] then
-			hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
-			hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
+			SafeHookSecure(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
+			SafeHookSecure(PetHitIndicator, "Show", PetHitIndicator.Hide)
 		end
 
 		----------------------------------------------------------------------
@@ -3307,7 +3307,7 @@
 				end)
 			end)
 
-			hooksecurefunc("AcceptResurrect", function()
+			SafeHookSecure("AcceptResurrect", function()
 				-- Player has ressed without releasing
 				ShowDuraStats("status")
 			end)
@@ -3366,7 +3366,7 @@
 				end
 			end
 			-- Process temporary frames
-			hooksecurefunc("FCF_OpenTemporaryWindow", function()
+			SafeHookSecure("FCF_OpenTemporaryWindow", function()
 				local cf = FCF_GetCurrentChatFrame():GetName() or nil
 				if cf then
 					_G[cf]:SetFading(false)
@@ -3406,7 +3406,7 @@
 				end
 			end
 			-- Process temporary chat frames
-			hooksecurefunc("FCF_OpenTemporaryWindow", function()
+			SafeHookSecure("FCF_OpenTemporaryWindow", function()
 				local cf = FCF_GetCurrentChatFrame():GetName() or nil
 				if cf then
 					_G[cf]:SetMaxLines(4096)
@@ -3509,12 +3509,12 @@
 			end
 
 			-- Process new chat frames and combat log
-			hooksecurefunc("FloatingChatFrame_UpdateBackgroundAnchors", function(self)
+			SafeHookSecure("FloatingChatFrame_UpdateBackgroundAnchors", function(self)
 				self:SetClampRectInsets(0, 0, 0, 0)
 			end)
 
 			-- Process temporary chat frames
-			hooksecurefunc("FCF_OpenTemporaryWindow", function()
+			SafeHookSecure("FCF_OpenTemporaryWindow", function()
 				local cf = FCF_GetCurrentChatFrame():GetName() or nil
 				if cf then
 					_G[cf]:SetClampRectInsets(0, 0, 0, 0)
@@ -3552,7 +3552,7 @@
 			TaxiFrame:SetClampRectInsets(200, -200, -300, 300)
 
 			-- Position flight map when shown
-			hooksecurefunc(TaxiFrame, "SetPoint", function(self, ...)
+			SafeHookSecure(TaxiFrame, "SetPoint", function(self, ...)
 				local a, void, r, x, y = TaxiFrame:GetPoint()
 				x = tonumber(string.format("%.2f", x))
 				y = tonumber(string.format("%.2f", y))
@@ -4294,7 +4294,7 @@
 				end)
 
 				-- Show frame when PvP ready frame shows
-				hooksecurefunc("PVPReadyDialog_Display", function(self, id)
+				SafeHookSecure("PVPReadyDialog_Display", function(self, id)
 					t = GetBattlefieldPortExpiration(id) + 1
 					-- t = 89; -- debug
 					if t and t > 1 then
@@ -4462,7 +4462,7 @@
 			end
 
 			-- Show progress bar when flight is taken
-			hooksecurefunc("TakeTaxiNode", function(node)
+			SafeHookSecure("TakeTaxiNode", function(node)
 				if UnitAffectingCombat("player") then return end
 				if editFrame:IsShown() then editFrame:Hide() end
 				for i = 1, NumTaxiNodes() do
@@ -4682,12 +4682,12 @@
 			end
 
 			-- Stop the progress bar under various circumstances
-			hooksecurefunc("TaxiRequestEarlyLanding", CeaseProgress)
-			hooksecurefunc("AcceptBattlefieldPort", CeaseProgress)
-			hooksecurefunc(C_SummonInfo, "ConfirmSummon", CeaseProgress)
+			SafeHookSecure("TaxiRequestEarlyLanding", CeaseProgress)
+			SafeHookSecure("AcceptBattlefieldPort", CeaseProgress)
+			SafeHookSecure(C_SummonInfo, "ConfirmSummon", CeaseProgress)
 
 			-- Show flight time in node tooltips
-			hooksecurefunc("TaxiNodeOnButtonEnter", function(button)
+			SafeHookSecure("TaxiNodeOnButtonEnter", function(button)
 				local index = button:GetID()
 				for i = 1, NumTaxiNodes() do
 					local nodeType = TaxiNodeGetType(i)
@@ -4760,10 +4760,10 @@
 				RGXQoLLC.flightFrame:UnregisterEvent("PLAYER_CONTROL_GAINED")
 			end
 
-			hooksecurefunc("TaxiNodeOnButtonEnter", StopLandingEvent)
-			hooksecurefunc("TaxiRequestEarlyLanding", StopLandingEvent)
-			hooksecurefunc("AcceptBattlefieldPort", StopLandingEvent)
-			hooksecurefunc(C_SummonInfo, "ConfirmSummon", StopLandingEvent)
+			SafeHookSecure("TaxiNodeOnButtonEnter", StopLandingEvent)
+			SafeHookSecure("TaxiRequestEarlyLanding", StopLandingEvent)
+			SafeHookSecure("AcceptBattlefieldPort", StopLandingEvent)
+			SafeHookSecure(C_SummonInfo, "ConfirmSummon", StopLandingEvent)
 
 			----------------------------------------------------------------------
 			-- Drag frame
@@ -5400,7 +5400,7 @@
 					end
 				end
 
-				hooksecurefunc(MinimapCluster.BorderTop, "SetScale", SetButtonFrameScale)
+				SafeHookSecure(MinimapCluster.BorderTop, "SetScale", SetButtonFrameScale)
 
 				-- Position LibDBIcon tooltips when shown
 				LibDBIconTooltip:HookScript("OnShow", function()
@@ -5784,7 +5784,7 @@
 						myButton:HookScript("OnEnter", function()
 							_G[name]:GetScript("OnEnter")(_G[name], true)
 						end)
-						hooksecurefunc(myButton.icon, "UpdateCoord", function()
+						SafeHookSecure(myButton.icon, "UpdateCoord", function()
 							myButton.icon:SetTexCoord(0, 0.25, 0.75, 1)
 						end)
 						myButton.icon:SetTexCoord(0, 0.25, 0.75, 1)
@@ -5806,7 +5806,7 @@
 						-- Zygor (uses LibDBIcon10_RGXQoLCustomIcon_ZygorGuidesViewerMapIcon)
 						local myButton = LibStub("LibDBIcon-1.0"):GetMinimapButton("RGXQoLCustomIcon_" .. name)
 						myButton.icon:SetTexture("Interface\\AddOns\\ZygorGuidesViewerClassic\\Skins\\minimap-icon.tga")
-						hooksecurefunc(myButton.icon, "UpdateCoord", function()
+						SafeHookSecure(myButton.icon, "UpdateCoord", function()
 							myButton.icon:SetTexCoord(0, 0.5, 0, 0.25)
 						end)
 						myButton.icon:SetTexCoord(0, 0.5, 0, 0.25)
@@ -5819,7 +5819,7 @@
 						end)
 						if ZGV_Notification_Entry_Template_Mixin then
 							-- Fix notification system entry height
-							hooksecurefunc(ZGV_Notification_Entry_Template_Mixin, "UpdateHeight", function(self)
+							SafeHookSecure(ZGV_Notification_Entry_Template_Mixin, "UpdateHeight", function(self)
 								self:Show()
 								local height = 46
 								if ZGV and ZGV.db and ZGV.db.profile and ZGV.db.profile.nc_size and ZGV.db.profile.nc_size == 1 then height = 36 end
@@ -6034,7 +6034,7 @@
 					end
 				end
 				SetTimeClockButtonFunc()
-				hooksecurefunc("TimeManagerClockButton_UpdateShowClockSetting", SetTimeClockButtonFunc)
+				SafeHookSecure("TimeManagerClockButton_UpdateShowClockSetting", SetTimeClockButtonFunc)
 			end)
 
 			-- Function to toggle clock
@@ -6197,7 +6197,7 @@
 				-- LibDBIcon_IconCreated: Done in LibDBIcon callback function
 
 				-- Show tracking button when button alpha is set to 1 if tracking is active
-				hooksecurefunc(MiniMapTracking, "SetAlpha", function(self, alphavalue)
+				SafeHookSecure(MiniMapTracking, "SetAlpha", function(self, alphavalue)
 					if alphavalue and alphavalue == 1 then
 						MiniMapTracking:Show()
 					end
@@ -7036,7 +7036,7 @@
 			end)
 
 			-- Reset animation when dressup frame is shown and model is reset
-			hooksecurefunc(DressUpFrame, "Show", SetAnimationSlider)
+			SafeHookSecure(DressUpFrame, "Show", SetAnimationSlider)
 			DressUpFrameResetButton:HookScript("OnClick", SetAnimationSlider)
 
 			-- Skin slider for ElvUI
@@ -7429,7 +7429,7 @@
 			end)
 
 			-- Release in battlegrounds
-			hooksecurefunc("StaticPopup_Show", function(sType)
+			SafeHookSecure("StaticPopup_Show", function(sType)
 				if sType and sType == "DEATH" and RGXQoLLC["AutoReleasePvP"] == "On" then
 					if C_DeathInfo.GetSelfResurrectOptions() and #C_DeathInfo.GetSelfResurrectOptions() > 0 then return end
 					local InstStat, InstType = IsInInstance()
@@ -7545,13 +7545,13 @@
 						button:SetPoint("TOPLEFT", _G["ClassTrainerSkill" .. (i - 1)], "BOTTOMLEFT", 0, 1)
 					end
 
-					hooksecurefunc("ClassTrainer_SetToTradeSkillTrainer", function()
+					SafeHookSecure("ClassTrainer_SetToTradeSkillTrainer", function()
 						_G.CLASS_TRAINER_SKILLS_DISPLAYED = _G.CLASS_TRAINER_SKILLS_DISPLAYED + numTallTrainers
 						ClassTrainerListScrollFrame:SetHeight(336 + tall)
 						ClassTrainerDetailScrollFrame:SetHeight(336 + tall)
 					end)
 
-					hooksecurefunc("ClassTrainer_SetToClassTrainer", function()
+					SafeHookSecure("ClassTrainer_SetToClassTrainer", function()
 						_G.CLASS_TRAINER_SKILLS_DISPLAYED = _G.CLASS_TRAINER_SKILLS_DISPLAYED + numTallTrainers - 1
 						ClassTrainerListScrollFrame:SetHeight(336 + tall)
 						ClassTrainerDetailScrollFrame:SetHeight(336 + tall)
@@ -7560,7 +7560,7 @@
 				end
 
 				-- Set highlight bar width when shown
-				hooksecurefunc(_G["ClassTrainerSkillHighlightFrame"], "Show", function()
+				SafeHookSecure(_G["ClassTrainerSkillHighlightFrame"], "Show", function()
 					ClassTrainerSkillHighlightFrame:SetWidth(290)
 				end)
 
@@ -7681,7 +7681,7 @@
 
 				-- Enable button only when skills are available
 				local skillsAvailable
-				hooksecurefunc("ClassTrainerFrame_Update", function()
+				SafeHookSecure("ClassTrainerFrame_Update", function()
 					skillsAvailable = false
 					for i = 1, GetNumTrainerServices() do
 						local void, void, isAvail = GetTrainerServiceInfo(i)
@@ -7773,7 +7773,7 @@
 			if RGXQoLLC["SetWeatherDensity"] == "On" then SetWeatherFunc() end
 
 			-- Prevent weather density from being changed when particle density is changed
-			hooksecurefunc("SetCVar", function(setting, value)
+			SafeHookSecure("SetCVar", function(setting, value)
 				if setting and RGXQoLLC["SetWeatherDensity"] == "On" then
 					if setting == "graphicsParticleDensity" then
 						if GetCVar("WeatherDensity") ~= RGXQoLLC["WeatherLevel"] then
@@ -7876,7 +7876,7 @@
 				end
 
 				-- Set highlight bar width when shown
-				hooksecurefunc(_G["TradeSkillHighlightFrame"], "Show", function()
+				SafeHookSecure(_G["TradeSkillHighlightFrame"], "Show", function()
 					_G["TradeSkillHighlightFrame"]:SetWidth(290)
 				end)
 
@@ -8048,7 +8048,7 @@
 				CraftFramePointsText:SetPoint("LEFT", CraftFramePointsLabel, "RIGHT", 3, 0)
 
 				-- Move craft frame cost column (such as Beast Training)
-				hooksecurefunc("CraftFrame_Update", function()
+				SafeHookSecure("CraftFrame_Update", function()
 					for i = 1, CRAFTS_DISPLAYED, 1 do
 						if _G["Craft" .. i] then
 							local craftButtonCost = _G["Craft"..i.."Cost"]
@@ -8060,7 +8060,7 @@
 				end)
 
 				-- Set highlight bar width when shown
-				hooksecurefunc(_G["CraftHighlightFrame"], "Show", function()
+				SafeHookSecure(_G["CraftHighlightFrame"], "Show", function()
 					_G["CraftHighlightFrame"]:SetWidth(290)
 				end)
 
@@ -8143,7 +8143,7 @@
 				end
 
 				-- Fix for TradeSkillMaster moving the craft create button
-				hooksecurefunc(CraftCreateButton, "SetFrameLevel", function()
+				SafeHookSecure(CraftCreateButton, "SetFrameLevel", function()
 					CraftCreateButton:ClearAllPoints()
 					CraftCreateButton:SetPoint("RIGHT", CraftCancelButton, "LEFT", -1, 0)
 				end)
@@ -8198,7 +8198,7 @@
 			end
 
 			-- Update the count value when free slots are updated
-			hooksecurefunc("MainMenuBarBackpackButton_UpdateFreeSlots", UpdateSlots)
+			SafeHookSecure("MainMenuBarBackpackButton_UpdateFreeSlots", UpdateSlots)
 
 			-- Show free slots in the backpack tooltip
 			MainMenuBarBackpackButton:HookScript("OnEnter", function(self)
@@ -8297,7 +8297,7 @@
 				-- Empty quest frame
 				QuestLogNoQuestsText:ClearAllPoints()
 				QuestLogNoQuestsText:SetPoint("TOP", QuestLogListScrollFrame, 0, -50)
-				hooksecurefunc(EmptyQuestLogFrame, "Show", function()
+				SafeHookSecure(EmptyQuestLogFrame, "Show", function()
 					EmptyQuestLogFrame:ClearAllPoints()
 					EmptyQuestLogFrame:SetPoint("BOTTOMLEFT", QuestLogFrame, "BOTTOMLEFT", 20, -76)
 					EmptyQuestLogFrame:SetHeight(487)
@@ -8334,7 +8334,7 @@
 			L["+"] = "+" -- Elite or group quest
 
 			-- Show quest level in quest log detail frame (but not in quest accept or turn-in frame)
-			hooksecurefunc("QuestLog_UpdateQuestDetails", function()
+			SafeHookSecure("QuestLog_UpdateQuestDetails", function()
 				if RGXQoLLC["EnhanceQuestLevels"] == "On" then
 					local quest = GetQuestLogSelection()
 					if quest then
@@ -8355,7 +8355,7 @@
 			end)
 
 			-- Show quest levels in quest log
-			hooksecurefunc("QuestLog_Update", function()
+			SafeHookSecure("QuestLog_Update", function()
 				local numEntries, numQuests = GetNumQuestLogEntries()
 				if numEntries == 0 then return end
 				-- Traverse quests in log
@@ -8469,7 +8469,7 @@
 			BankItemSearchBox:SetPoint("TOPRIGHT", -60, -40)
 
 			-- Attach bag search box first bag only
-			hooksecurefunc("ContainerFrame_Update", function(self)
+			SafeHookSecure("ContainerFrame_Update", function(self)
 				if self:GetID() == 0 then
 					BagItemSearchBox:SetParent(self)
 					BagItemSearchBox:SetPoint("TOPLEFT", self, "TOPLEFT", 54, -29)
@@ -8523,8 +8523,8 @@
 			if GameTooltip:HasScript("OnTooltipSetItem") then
 				GameTooltip:HookScript("OnTooltipSetItem", ShowSellPrice)
 			end
-			hooksecurefunc(GameTooltip, "SetHyperlink", function(tip) ShowSellPrice(tip, GameTooltip) end)
-			hooksecurefunc(ItemRefTooltip, "SetHyperlink", function(tip) ShowSellPrice(tip, ItemRefTooltip) end)
+			SafeHookSecure(GameTooltip, "SetHyperlink", function(tip) ShowSellPrice(tip, GameTooltip) end)
+			SafeHookSecure(ItemRefTooltip, "SetHyperlink", function(tip) ShowSellPrice(tip, ItemRefTooltip) end)
 
 		end
 
@@ -9000,7 +9000,7 @@
 				end)
 
 				-- Clear the cursor and reset editboxes when a new item replaces an existing one
-				hooksecurefunc("AuctionsFrameAuctions_ValidateAuction", function()
+				SafeHookSecure("AuctionsFrameAuctions_ValidateAuction", function()
 					if GetAuctionSellItemInfo() then
 						-- Return anything you might be holding
 						ClearCursor();
@@ -9102,7 +9102,7 @@
 				end
 			end
 			-- Enable arrow keys for temporary chat frames
-			hooksecurefunc("FCF_OpenTemporaryWindow", function()
+			SafeHookSecure("FCF_OpenTemporaryWindow", function()
 				local cf = FCF_GetCurrentChatFrame():GetName() or nil
 				if cf then
 					_G[cf .. "EditBox"]:SetAltArrowKeyMode(false)
@@ -9125,7 +9125,7 @@
 			topCenterContainer:ClearAllPoints()
 			topCenterContainer:SetPoint('CENTER', topCenterHolder)
 
-			hooksecurefunc(topCenterContainer, 'SetPoint', function(self, void, b)
+			SafeHookSecure(topCenterContainer, 'SetPoint', function(self, void, b)
 				if b and (b ~= topCenterHolder) then
 					-- Reset parent if it changes from topCenterHolder
 					self:ClearAllPoints()
@@ -9456,7 +9456,7 @@
 			end
 
 			-- Do the functions above for temporary chat frames
-			hooksecurefunc("FCF_OpenTemporaryWindow", function(chatType)
+			SafeHookSecure("FCF_OpenTemporaryWindow", function(chatType)
 				local cf = FCF_GetCurrentChatFrame():GetName() or nil
 				if cf then
 
@@ -9673,7 +9673,7 @@
 			end
 
 			-- Hook temporary chat frame tab clicks
-			hooksecurefunc("FCF_OpenTemporaryWindow", function()
+			SafeHookSecure("FCF_OpenTemporaryWindow", function()
 				local cf = FCF_GetCurrentChatFrame():GetName() or nil
 				if cf then
 					_G[cf .. "Tab"]:HookScript("OnClick", function()
@@ -10038,10 +10038,10 @@
 			end
 
 			-- Add spell ID to tooltip when buff frame buffs are hovered
-			hooksecurefunc(GameTooltip, 'SetUnitAura', CooldownIDFunc)
+			SafeHookSecure(GameTooltip, 'SetUnitAura', CooldownIDFunc)
 
 			-- Add spell ID to tooltip when target frame buffs are hovered
-			hooksecurefunc(GameTooltip, 'SetUnitBuff', CooldownIDFunc)
+			SafeHookSecure(GameTooltip, 'SetUnitBuff', CooldownIDFunc)
 
 		end
 
@@ -10077,7 +10077,7 @@
 			--	Position the tooltip
 			----------------------------------------------------------------------
 
-			hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
+			SafeHookSecure("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
 				if RGXQoLLC["TooltipAnchorMenu"] ~= 1 then
 					if (not tooltip or not parent) then
 						return
@@ -10802,7 +10802,7 @@
 			end
 
 			-- Do the functions above for other chat frames (pet battles, whispers, etc)
-			hooksecurefunc("FCF_OpenTemporaryWindow", function()
+			SafeHookSecure("FCF_OpenTemporaryWindow", function()
 				local cf = FCF_GetCurrentChatFrame():GetName() or nil
 				if cf then
 					-- Position the editbox
@@ -10907,10 +10907,10 @@
 			RefreshBorders()
 
 			-- Hide borders when cinematic is shown
-			hooksecurefunc(CinematicFrame, "Hide", function()
+			SafeHookSecure(CinematicFrame, "Hide", function()
 				BordTop:Show(); BordBot:Show(); BordLeft:Show(); BordRight:Show()
 			end)
-			hooksecurefunc(CinematicFrame, "Show", function()
+			SafeHookSecure(CinematicFrame, "Show", function()
 				BordTop:Hide(); BordBot:Hide(); BordLeft:Hide(); BordRight:Hide()
 			end)
 
