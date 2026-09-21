@@ -24,6 +24,28 @@
 		end
 		return hooksecurefunc(name, func)
 	end
+
+	-- WoW Forever beta safety: shadow risky WoW API globals with safe
+	-- fallbacks so the entire 14k-line file can use the standard names
+	-- without nil crashes on the beta client.
+	local GetItemInfoFromHyperlink = _G.GetItemInfoFromHyperlink or function(link)
+		if type(link) == "string" then return tonumber(link:match("item:(%d+)")) end
+	end
+	local SetRaidTarget = _G.SetRaidTarget or function() end
+	local UninviteUnit = _G.C_PartyInfo and _G.C_PartyInfo.RemoveFromParty or _G.UninviteUnit or function() end
+	local AcceptResurrect = _G.AcceptResurrect or function() end
+	local DeclineResurrect = _G.DeclineResurrect or function() end
+	local TakeTaxiNode = _G.TakeTaxiNode or function() end
+	local PickupContainerItem = _G.C_Container and _G.C_Container.PickupContainerItem or _G.PickupContainerItem or function() end
+	local GetContainerNumSlots = _G.C_Container and _G.C_Container.GetContainerNumSlots or _G.GetContainerNumSlots or function() return 0 end
+	local GetContainerItemInfo = _G.C_Container and _G.C_Container.GetContainerItemInfo or _G.GetContainerItemInfo or function() return nil end
+	local GetContainerNumFreeSlots = _G.C_Container and _G.C_Container.GetContainerNumFreeSlots or _G.GetContainerNumFreeSlots or function() return 0 end
+	local SelectQuestLogEntry = _G.SelectQuestLogEntry or function() end
+	local GetItemQualityColor = _G.GetItemQualityColor or function() return 1, 1, 1, "ffffff", 1 end
+	local GetNumTalentTabs = _G.GetNumTalentTabs or function() return 0 end
+	local UnitIsGroupLeader = _G.UnitIsGroupLeader or function() return false end
+	local UnitInRaid = _G.UnitInRaid or function() return false end
+	local UnitInParty = _G.UnitInParty or function() return false end
 	local ClientVersion = GetBuildInfo()
 	local GameLocale = GetLocale()
 	local void
@@ -2637,7 +2659,7 @@
 							RepairAllItems()
 							-- Show cost summary
 							if RGXQoLLC["AutoRepairShowSummary"] == "On" then
-								RGXQoLLC:Print(L["Repaired for"] .. " " .. GetCoinText(RepairCost) .. ".")
+								RGXQoLLC:Print(L["Repaired for"] .. " " .. (GetCoinText or GetMoneyString or function(v) return tostring(v) end)(RepairCost) .. ".")
 							end
 						end
 					end
@@ -11011,68 +11033,27 @@
 		local interPanel = CreateFrame("FRAME")
 		interPanel.name = "RGX QoL"
 
-		local maintitle = RGXQoLLC:MakeTx(interPanel, "RGX QoL", 0, 0)
-		maintitle:SetFont(maintitle:GetFont(), 72)
-		maintitle:ClearAllPoints()
-		maintitle:SetPoint("TOP", 0, -72)
-
-		local expTitle = RGXQoLLC:MakeTx(interPanel, L["World of Warcraft Classic"], 0, 0)
-		expTitle:SetFont(expTitle:GetFont(), 32)
-		expTitle:ClearAllPoints()
-		expTitle:SetPoint("TOP", 0, -152)
-
-		local subTitle = RGXQoLLC:MakeTx(interPanel, "Powered by RGX Framework", 0, 0)
-		subTitle:SetFont(subTitle:GetFont(), 20)
-		subTitle:ClearAllPoints()
-		subTitle:SetPoint("BOTTOM", 0, 72)
-
-		local slashTitle = RGXQoLLC:MakeTx(interPanel, "/ltp", 0, 0)
-		slashTitle:SetFont(slashTitle:GetFont(), 72)
-		slashTitle:ClearAllPoints()
-		slashTitle:SetPoint("BOTTOM", subTitle, "TOP", 0, 40)
-		slashTitle:SetScript("OnMouseUp", function(self, button)
-			if button == "LeftButton" then
-				SlashCmdList["RGXQoL"]("")
-			end
-		end)
-		slashTitle:SetScript("OnEnter", function()
-			slashTitle.r, slashTitle.g, slashTitle.b = slashTitle:GetTextColor()
-			slashTitle:SetTextColor(1, 1, 0)
-		end)
-		slashTitle:SetScript("OnLeave", function()
-			slashTitle:SetTextColor(slashTitle.r, slashTitle.g, slashTitle.b)
-		end)
-
-		local pTex = interPanel:CreateTexture(nil, "BACKGROUND")
-		pTex:SetAllPoints()
-		pTex:SetTexture("Interface\\GLUES\\Models\\UI_MainMenu\\swordgradient2")
-		pTex:SetAlpha(0.2)
-		pTex:SetTexCoord(0, 1, 1, 0)
-
 		-- Embed the main panel content into the settings panel
-		-- so /ltp and the settings menu show the same thing
+		-- The settings panel shows the same nav + option pages as /ltp
 		RGXQoLLC["PageF"]:SetParent(interPanel)
 		RGXQoLLC["PageF"]:ClearAllPoints()
 		RGXQoLLC["PageF"]:SetAllPoints(interPanel)
 		RGXQoLLC["PageF"]:SetMovable(false)
 		RGXQoLLC["PageF"]:EnableMouse(false)
+		RGXQoLLC["PageF"]:Show()
 
 		-- Hide the standalone close button (settings panel has its own)
 		if RGXQoLCB["CloseB"] then RGXQoLCB["CloseB"]:Hide() end
 
-		-- Override the show/hide to work within the settings context
-		RGXQoLLC.ShowMainPanel = function()
-			RGXQoLLC:HideFrames()
-			RGXQoLLC["PageF"]:Show()
-			if RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]] then
-				RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]]:Show()
-			end
+		-- Show the start page
+		if RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]] then
+			RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]]:Show()
 		end
 
 		local category = Settings.RegisterCanvasLayoutCategory(interPanel, "RGX QoL")
 		Settings.RegisterAddOnCategory(category)
 
-		end
+	end
 
 		----------------------------------------------------------------------
 		-- Frame alignment grid
