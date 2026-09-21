@@ -7610,7 +7610,7 @@
 				local DetailsInset = _G["ClassTrainerFrame"]:CreateTexture(nil, "ARTWORK")
 				DetailsInset:SetSize(302, 339 + tall)
 				DetailsInset:SetPoint("TOPLEFT", _G["ClassTrainerFrame"], "TOPLEFT", 348, -72)
-				DetailsInset:SetTexture("Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated")
+				DetailsInset:SetTexture("Interface\\Buttons\\WHITE8x8")
 
 				-- Move bottom button row
 				_G["ClassTrainerTrainButton"]:ClearAllPoints()
@@ -7900,7 +7900,7 @@
 				local DetailsInset = _G["TradeSkillFrame"]:CreateTexture(nil, "ARTWORK")
 				DetailsInset:SetSize(302, 339 + tall)
 				DetailsInset:SetPoint("TOPLEFT", _G["TradeSkillFrame"], "TOPLEFT", 348, -72)
-				DetailsInset:SetTexture("Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated")
+				DetailsInset:SetTexture("Interface\\Buttons\\WHITE8x8")
 
 				-- Hide expand tab (left of All button)
 				_G["TradeSkillExpandTabLeft"]:Hide()
@@ -8084,7 +8084,7 @@
 				local DetailsInset = _G["CraftFrame"]:CreateTexture(nil, "ARTWORK")
 				DetailsInset:SetSize(302, 339 + tall)
 				DetailsInset:SetPoint("TOPLEFT", _G["CraftFrame"], "TOPLEFT", 348, -72)
-				DetailsInset:SetTexture("Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated")
+				DetailsInset:SetTexture("Interface\\Buttons\\WHITE8x8")
 
 				-- Hide expand tab (left of All button)
 				_G["CraftExpandTabLeft"]:Hide()
@@ -12018,8 +12018,8 @@
 		end)
 
 		-- Set textures
-		RGXQoLLC:CreateBar("FootTexture", Side, 570, 48, "BOTTOM", 0.5, 0.5, 0.5, 1.0, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
-		RGXQoLLC:CreateBar("MainTexture", Side, 570, RGXQoLLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+		RGXQoLLC:CreateBar("FootTexture", Side, 570, 48, "BOTTOM", 0.5, 0.5, 0.5, 1.0, "")
+		RGXQoLLC:CreateBar("MainTexture", Side, 570, RGXQoLLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "")
 
 		-- Allow movement
 		Side:EnableMouse(true)
@@ -12405,13 +12405,17 @@
 			border:SetBackdropBorderColor(Design:Unpack("border"))
 			border:SetFrameLevel(0)
 		else
+			if Design then
+			PageF.t:SetColorTexture(Design:Unpack("surface"))
+		else
 			PageF.t:SetColorTexture(0.05, 0.05, 0.05, 0.9)
+		end
 		end
 
 		-- Add textures
-		RGXQoLLC:CreateBar("FootTexture", PageF, 570, 48, "BOTTOM", 0.5, 0.5, 0.5, 1.0, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
-		RGXQoLLC:CreateBar("MainTexture", PageF, 440, RGXQoLLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
-		RGXQoLLC:CreateBar("MenuTexture", PageF, 130, RGXQoLLC.MainPanelHeight - 47, "TOPLEFT", 0.7, 0.7, 0.7, 0.7, "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+		-- FootTexture removed (framework design)
+		RGXQoLLC:CreateBar("MainTexture", PageF, 440, RGXQoLLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "")
+		-- MenuTexture removed (framework design)
 
 		-- Set panel position when shown
 		PageF:SetScript("OnShow", function()
@@ -13160,7 +13164,7 @@
 					frame:SetScript("OnDragStart", frame.StartMoving)
 					frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() frame:SetUserPlaced(false) end)
 					frame:Hide()
-					RGXQoLLC:CreateBar("HelpPanelMainTexture", frame, 570, 360, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+					RGXQoLLC:CreateBar("HelpPanelMainTexture", frame, 570, 360, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "")
 					-- Panel contents
 					local col1, col2, color1 = 10, 120, "|cffffffaa"
 					RGXQoLLC:MakeTx(frame, "Leatrix Plus Help", col1, -10)
@@ -13485,7 +13489,7 @@
 					frame:SetScript("OnDragStart", frame.StartMoving)
 					frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() frame:SetUserPlaced(false) end)
 					frame:Hide()
-					RGXQoLLC:CreateBar("MutePanelMainTexture", frame, 294, 86, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-Parchment-Horizontal-Desaturated.png")
+					RGXQoLLC:CreateBar("MutePanelMainTexture", frame, 294, 86, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "")
 					-- Panel contents
 					RGXQoLLC:MakeTx(frame, "Sound Limit", 16, -12)
 					local endBox = RGXQoLLC:CreateEditBox("SoundEndBox", frame, 116, 10, "TOPLEFT", 16, -32, "SoundEndBox", "SoundEndBox")
