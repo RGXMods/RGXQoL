@@ -1,5 +1,5 @@
-﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
-	<ScrollFrame name="LeaPlusRecentChatScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	<ScrollFrame name="RGXQoLRecentChatScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
 		<KeyValues>
 			<KeyValue key="scrollBarX" value="-16" type="number"/>
 			<KeyValue key="scrollBarTopY" value="0" type="number"/>
@@ -23,7 +23,7 @@
 			</EditBox>
 		</ScrollChild>
 	</ScrollFrame>
-	<ScrollFrame name="LeaPlusSellJunkScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
+	<ScrollFrame name="RGXQoLSellJunkScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
 		<KeyValues>
 			<KeyValue key="scrollBarX" value="8" type="number"/>
 			<KeyValue key="scrollBarTopY" value="0" type="number"/>
@@ -47,7 +47,7 @@
 			</EditBox>
 		</ScrollChild>
 	</ScrollFrame>
-	<ScrollFrame name="LeaPlusMuteCustomSoundsScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
+	<ScrollFrame name="RGXQoLMuteCustomSoundsScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
 		<KeyValues>
 			<KeyValue key="scrollBarX" value="8" type="number"/>
 			<KeyValue key="scrollBarTopY" value="0" type="number"/>
@@ -67,7 +67,7 @@
 			</EditBox>
 		</ScrollChild>
 	</ScrollFrame>
-	<ScrollFrame name="LeaPlusEnhanceMinimapExcludeButtonsScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
+	<ScrollFrame name="RGXQoLEnhanceMinimapExcludeButtonsScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
 		<KeyValues>
 			<KeyValue key="scrollBarX" value="8" type="number"/>
 			<KeyValue key="scrollBarTopY" value="0" type="number"/>
@@ -87,7 +87,7 @@
 			</EditBox>
 		</ScrollChild>
 	</ScrollFrame>
-	<ScrollFrame name="LeaPlusShowFlightTimesScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
+	<ScrollFrame name="RGXQoLShowFlightTimesScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
 		<KeyValues>
 			<KeyValue key="scrollBarX" value="-16" type="number"/>
 			<KeyValue key="scrollBarTopY" value="0" type="number"/>
@@ -95,7 +95,7 @@
 			<KeyValue key="scrollBarTemplate" value="MinimalScrollBar" type="string"/>
 		</KeyValues>
 	</ScrollFrame>
-	<ScrollFrame name="LeaPlusConfigurationPanelScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
+	<ScrollFrame name="RGXQoLConfigurationPanelScrollFrameTemplate" inherits="ScrollFrameTemplate" virtual="true">
 		<KeyValues>
 			<KeyValue key="scrollBarX" value="12" type="number"/>
 			<KeyValue key="scrollBarTopY" value="0" type="number"/>
@@ -103,7 +103,7 @@
 			<KeyValue key="scrollBarTemplate" value="MinimalScrollBar" type="string"/>
 		</KeyValues>
 	</ScrollFrame>
-	<Slider name="LeaPlusConfigurationPanelSliderTemplate" orientation="HORIZONTAL" enableMouse="true" virtual="true">
+	<Slider name="RGXQoLConfigurationPanelSliderTemplate" orientation="HORIZONTAL" enableMouse="true" virtual="true">
 		<HitRectInsets>
 			<AbsInset left="0" right="0" top="-10" bottom="-10"/>
 		</HitRectInsets>
