@@ -1,12 +1,12 @@
 ----------------------------------------------------------------------
--- 	Leatrix Plus 1.15.150 (12th August 2026)
+-- 	RGX QoL 1.0.0 (derived from RGX QoL Plus 1.15.150)
 ----------------------------------------------------------------------
 
 --	01:Functions 02:Locks   03:Restart 40:Player   45:Rest
 --	60:Events    62:Profile 70:Logout  80:Commands 90:Panel
 
 ----------------------------------------------------------------------
--- 	Leatrix Plus
+-- 	RGX QoL
 ----------------------------------------------------------------------
 
 	-- Create global table
@@ -63,7 +63,7 @@
 		if gametocversion and gametocversion > 19999 then
 			-- Game client is not Wow Classic
 			C_Timer.After(2, function()
-				print(L["LEATRIX PLUS: WRONG VERSION INSTALLED!"])
+				print(L["RGX QO: WRONG VERSION INSTALLED!"])
 			end)
 			return
 		end
@@ -77,7 +77,7 @@
 	if C_AddOns.IsAddOnLoaded("ElvUI") then RGXQoLLC.ElvUI = unpack(ElvUI) end
 
 ----------------------------------------------------------------------
---	L00: Leatrix Plus
+--	L00: RGX QoL
 ----------------------------------------------------------------------
 
 	-- Initialise variables
@@ -477,7 +477,7 @@
 
 	end
 
-	-- Find out if Leatrix Plus is showing (main panel or config panel)
+	-- Find out if RGX QoL is showing (main panel or config panel)
 	function RGXQoLLC:IsPlusShowing()
 		if RGXQoLLC["PageF"]:IsShown() then return true end
 		for k, v in pairs(RGXQoLConfigList) do
@@ -2794,7 +2794,7 @@
 				-- Set chain style according to value
 				if chain == 1 then -- Rare
 					if C_AddOns.IsAddOnLoaded("EasyFrames") then
-						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
+						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
 						if EasyFramesLightTexture then
 							PlayerFrameTexture:SetTexCoord(0, 0.2265, 0.875, 0.9726)
 						else
@@ -2806,7 +2806,7 @@
 					end
 				elseif chain == 2 then -- Elite
 					if C_AddOns.IsAddOnLoaded("EasyFrames") then
-						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
+						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
 						if EasyFramesLightTexture then
 							PlayerFrameTexture:SetTexCoord(0.5, 0.7265, 0.875, 0.9726)
 						else
@@ -2818,14 +2818,14 @@
 					end
 				elseif chain == 3 then -- Rare Elite
 					if C_AddOns.IsAddOnLoaded("EasyFrames") then
-						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
+						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
 						if EasyFramesLightTexture then
 							PlayerFrameTexture:SetTexCoord(0.25, 0.4765, 0.875, 0.9726)
 						else
 							PlayerFrameTexture:SetTexCoord(0.25, 0.4765, 0.75, 0.8476)
 						end
 					else
-						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
+						PlayerFrameTexture:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
 						PlayerFrameTexture:SetTexCoord(0.75, 0.9765, 0.75, 0.8476)
 					end
 				end
@@ -3760,7 +3760,7 @@
 			titleTX:SetJustifyH("LEFT")
 
 			-- Show help button for title
-			RGXQoLLC:CreateHelpButton("MuteGameSoundsCustomHelpButton", MuteCustomPanel, titleTX, "Enter sound file IDs separated by comma then click the Mute button.|n|nIf you wish, you can enter a brief note for each file ID but do not include numbers in your notes.|n|nFor example, you can enter 'DevAura 569679, RetAura 568744' to mute the Devotion Aura and Retribution Aura spells.|n|nUse Leatrix Sounds to find, test and play sound file IDs.")
+			RGXQoLLC:CreateHelpButton("MuteGameSoundsCustomHelpButton", MuteCustomPanel, titleTX, "Enter sound file IDs separated by comma then click the Mute button.|n|nIf you wish, you can enter a brief note for each file ID but do not include numbers in your notes.|n|nFor example, you can enter 'DevAura 569679, RetAura 568744' to mute the Devotion Aura and Retribution Aura spells.|n|nUse RGX QoL Sounds to find, test and play sound file IDs.")
 
 			-- Add large editbox
 			local eb = CreateFrame("Frame", nil, MuteCustomPanel, "BackdropTemplate")
@@ -4388,7 +4388,7 @@
 			-- Add title
 			titleFrame.m = titleFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 			titleFrame.m:SetPoint("LEFT", 4, 0)
-			titleFrame.m:SetText(L["Leatrix Plus"])
+			titleFrame.m:SetText(L["RGX QoL"])
 			titleFrame.m:SetFont(titleFrame.m:GetFont(), 16, nil)
 
 			-- Add right-click to close message
@@ -4412,7 +4412,7 @@
 
 			editFrame:SetScrollChild(editBox)
 
-			local introMsg = L["Leatrix Plus needs to be updated with the flight details.  Press CTRL/C to copy the flight details below then paste them into an email to flight@leatrix.com.  When your report is received, Leatrix Plus will be updated and you will never see this window again for this flight."] .. "|n|n"
+			local introMsg = L["RGX QoL Plus needs to be updated with the flight details.  Press CTRL/C to copy the flight details below then paste them into an email to flight@RGX QoL.com.  When your report is received, RGX QoL Plus will be updated and you will never see this window again for this flight."] .. "|n|n"
 			local startHighlight = string.len(introMsg)
 
 			local function DoHighlight()
@@ -5208,7 +5208,7 @@
 				end)
 
 				-- Debug
-				-- eb.Text:SetText("RGXQoL\nLeatrix_Maps\nBugSack\nRGXQoL\nLeatrix_Maps\nBugSack\nRGXQoL\nLeatrix_Maps\nBugSack\nRGXQoL\nLeatrix_Maps\nBugSack\nRGXQoL\nLeatrix_Maps\nBugSack")
+				-- eb.Text:SetText("RGXQoL\nRGXQoL\nBugSack\nRGXQoL\nRGXQoL\nBugSack\nRGXQoL\nRGXQoL\nBugSack\nRGXQoL\nRGXQoL\nBugSack\nRGXQoL\nRGXQoL\nBugSack")
 
 				-- Function to save the excluded list
 				local function SaveString(self, userInput)
@@ -7604,14 +7604,14 @@
 
 				-- Set top left texture
 				regions[2]:SetSize(512, 512)
-				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
+				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL")
 				regions[2]:SetTexCoord(0.25, 0.75, 0, 0.5)
 
 				-- Set top right texture
 				regions[3]:ClearAllPoints()
 				regions[3]:SetPoint("TOPLEFT", regions[2], "TOPRIGHT", 0, 0)
 				regions[3]:SetSize(256, 512)
-				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
+				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL")
 				regions[3]:SetTexCoord(0.75, 1, 0, 0.5)
 
 				-- Hide bottom left and bottom right textures
@@ -7932,14 +7932,14 @@
 
 				-- Set top left texture
 				regions[2]:SetSize(512, 512)
-				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
+				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL")
 				regions[2]:SetTexCoord(0.25, 0.75, 0, 0.5)
 
 				-- Set top right texture
 				regions[3]:ClearAllPoints()
 				regions[3]:SetPoint("TOPLEFT", regions[2], "TOPRIGHT", 0, 0)
 				regions[3]:SetSize(256, 512)
-				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
+				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL")
 				regions[3]:SetTexCoord(0.75, 1, 0, 0.5)
 
 				-- Hide bottom left and bottom right textures
@@ -8116,14 +8116,14 @@
 
 				-- Set top left texture
 				regions[2]:SetSize(512, 512)
-				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
+				regions[2]:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL")
 				regions[2]:SetTexCoord(0.25, 0.75, 0, 0.5)
 
 				-- Set top right texture
 				regions[3]:ClearAllPoints()
 				regions[3]:SetPoint("TOPLEFT", regions[2], "TOPRIGHT", 0, 0)
 				regions[3]:SetSize(256, 512)
-				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus")
+				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL")
 				regions[3]:SetTexCoord(0.75, 1, 0, 0.5)
 
 				-- Hide bottom left and bottom right textures
@@ -8276,14 +8276,14 @@
 
 				-- Set top left texture
 				regions[3]:SetSize(512, 512)
-				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
+				regions[3]:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
 				regions[3]:SetTexCoord(0.25, 0.75, 0, 0.5)
 
 				-- Set top right texture
 				regions[4]:ClearAllPoints()
 				regions[4]:SetPoint("TOPLEFT", regions[3], "TOPRIGHT", 0, 0)
 				regions[4]:SetSize(256, 512)
-				regions[4]:SetTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
+				regions[4]:SetTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
 				regions[4]:SetTexCoord(0.75, 1, 0, 0.5)
 
 				-- Hide bottom left and bottom right textures
@@ -10392,7 +10392,7 @@
 					AltoTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"])
 				end
 
-				-- Leatrix Plus
+				-- RGX QoL Plus
 				TipDrag:SetScale(RGXQoLLC["LeaPlusTipSize"])
 
 				-- Set slider formatted text
@@ -11157,7 +11157,7 @@
 		-- Show first run message
 		if not RGXQoLDB["FirstRunMessageSeen"] then
 			C_Timer.After(1, function()
-				RGXQoLLC:Print(L["Enter"] .. " |cff00ff00" .. "/ltp" .. "|r " .. L["or click the minimap button to open Leatrix Plus."])
+				RGXQoLLC:Print(L["Enter"] .. " |cff00ff00" .. "/ltp" .. "|r " .. L["or click the minimap button to open RGX QoL Plus."])
 				RGXQoLDB["FirstRunMessageSeen"] = true
 			end)
 		end
@@ -12300,10 +12300,10 @@
 
 			-- Set skinned button textures
 			if not naked then
-				mbtn:SetNormalTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
+				mbtn:SetNormalTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
 				mbtn:GetNormalTexture():SetTexCoord(0.125, 0.25, 0.21875, 0.25)
 			end
-			mbtn:SetHighlightTexture("Interface\\AddOns\\RGXQoL\\Leatrix_Plus.blp")
+			mbtn:SetHighlightTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
 			mbtn:GetHighlightTexture():SetTexCoord(0, 0.125, 0.21875, 0.25)
 
 			-- Hide the default textures
@@ -12446,7 +12446,7 @@
 		CloseB:SetScript("OnClick", RGXQoLLC.HideFrames)
 
 		-- Add web link Button
-		local PageFAlertButton = RGXQoLLC:CreateButton("PageFAlertButton", PageF, "You should keybind web link!", "BOTTOMLEFT", 16, 10, 0, 25, true, "You should set a keybind for the web link feature.  It's very useful.|n|nOpen the key bindings window (accessible from the game menu) and click Leatrix Plus.|n|nSet a keybind for Show web link.|n|nNow when your pointer is over an item, NPC or spell (and more), press your keybind to get a web link.", true)
+		local PageFAlertButton = RGXQoLLC:CreateButton("PageFAlertButton", PageF, "You should keybind web link!", "BOTTOMLEFT", 16, 10, 0, 25, true, "You should set a keybind for the web link feature.  It's very useful.|n|nOpen the key bindings window (accessible from the game menu) and click RGX QoL Plus.|n|nSet a keybind for Show web link.|n|nNow when your pointer is over an item, NPC or spell (and more), press your keybind to get a web link.", true)
 		PageFAlertButton:SetPushedTextOffset(0, 0)
 		PageF:HookScript("OnShow", function()
 			if GetBindingKey("RGXQO_GLOBAL_WEBLINK") then PageFAlertButton:Hide() else PageFAlertButton:Show() end
@@ -12500,7 +12500,7 @@
 						v.t:SetAlpha(1 - RGXQoLLC["PlusPanelAlpha"])
 					end
 				end
-				-- Refresh Leatrix Plus settings menu only
+				-- Refresh RGX QoL Plus settings menu only
 				if RGXQoLLC["Page8"]:IsShown() then
 					RGXQoLLC["Page8"]:Hide()
 					RGXQoLLC["Page8"]:Show()
@@ -13148,7 +13148,7 @@
 					RGXQoLLC:CreateBar("HelpPanelMainTexture", frame, 570, 360, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "")
 					-- Panel contents
 					local col1, col2, color1 = 10, 120, "|cffffffaa"
-					RGXQoLLC:MakeTx(frame, "Leatrix Plus Help", col1, -10)
+					RGXQoLLC:MakeTx(frame, "RGX QoL Plus Help", col1, -10)
 					RGXQoLLC:MakeWD(frame, color1 .. "/ltp", col1, -30)
 					RGXQoLLC:MakeWD(frame, "Toggle opttions panel.", col2, -30)
 					RGXQoLLC:MakeWD(frame, color1 .. "/ltp reset", col1, -50)
@@ -14111,11 +14111,11 @@
 
 	pg = "Page0";
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Welcome to Leatrix Plus.", 146, -72);
+	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Welcome to RGX QoL Plus.", 146, -72);
 	RGXQoLLC:MakeWD(RGXQoLLC[pg], "To begin, choose an options page.", 146, -92);
 
 	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Support", 146, -132);
-	RGXQoLLC:MakeWD(RGXQoLLC[pg], "curseforge.com/wow/addons/leatrix-plus", 146, -152);
+	RGXQoLLC:MakeWD(RGXQoLLC[pg], "curseforge.com/wow/addons/RGX QoL-plus", 146, -152);
 
 ----------------------------------------------------------------------
 -- 	LC1: Automation
@@ -14326,7 +14326,7 @@
 	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UseEnglishLanguage"		, "Use English language"			, 146, -112,	true,	"If checked, text used throughout the addon will be shown in English regardless of your game locale.")
 
 	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Scale", 340, -72);
-	RGXQoLLC:MakeSL(RGXQoLLC[pg], "PlusPanelScale", "Drag to set the scale of the Leatrix Plus panel.", 1, 2, 0.1, 340, -92, "%.1f")
+	RGXQoLLC:MakeSL(RGXQoLLC[pg], "PlusPanelScale", "Drag to set the scale of the RGX QoL Plus panel.", 1, 2, 0.1, 340, -92, "%.1f")
 
 	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Transparency", 340, -132);
-	RGXQoLLC:MakeSL(RGXQoLLC[pg], "PlusPanelAlpha", "Drag to set the transparency of the Leatrix Plus panel.", 0, 1, 0.1, 340, -152, "%.1f")
+	RGXQoLLC:MakeSL(RGXQoLLC[pg], "PlusPanelAlpha", "Drag to set the transparency of the RGX QoL Plus panel.", 0, 1, 0.1, 340, -152, "%.1f")
