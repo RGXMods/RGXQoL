@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- L00: Leatrix Plus Library for Classic Era
+-- L00: RGX QoL Library for WoW Forever
 ----------------------------------------------------------------------
 
 -- LibDBIcon 12.0.0:
@@ -1441,7 +1441,7 @@ end
 -- L16: LibDBIcon: LibCandyBar
 ----------------------------------------------------------------------
 
-function RGXQoLAddon:LeaPlusCandyBar()
+function RGXQoLAddon:RGXQoLCandyBar()
 
 -- LibCandyBarStart
 --@curseforge-project-slug: libcandybar-3-0@

@@ -1,6 +1,6 @@
 
 	----------------------------------------------------------------------
-	-- Leatrix Plus Mute for Classic Era
+	-- RGX QoL Mute for WoW Forever
 	----------------------------------------------------------------------
 
 	local void, RGXQoLAddon = ...

@@ -2272,7 +2272,7 @@
 			local SellJunkTicker
 
 			-- Create custom NewTicker function (from Wrath)
-			local function LeaPlusNewTicker(duration, callback, iterations)
+			local function RGXQoLNewTicker(duration, callback, iterations)
 				local ticker = setmetatable({}, TickerMetatable)
 				ticker._remainingIterations = iterations
 				ticker._callback = function()
@@ -2624,7 +2624,7 @@
 					-- Cancel existing ticker if present
 					if SellJunkTicker then SellJunkTicker._cancelled = true; end
 					-- Sell grey items using ticker (ends when all grey items are sold or iteration count reached)
-					SellJunkTicker = LeaPlusNewTicker(0.2, SellJunkFunc, IterationCount)
+					SellJunkTicker = RGXQoLNewTicker(0.2, SellJunkFunc, IterationCount)
 					SellJunkFrame:RegisterEvent("ITEM_LOCKED")
 				elseif event == "ITEM_LOCKED" then
 					StartMsg:Show()
@@ -3044,19 +3044,19 @@
 			local QuestTextPanel = RGXQoLLC:CreatePanel("Resize quest text", "QuestTextPanel")
 
 			RGXQoLLC:MakeTx(QuestTextPanel, "Text size", 16, -72)
-			RGXQoLLC:MakeSL(QuestTextPanel, "LeaPlusQuestFontSize", "Drag to set the font size of quest text.", 10, 30, 1, 16, -92, "%.0f")
+			RGXQoLLC:MakeSL(QuestTextPanel, "RGXQoLQuestFontSize", "Drag to set the font size of quest text.", 10, 30, 1, 16, -92, "%.0f")
 
 			-- Function to update the font size
 			local function QuestSizeUpdate()
 				local a, b, c = QuestFont:GetFont()
-				QuestTitleFont:SetFont(a, RGXQoLLC["LeaPlusQuestFontSize"] + 3, c)
-				QuestFont:SetFont(a, RGXQoLLC["LeaPlusQuestFontSize"] + 1, c)
+				QuestTitleFont:SetFont(a, RGXQoLLC["RGXQoLQuestFontSize"] + 3, c)
+				QuestFont:SetFont(a, RGXQoLLC["RGXQoLQuestFontSize"] + 1, c)
 				local d, e, f = QuestFontNormalSmall:GetFont()
-				QuestFontNormalSmall:SetFont(d, RGXQoLLC["LeaPlusQuestFontSize"], f)
+				QuestFontNormalSmall:SetFont(d, RGXQoLLC["RGXQoLQuestFontSize"], f)
 			end
 
 			-- Set text size when slider changes and on startup
-			RGXQoLCB["LeaPlusQuestFontSize"]:HookScript("OnValueChanged", QuestSizeUpdate)
+			RGXQoLCB["RGXQoLQuestFontSize"]:HookScript("OnValueChanged", QuestSizeUpdate)
 			QuestSizeUpdate()
 
 			-- Help button hidden
@@ -3072,7 +3072,7 @@
 			QuestTextPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				RGXQoLLC["LeaPlusQuestFontSize"] = 12
+				RGXQoLLC["RGXQoLQuestFontSize"] = 12
 				QuestSizeUpdate()
 
 				-- Refresh side panel
@@ -3084,7 +3084,7 @@
 			RGXQoLCB["QuestTextBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					RGXQoLLC["LeaPlusQuestFontSize"] = 18
+					RGXQoLLC["RGXQoLQuestFontSize"] = 18
 					QuestSizeUpdate()
 				else
 					QuestTextPanel:Show()
@@ -3104,20 +3104,20 @@
 			local MailTextPanel = RGXQoLLC:CreatePanel("Resize mail text", "MailTextPanel")
 
 			RGXQoLLC:MakeTx(MailTextPanel, "Text size", 16, -72)
-			RGXQoLLC:MakeSL(MailTextPanel, "LeaPlusMailFontSize", "Drag to set the font size of mail text.", 10, 30, 1, 16, -92, "%.0f")
+			RGXQoLLC:MakeSL(MailTextPanel, "RGXQoLMailFontSize", "Drag to set the font size of mail text.", 10, 30, 1, 16, -92, "%.0f")
 
 			-- Function to set the text size
 			local function MailSizeUpdate()
 				local MailFont, void, flags = QuestFont:GetFont()
-				OpenMailBodyText:SetFont("h1", MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
-				OpenMailBodyText:SetFont("h2", MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
-				OpenMailBodyText:SetFont("h3", MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
-				OpenMailBodyText:SetFont("p", MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
-				MailEditBox:GetEditBox():SetFont(MailFont, RGXQoLLC["LeaPlusMailFontSize"], flags)
+				OpenMailBodyText:SetFont("h1", MailFont, RGXQoLLC["RGXQoLMailFontSize"], flags)
+				OpenMailBodyText:SetFont("h2", MailFont, RGXQoLLC["RGXQoLMailFontSize"], flags)
+				OpenMailBodyText:SetFont("h3", MailFont, RGXQoLLC["RGXQoLMailFontSize"], flags)
+				OpenMailBodyText:SetFont("p", MailFont, RGXQoLLC["RGXQoLMailFontSize"], flags)
+				MailEditBox:GetEditBox():SetFont(MailFont, RGXQoLLC["RGXQoLMailFontSize"], flags)
 			end
 
 			-- Set text size after changing slider and on startup
-			RGXQoLCB["LeaPlusMailFontSize"]:HookScript("OnValueChanged", MailSizeUpdate)
+			RGXQoLCB["RGXQoLMailFontSize"]:HookScript("OnValueChanged", MailSizeUpdate)
 			MailSizeUpdate()
 
 			-- Help button hidden
@@ -3133,7 +3133,7 @@
 			MailTextPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				RGXQoLLC["LeaPlusMailFontSize"] = 15
+				RGXQoLLC["RGXQoLMailFontSize"] = 15
 
 				-- Refresh side panel
 				MailTextPanel:Hide(); MailTextPanel:Show()
@@ -3144,7 +3144,7 @@
 			RGXQoLCB["MailTextBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					RGXQoLLC["LeaPlusMailFontSize"] = 22
+					RGXQoLLC["RGXQoLMailFontSize"] = 22
 					MailSizeUpdate()
 				else
 					MailTextPanel:Show()
@@ -3164,16 +3164,16 @@
 			local BookTextPanel = RGXQoLLC:CreatePanel("Resize book text", "BookTextPanel")
 
 			RGXQoLLC:MakeTx(BookTextPanel, "Text size", 16, -72)
-			RGXQoLLC:MakeSL(BookTextPanel, "LeaPlusBookFontSize", "Drag to set the font size of book text.", 10, 30, 1, 16, -92, "%.0f")
+			RGXQoLLC:MakeSL(BookTextPanel, "RGXQoLBookFontSize", "Drag to set the font size of book text.", 10, 30, 1, 16, -92, "%.0f")
 
 			-- Function to set the text size
 			local function BookSizeUpdate()
 				local BookFont, void, flags = QuestFont:GetFont()
-				ItemTextFontNormal:SetFont(BookFont, RGXQoLLC["LeaPlusBookFontSize"], flags)
+				ItemTextFontNormal:SetFont(BookFont, RGXQoLLC["RGXQoLBookFontSize"], flags)
 			end
 
 			-- Set text size after changing slider and on startup
-			RGXQoLCB["LeaPlusBookFontSize"]:HookScript("OnValueChanged", BookSizeUpdate)
+			RGXQoLCB["RGXQoLBookFontSize"]:HookScript("OnValueChanged", BookSizeUpdate)
 			BookSizeUpdate()
 
 			-- Help button hidden
@@ -3189,7 +3189,7 @@
 			BookTextPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				RGXQoLLC["LeaPlusBookFontSize"] = 15
+				RGXQoLLC["RGXQoLBookFontSize"] = 15
 
 				-- Refresh side panel
 				BookTextPanel:Hide(); BookTextPanel:Show()
@@ -3200,7 +3200,7 @@
 			RGXQoLCB["BookTextBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Preset profile
-					RGXQoLLC["LeaPlusBookFontSize"] = 22
+					RGXQoLLC["RGXQoLBookFontSize"] = 22
 					BookSizeUpdate()
 				else
 					BookTextPanel:Show()
@@ -3591,9 +3591,9 @@
 				for i = 1, NUM_TAXI_BUTTONS do
 					local button = _G["TaxiButton"..i]
 					if button and button:IsVisible() then
-						_G["TaxiButton" .. i]:SetSize(RGXQoLLC["LeaPlusTaxiIconSize"], RGXQoLLC["LeaPlusTaxiIconSize"])
-						if button:GetHighlightTexture() then button:GetHighlightTexture():SetSize(RGXQoLLC["LeaPlusTaxiIconSize"] * 2, RGXQoLLC["LeaPlusTaxiIconSize"] * 2) end
-						if button:GetPushedTexture() then button:GetPushedTexture():SetSize(RGXQoLLC["LeaPlusTaxiIconSize"] * 2, RGXQoLLC["LeaPlusTaxiIconSize"] * 2) end
+						_G["TaxiButton" .. i]:SetSize(RGXQoLLC["RGXQoLTaxiIconSize"], RGXQoLLC["RGXQoLTaxiIconSize"])
+						if button:GetHighlightTexture() then button:GetHighlightTexture():SetSize(RGXQoLLC["RGXQoLTaxiIconSize"] * 2, RGXQoLLC["RGXQoLTaxiIconSize"] * 2) end
+						if button:GetPushedTexture() then button:GetPushedTexture():SetSize(RGXQoLLC["RGXQoLTaxiIconSize"] * 2, RGXQoLLC["RGXQoLTaxiIconSize"] * 2) end
 				   end
 				end
 			end)
@@ -3609,10 +3609,10 @@
 			local TaxiPanel = RGXQoLLC:CreatePanel("Enhance flight map", "TaxiPanel")
 
 			RGXQoLLC:MakeTx(TaxiPanel, "Map scale", 356, -72)
-			RGXQoLLC:MakeSL(TaxiPanel, "LeaPlusTaxiMapScale", "Drag to set the scale of the flight map.", 1, 3, 0.05, 356, -92, "%.0f")
+			RGXQoLLC:MakeSL(TaxiPanel, "RGXQoLTaxiMapScale", "Drag to set the scale of the flight map.", 1, 3, 0.05, 356, -92, "%.0f")
 
 			RGXQoLLC:MakeTx(TaxiPanel, "Icon size", 356, -132)
-			RGXQoLLC:MakeSL(TaxiPanel, "LeaPlusTaxiIconSize", "Drag to set the size of the icons.", 5, 30, 1, 356, -152, "%.0f")
+			RGXQoLLC:MakeSL(TaxiPanel, "RGXQoLTaxiIconSize", "Drag to set the size of the icons.", 5, 30, 1, 356, -152, "%.0f")
 
 			RGXQoLLC:MakeTx(TaxiPanel, "Position", 16, -72)
 			TaxiPanel.txt = RGXQoLLC:MakeWD(TaxiPanel, "Hold ALT and drag the flight map to move it.", 16, -92, 500)
@@ -3621,8 +3621,8 @@
 
 			-- Function to set flight map scale
 			local function SetFlightMapScale()
-				TaxiFrame:SetScale(RGXQoLLC["LeaPlusTaxiMapScale"])
-				RGXQoLCB["LeaPlusTaxiMapScale"].f:SetFormattedText("%.0f%%", RGXQoLLC["LeaPlusTaxiMapScale"] * 100)
+				TaxiFrame:SetScale(RGXQoLLC["RGXQoLTaxiMapScale"])
+				RGXQoLCB["RGXQoLTaxiMapScale"].f:SetFormattedText("%.0f%%", RGXQoLLC["RGXQoLTaxiMapScale"] * 100)
 			end
 
 			-- Function to set icon size (used for reset and when slider changes)
@@ -3630,17 +3630,17 @@
 				for i = 1, NUM_TAXI_BUTTONS do
 					local button = _G["TaxiButton"..i]
 					if button and button:IsVisible() then
-						_G["TaxiButton" .. i]:SetSize(RGXQoLLC["LeaPlusTaxiIconSize"], RGXQoLLC["LeaPlusTaxiIconSize"])
-						if button:GetHighlightTexture() then button:GetHighlightTexture():SetSize(RGXQoLLC["LeaPlusTaxiIconSize"] * 2, RGXQoLLC["LeaPlusTaxiIconSize"] * 2) end
-						if button:GetPushedTexture() then button:GetPushedTexture():SetSize(RGXQoLLC["LeaPlusTaxiIconSize"] * 2, RGXQoLLC["LeaPlusTaxiIconSize"] * 2) end
+						_G["TaxiButton" .. i]:SetSize(RGXQoLLC["RGXQoLTaxiIconSize"], RGXQoLLC["RGXQoLTaxiIconSize"])
+						if button:GetHighlightTexture() then button:GetHighlightTexture():SetSize(RGXQoLLC["RGXQoLTaxiIconSize"] * 2, RGXQoLLC["RGXQoLTaxiIconSize"] * 2) end
+						if button:GetPushedTexture() then button:GetPushedTexture():SetSize(RGXQoLLC["RGXQoLTaxiIconSize"] * 2, RGXQoLLC["RGXQoLTaxiIconSize"] * 2) end
 				   end
 				end
-				RGXQoLCB["LeaPlusTaxiIconSize"].f:SetFormattedText("%.0f%%", RGXQoLLC["LeaPlusTaxiIconSize"] * 10)
+				RGXQoLCB["RGXQoLTaxiIconSize"].f:SetFormattedText("%.0f%%", RGXQoLLC["RGXQoLTaxiIconSize"] * 10)
 			end
 
 			-- Set flight map scale when slider changes and on startup
-			RGXQoLCB["LeaPlusTaxiMapScale"]:HookScript("OnValueChanged", SetFlightMapScale)
-			RGXQoLCB["LeaPlusTaxiIconSize"]:HookScript("OnValueChanged", SetFlightMapIconSize)
+			RGXQoLCB["RGXQoLTaxiMapScale"]:HookScript("OnValueChanged", SetFlightMapScale)
+			RGXQoLCB["RGXQoLTaxiIconSize"]:HookScript("OnValueChanged", SetFlightMapIconSize)
 			SetFlightMapScale()
 
 			-- Help button tooltip
@@ -3656,8 +3656,8 @@
 			TaxiPanel.r:SetScript("OnClick", function()
 
 				-- Reset slider
-				RGXQoLLC["LeaPlusTaxiMapScale"] = 1.9
-				RGXQoLLC["LeaPlusTaxiIconSize"] = 10
+				RGXQoLLC["RGXQoLTaxiMapScale"] = 1.9
+				RGXQoLLC["RGXQoLTaxiIconSize"] = 10
 				SetFlightMapScale()
 				RGXQoLLC["FlightMapA"] = "TOPLEFT"
 				RGXQoLLC["FlightMapR"] = "TOPLEFT"
@@ -3678,8 +3678,8 @@
 				else
 					if IsShiftKeyDown() and IsControlKeyDown() then
 						-- Preset profile
-						RGXQoLLC["LeaPlusTaxiMapScale"] = 1.9
-						RGXQoLLC["LeaPlusTaxiIconSize"] = 10
+						RGXQoLLC["RGXQoLTaxiMapScale"] = 1.9
+						RGXQoLLC["RGXQoLTaxiIconSize"] = 10
 						RGXQoLLC["FlightMapA"] = "TOPLEFT"
 						RGXQoLLC["FlightMapR"] = "TOPLEFT"
 						RGXQoLLC["FlightMapX"] = 0
@@ -4650,11 +4650,11 @@
 								-- Set flight bar background
 								if RGXQoLLC["FlightBarBackground"] == "On" then
 									if RGXQoLLC.ElvUI then
-										_G.LeaPlusGlobalFlightBar = mybar.candyBarBar
+										_G.RGXQoLGlobalFlightBar = mybar.candyBarBar
 										if faction == "Alliance" then
-											RGXQoLLC.ElvUI:GetModule("Skins"):HandleStatusBar(_G.LeaPlusGlobalFlightBar, {0, 0.5, 1, 0.5})
+											RGXQoLLC.ElvUI:GetModule("Skins"):HandleStatusBar(_G.RGXQoLGlobalFlightBar, {0, 0.5, 1, 0.5})
 										else
-											RGXQoLLC.ElvUI:GetModule("Skins"):HandleStatusBar(_G.LeaPlusGlobalFlightBar, {1, 0.0, 0, 0.5})
+											RGXQoLLC.ElvUI:GetModule("Skins"):HandleStatusBar(_G.RGXQoLGlobalFlightBar, {1, 0.0, 0, 0.5})
 										end
 									else
 										mybar:SetTexture(texture)
@@ -5327,7 +5327,7 @@
 						RGXQoLLC:ReloadCheck()
 					else
 						ExcludedButtonsPanel:Show()
-						LeaPlusGlobalPanel_SideMinimap:Hide()
+						RGXQoLGlobalPanel_SideMinimap:Hide()
 					end
 				end)
 
@@ -5391,7 +5391,7 @@
 				bFrame:SetFrameLevel(8)
 
 				RGXQoLLC.bFrame = bFrame -- Used in LibDBIcon callback
-				_G["LeaPlusGlobalMinimapCombinedButtonFrame"] = bFrame -- For third party addons
+				_G["RGXQoLGlobalMinimapCombinedButtonFrame"] = bFrame -- For third party addons
 
 				-- Hide button frame automatically
 				local ButtonFrameTicker
@@ -5645,8 +5645,8 @@
 				GameTimeFrame:SetSize(23, 23)
 
 				-- Debug buttons
-				local LeaPlusMiniMapDebug = nil
-				if LeaPlusMiniMapDebug then
+				local RGXQoLMiniMapDebug = nil
+				if RGXQoLMiniMapDebug then
 					C_Timer.After(1, function()
 						MiniMapMailFrame:Show()
 						MiniMapBattlefieldFrame:Show()
@@ -7063,8 +7063,8 @@
 
 			-- Skin slider for ElvUI
 			if RGXQoLLC.ElvUI then
-				_G.LeaPlusGlobalDressupAnim = RGXQoLCB["DressupAnim"]
-				RGXQoLLC.ElvUI:GetModule("Skins"):HandleSliderFrame(_G.LeaPlusGlobalDressupAnim, false)
+				_G.RGXQoLGlobalDressupAnim = RGXQoLCB["DressupAnim"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleSliderFrame(_G.RGXQoLGlobalDressupAnim, false)
 			end
 
 			----------------------------------------------------------------------
@@ -7224,17 +7224,17 @@
 
 			-- Skin buttons for ElvUI
 			if RGXQoLLC.ElvUI then
-				_G.LeaPlusGlobalDressUpButtonsButton = RGXQoLCB["DressUpButonsBtn"]
-				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpButtonsButton)
+				_G.RGXQoLGlobalDressUpButtonsButton = RGXQoLCB["DressUpButonsBtn"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.RGXQoLGlobalDressUpButtonsButton)
 
-				_G.LeaPlusGlobalDressUpShowMeButton = RGXQoLCB["DressUpShowMeBtn"]
-				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpShowMeButton)
+				_G.RGXQoLGlobalDressUpShowMeButton = RGXQoLCB["DressUpShowMeBtn"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.RGXQoLGlobalDressUpShowMeButton)
 
-				_G.LeaPlusGlobalDressUpTargetButton = RGXQoLCB["DressUpTargetBtn"]
-				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpTargetButton)
+				_G.RGXQoLGlobalDressUpTargetButton = RGXQoLCB["DressUpTargetBtn"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.RGXQoLGlobalDressUpTargetButton)
 
-				_G.LeaPlusGlobalDressUpNudeButton = RGXQoLCB["DressUpNudeBtn"]
-				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalDressUpNudeButton)
+				_G.RGXQoLGlobalDressUpNudeButton = RGXQoLCB["DressUpNudeBtn"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.RGXQoLGlobalDressUpNudeButton)
 			end
 
 			----------------------------------------------------------------------
@@ -7665,7 +7665,7 @@
 				RGXQoLLC:CreateButton("TrainAllButton", ClassTrainerFrame, "Train All", "BOTTOMLEFT", 344, 54, 0, 22, false, "")
 
 				-- Give button global scope (useful for compatibility with other addons and essential for ElvUI)
-				_G.LeaPlusGlobalTrainAllButton = RGXQoLCB["TrainAllButton"]
+				_G.RGXQoLGlobalTrainAllButton = RGXQoLCB["TrainAllButton"]
 
 				-- Button tooltip
 				RGXQoLCB["TrainAllButton"]:SetScript("OnEnter", function(self)
@@ -7756,7 +7756,7 @@
 						_G["ClassTrainerTrainButton"]:SetPoint("BOTTOMRIGHT", _G["ClassTrainerFrame"], "BOTTOMRIGHT", -42, 78)
 						RGXQoLCB["TrainAllButton"]:ClearAllPoints()
 						RGXQoLCB["TrainAllButton"]:SetPoint("BOTTOMLEFT", _G["ClassTrainerFrame"], "BOTTOMLEFT", 344, 78)
-						E:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalTrainAllButton)
+						E:GetModule("Skins"):HandleButton(_G.RGXQoLGlobalTrainAllButton)
 					end
 				end
 
@@ -8303,7 +8303,7 @@
 				QuestFramePushQuestButton:SetPoint("LEFT", QuestLogFrameAbandonButton, "RIGHT", -3, 0)
 
 				-- Add map button
-				local logMapButton = CreateFrame("Button", "LeaPlusGlobalQuestLogMapButton", QuestLogFrame, "UIPanelButtonTemplate")
+				local logMapButton = CreateFrame("Button", "RGXQoLGlobalQuestLogMapButton", QuestLogFrame, "UIPanelButtonTemplate")
 				logMapButton:SetText(L["Map"])
 				logMapButton:ClearAllPoints()
 				logMapButton:SetPoint("LEFT", QuestFramePushQuestButton, "RIGHT", -3, 0)
@@ -8342,8 +8342,8 @@
 					local E = RGXQoLLC.ElvUI
 					if E.private.skins.blizzard.enable and E.private.skins.blizzard.quest then
 						-- Skin map button
-						_G.LeaPlusGlobalMapButton = logMapButton
-						E:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalMapButton)
+						_G.RGXQoLGlobalMapButton = logMapButton
+						E:GetModule("Skins"):HandleButton(_G.RGXQoLGlobalMapButton)
 					end
 				end
 
@@ -8989,8 +8989,8 @@
 				RGXQoLCB["FindAuctionButton"]:SetParent(AuctionFrameAuctions)
 
 				if RGXQoLLC.ElvUI then
-					_G.LeaPlusGlobalFindItemButton = RGXQoLCB["FindAuctionButton"]
-					RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.LeaPlusGlobalFindItemButton)
+					_G.RGXQoLGlobalFindItemButton = RGXQoLCB["FindAuctionButton"]
+					RGXQoLLC.ElvUI:GetModule("Skins"):HandleButton(_G.RGXQoLGlobalFindItemButton)
 				end
 
 				-- Show find button when the auctions tab is shown
@@ -9072,31 +9072,31 @@
 			local function MasterVolUpdate()
 				if RGXQoLLC["ShowVolume"] == "On" then
 					-- Set the volume
-					SetCVar("Sound_MasterVolume", RGXQoLLC["LeaPlusMaxVol"]);
+					SetCVar("Sound_MasterVolume", RGXQoLLC["RGXQoLMaxVol"]);
 					-- Format the slider text
-					RGXQoLCB["LeaPlusMaxVol"].f:SetFormattedText("%.0f", RGXQoLLC["LeaPlusMaxVol"] * 20)
+					RGXQoLCB["RGXQoLMaxVol"].f:SetFormattedText("%.0f", RGXQoLLC["RGXQoLMaxVol"] * 20)
 				end
 			end
 
 			-- Create slider control
-			RGXQoLLC["LeaPlusMaxVol"] = tonumber(GetCVar("Sound_MasterVolume"));
-			RGXQoLLC:MakeSL(CharacterModelFrame, "LeaPlusMaxVol", "",	0, 1, 0.05, -42, -328, "%.2f")
-			RGXQoLCB["LeaPlusMaxVol"]:SetWidth(64)
-			RGXQoLCB["LeaPlusMaxVol"].f:ClearAllPoints()
-			RGXQoLCB["LeaPlusMaxVol"].f:SetPoint("LEFT", RGXQoLCB["LeaPlusMaxVol"], "RIGHT", 6, 0)
+			RGXQoLLC["RGXQoLMaxVol"] = tonumber(GetCVar("Sound_MasterVolume"));
+			RGXQoLLC:MakeSL(CharacterModelFrame, "RGXQoLMaxVol", "",	0, 1, 0.05, -42, -328, "%.2f")
+			RGXQoLCB["RGXQoLMaxVol"]:SetWidth(64)
+			RGXQoLCB["RGXQoLMaxVol"].f:ClearAllPoints()
+			RGXQoLCB["RGXQoLMaxVol"].f:SetPoint("LEFT", RGXQoLCB["RGXQoLMaxVol"], "RIGHT", 6, 0)
 
 			-- Set slider control value when shown
-			RGXQoLCB["LeaPlusMaxVol"]:SetScript("OnShow", function()
-				RGXQoLCB["LeaPlusMaxVol"]:SetValue(GetCVar("Sound_MasterVolume"))
+			RGXQoLCB["RGXQoLMaxVol"]:SetScript("OnShow", function()
+				RGXQoLCB["RGXQoLMaxVol"]:SetValue(GetCVar("Sound_MasterVolume"))
 			end)
 
 			-- Update volume when slider control is changed
-			RGXQoLCB["LeaPlusMaxVol"]:HookScript("OnValueChanged", function()
+			RGXQoLCB["RGXQoLMaxVol"]:HookScript("OnValueChanged", function()
 				if IsMouseButtonDown("RightButton") and IsShiftKeyDown() then
 					-- Dual layout is active so don't adjust slider
-					RGXQoLCB["LeaPlusMaxVol"].f:SetFormattedText("%.0f", RGXQoLLC["LeaPlusMaxVol"] * 20)
-					RGXQoLCB["LeaPlusMaxVol"]:Hide()
-					RGXQoLCB["LeaPlusMaxVol"]:Show()
+					RGXQoLCB["RGXQoLMaxVol"].f:SetFormattedText("%.0f", RGXQoLLC["RGXQoLMaxVol"] * 20)
+					RGXQoLCB["RGXQoLMaxVol"]:Hide()
+					RGXQoLCB["RGXQoLMaxVol"]:Show()
 					return
 				else
 					-- Set sound level and refresh slider
@@ -9106,8 +9106,8 @@
 
 			-- ElvUI skin for slider control
 			if RGXQoLLC.ElvUI then
-				_G.LeaPlusGlobalVolumeButton = RGXQoLCB["LeaPlusMaxVol"]
-				RGXQoLLC.ElvUI:GetModule("Skins"):HandleSliderFrame(_G.LeaPlusGlobalVolumeButton, false)
+				_G.RGXQoLGlobalVolumeButton = RGXQoLCB["RGXQoLMaxVol"]
+				RGXQoLLC.ElvUI:GetModule("Skins"):HandleSliderFrame(_G.RGXQoLGlobalVolumeButton, false)
 			end
 
 		end
@@ -10205,7 +10205,7 @@
 			RGXQoLLC:MakeSL(SideTip, "TipCursorY", "Drag to set the cursor Y offset.", -128, 128, 1, 356, -202, "%.0f")
 
 			RGXQoLLC:MakeTx(SideTip, "Scale", 356, -232)
-			RGXQoLLC:MakeSL(SideTip, "LeaPlusTipSize", "Drag to set the tooltip scale.", 0.50, 2.00, 0.05, 356, -252, "%.2f")
+			RGXQoLLC:MakeSL(SideTip, "RGXQoLTipSize", "Drag to set the tooltip scale.", 0.50, 2.00, 0.05, 356, -252, "%.2f")
 
 			-- Function to enable or disable anchor controls
 			local function SetAnchorControls()
@@ -10265,7 +10265,7 @@
 				RGXQoLLC["TipShowTarget"] = "On"
 				RGXQoLLC["TipHideInCombat"] = "Off"; SetTipHideShiftOverrideFunc()
 				RGXQoLLC["TipHideShiftOverride"] = "On"
-				RGXQoLLC["LeaPlusTipSize"] = 1.00
+				RGXQoLLC["RGXQoLTipSize"] = 1.00
 				RGXQoLLC["TipOffsetX"] = -13
 				RGXQoLLC["TipOffsetY"] = 94
 				RGXQoLLC["TooltipAnchorMenu"] = 1
@@ -10315,7 +10315,7 @@
 					RGXQoLLC["TipShowTarget"] = "On"
 					RGXQoLLC["TipHideInCombat"] = "Off"; SetTipHideShiftOverrideFunc()
 					RGXQoLLC["TipHideShiftOverride"] = "On"
-					RGXQoLLC["LeaPlusTipSize"] = 1.25
+					RGXQoLLC["RGXQoLTipSize"] = 1.25
 					RGXQoLLC["TipOffsetX"] = -13
 					RGXQoLLC["TipOffsetY"] = 94
 					RGXQoLLC["TooltipAnchorMenu"] = 2
@@ -10334,7 +10334,7 @@
 					SideTip:Show()
 
 					-- Set scale
-					TipDrag:SetScale(RGXQoLLC["LeaPlusTipSize"])
+					TipDrag:SetScale(RGXQoLLC["RGXQoLTipSize"])
 
 					-- Set position of the drag frame
 					TipDrag:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", RGXQoLLC["TipOffsetX"], RGXQoLLC["TipOffsetY"])
@@ -10357,46 +10357,46 @@
 			local function SetTipScale()
 
 				-- General tooltip
-				if GameTooltip then GameTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if GameTooltip then GameTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
 
 				-- Friends
-				if FriendsTooltip then FriendsTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if FriendsTooltip then FriendsTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
 
 				-- AutoCompleteBox
-				if AutoCompleteBox then AutoCompleteBox:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if AutoCompleteBox then AutoCompleteBox:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
 
 				-- Items (links, comparisons)
-				if ItemRefTooltip then ItemRefTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
-				if ItemRefShoppingTooltip1 then ItemRefShoppingTooltip1:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
-				if ItemRefShoppingTooltip2 then ItemRefShoppingTooltip2:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
-				if ShoppingTooltip1 then ShoppingTooltip1:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
-				if ShoppingTooltip2 then ShoppingTooltip2:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if ItemRefTooltip then ItemRefTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
+				if ItemRefShoppingTooltip1 then ItemRefShoppingTooltip1:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
+				if ItemRefShoppingTooltip2 then ItemRefShoppingTooltip2:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
+				if ShoppingTooltip1 then ShoppingTooltip1:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
+				if ShoppingTooltip2 then ShoppingTooltip2:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
 
 				-- Embedded item tooltip (as used in PVP UI)
-				if EmbeddedItemTooltip then EmbeddedItemTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if EmbeddedItemTooltip then EmbeddedItemTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
 
 				-- Nameplate tooltip
-				if NamePlateTooltip then NamePlateTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if NamePlateTooltip then NamePlateTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
 
 				-- LibDBIcon
-				if LibDBIconTooltip then LibDBIconTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"]) end
+				if LibDBIconTooltip then LibDBIconTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"]) end
 
 				-- Total RP 3
 				if C_AddOns.IsAddOnLoaded("totalRP3") and TRP3_MainTooltip and TRP3_CharacterTooltip then
-					TRP3_MainTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"])
-					TRP3_CharacterTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"])
+					TRP3_MainTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"])
+					TRP3_CharacterTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"])
 				end
 
 				-- Altoholic
 				if AltoTooltip then
-					AltoTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"])
+					AltoTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"])
 				end
 
 				-- RGX QoL Plus
-				TipDrag:SetScale(RGXQoLLC["LeaPlusTipSize"])
+				TipDrag:SetScale(RGXQoLLC["RGXQoLTipSize"])
 
 				-- Set slider formatted text
-				RGXQoLCB["LeaPlusTipSize"].f:SetFormattedText("%.0f%%", RGXQoLLC["LeaPlusTipSize"] * 100)
+				RGXQoLCB["RGXQoLTipSize"].f:SetFormattedText("%.0f%%", RGXQoLLC["RGXQoLTipSize"] * 100)
 
 			end
 
@@ -10404,7 +10404,7 @@
 			RGXQoLLC.SetTipScale = SetTipScale
 
 			-- Set tooltip scale when slider or checkbox changes and on startup
-			RGXQoLCB["LeaPlusTipSize"]:HookScript("OnValueChanged", SetTipScale)
+			RGXQoLCB["RGXQoLTipSize"]:HookScript("OnValueChanged", SetTipScale)
 			SetTipScale()
 
 			----------------------------------------------------------------------
@@ -10413,7 +10413,7 @@
 
 			-- Set tooltip scale when tooltip is shown
 			SettingsTooltip:HookScript("OnShow", function()
-				SettingsTooltip:SetScale(RGXQoLLC["LeaPlusTipSize"] * UIParent:GetScale())
+				SettingsTooltip:SetScale(RGXQoLLC["RGXQoLTipSize"] * UIParent:GetScale())
 			end)
 
 			---------------------------------------------------------------------------------------------------------
@@ -11034,7 +11034,7 @@
 		interPanel.name = "RGX QoL"
 
 		-- Embed the main panel content into the settings panel
-		-- The settings panel shows the same nav + option pages as /ltp
+		-- The settings panel shows the same nav + option pages as /qol
 		RGXQoLLC["PageF"]:SetParent(interPanel)
 		RGXQoLLC["PageF"]:ClearAllPoints()
 		RGXQoLLC["PageF"]:SetAllPoints(interPanel)
@@ -11157,7 +11157,7 @@
 		-- Show first run message
 		if not RGXQoLDB["FirstRunMessageSeen"] then
 			C_Timer.After(1, function()
-				RGXQoLLC:Print(L["Enter"] .. " |cff00ff00" .. "/ltp" .. "|r " .. L["or click the minimap button to open RGX QoL Plus."])
+				RGXQoLLC:Print(L["Enter"] .. " |cff00ff00" .. "/qol" .. "|r " .. L["or click the minimap button to open RGX QoL Plus."])
 				RGXQoLDB["FirstRunMessageSeen"] = true
 			end)
 		end
@@ -11268,13 +11268,13 @@
 				RGXQoLLC:LoadVarChk("HideRaidGroupLabels", "Off")			-- Hide raid group labels
 
 				RGXQoLLC:LoadVarChk("MailFontChange", "Off")				-- Resize mail text
-				RGXQoLLC:LoadVarNum("LeaPlusMailFontSize", 15, 10, 30)		-- Mail text slider
+				RGXQoLLC:LoadVarNum("RGXQoLMailFontSize", 15, 10, 30)		-- Mail text slider
 
 				RGXQoLLC:LoadVarChk("QuestFontChange", "Off")				-- Resize quest text
-				RGXQoLLC:LoadVarNum("LeaPlusQuestFontSize", 12, 10, 30)	-- Quest text slider
+				RGXQoLLC:LoadVarNum("RGXQoLQuestFontSize", 12, 10, 30)	-- Quest text slider
 
 				RGXQoLLC:LoadVarChk("BookFontChange", "Off")				-- Resize book text
-				RGXQoLLC:LoadVarNum("LeaPlusBookFontSize", 15, 10, 30)		-- Book text slider
+				RGXQoLLC:LoadVarNum("RGXQoLBookFontSize", 15, 10, 30)		-- Book text slider
 
 				-- Interface
 				RGXQoLLC:LoadVarChk("MinimapModder", "Off")				-- Enhance minimap
@@ -11297,7 +11297,7 @@
 				RGXQoLLC:LoadVarChk("TipHideInCombat", "Off")				-- Hide tooltips during combat
 				RGXQoLLC:LoadVarChk("TipHideShiftOverride", "On")			-- Hide tooltips shift override
 				RGXQoLLC:LoadVarChk("TipNoHealthBar", "Off")				-- Hide health bar
-				RGXQoLLC:LoadVarNum("LeaPlusTipSize", 1.00, 0.50, 2.00)	-- Tooltip scale slider
+				RGXQoLLC:LoadVarNum("RGXQoLTipSize", 1.00, 0.50, 2.00)	-- Tooltip scale slider
 				RGXQoLLC:LoadVarNum("TipOffsetX", -13, -5000, 5000)		-- Tooltip X offset
 				RGXQoLLC:LoadVarNum("TipOffsetY", 94, -5000, 5000)			-- Tooltip Y offset
 				RGXQoLLC:LoadVarNum("TooltipAnchorMenu", 1, 1, 5)			-- Tooltip anchor menu
@@ -11316,8 +11316,8 @@
 				RGXQoLLC:LoadVarChk("EnhanceTrainers", "Off")				-- Enhance trainers
 				RGXQoLLC:LoadVarChk("ShowTrainAllBtn", "On")				-- Enhance trainers train all button
 				RGXQoLLC:LoadVarChk("EnhanceFlightMap", "Off")				-- Enhance flight map
-				RGXQoLLC:LoadVarNum("LeaPlusTaxiMapScale", 1.9, 1, 3)		-- Enhance flight map scale
-				RGXQoLLC:LoadVarNum("LeaPlusTaxiIconSize", 10, 5, 30)		-- Enhance flight icon size
+				RGXQoLLC:LoadVarNum("RGXQoLTaxiMapScale", 1.9, 1, 3)		-- Enhance flight map scale
+				RGXQoLLC:LoadVarNum("RGXQoLTaxiIconSize", 10, 5, 30)		-- Enhance flight icon size
 				RGXQoLLC:LoadVarAnc("FlightMapA", "TOPLEFT")				-- Enhance flight map anchor
 				RGXQoLLC:LoadVarAnc("FlightMapR", "TOPLEFT")				-- Enhance flight map relative
 				RGXQoLLC:LoadVarNum("FlightMapX", 0, -5000, 5000)			-- Enhance flight map X
@@ -11630,13 +11630,13 @@
 			RGXQoLDB["HideRaidGroupLabels"] 	= RGXQoLLC["HideRaidGroupLabels"]
 
 			RGXQoLDB["MailFontChange"] 		= RGXQoLLC["MailFontChange"]
-			RGXQoLDB["LeaPlusMailFontSize"] 	= RGXQoLLC["LeaPlusMailFontSize"]
+			RGXQoLDB["RGXQoLMailFontSize"] 	= RGXQoLLC["RGXQoLMailFontSize"]
 
 			RGXQoLDB["QuestFontChange"] 		= RGXQoLLC["QuestFontChange"]
-			RGXQoLDB["LeaPlusQuestFontSize"]	= RGXQoLLC["LeaPlusQuestFontSize"]
+			RGXQoLDB["RGXQoLQuestFontSize"]	= RGXQoLLC["RGXQoLQuestFontSize"]
 
 			RGXQoLDB["BookFontChange"] 		= RGXQoLLC["BookFontChange"]
-			RGXQoLDB["LeaPlusBookFontSize"]	= RGXQoLLC["LeaPlusBookFontSize"]
+			RGXQoLDB["RGXQoLBookFontSize"]	= RGXQoLLC["RGXQoLBookFontSize"]
 
 			-- Interface
 			RGXQoLDB["MinimapModder"]			= RGXQoLLC["MinimapModder"]
@@ -11660,7 +11660,7 @@
 			RGXQoLDB["TipHideInCombat"]		= RGXQoLLC["TipHideInCombat"]
 			RGXQoLDB["TipHideShiftOverride"]	= RGXQoLLC["TipHideShiftOverride"]
 			RGXQoLDB["TipNoHealthBar"]			= RGXQoLLC["TipNoHealthBar"]
-			RGXQoLDB["LeaPlusTipSize"]			= RGXQoLLC["LeaPlusTipSize"]
+			RGXQoLDB["RGXQoLTipSize"]			= RGXQoLLC["RGXQoLTipSize"]
 			RGXQoLDB["TipOffsetX"]				= RGXQoLLC["TipOffsetX"]
 			RGXQoLDB["TipOffsetY"]				= RGXQoLLC["TipOffsetY"]
 			RGXQoLDB["TooltipAnchorMenu"]		= RGXQoLLC["TooltipAnchorMenu"]
@@ -11679,8 +11679,8 @@
 			RGXQoLDB["EnhanceTrainers"]		= RGXQoLLC["EnhanceTrainers"]
 			RGXQoLDB["ShowTrainAllBtn"]		= RGXQoLLC["ShowTrainAllBtn"]
 			RGXQoLDB["EnhanceFlightMap"]		= RGXQoLLC["EnhanceFlightMap"]
-			RGXQoLDB["LeaPlusTaxiMapScale"]	= RGXQoLLC["LeaPlusTaxiMapScale"]
-			RGXQoLDB["LeaPlusTaxiIconSize"]	= RGXQoLLC["LeaPlusTaxiIconSize"]
+			RGXQoLDB["RGXQoLTaxiMapScale"]	= RGXQoLLC["RGXQoLTaxiMapScale"]
+			RGXQoLDB["RGXQoLTaxiIconSize"]	= RGXQoLLC["RGXQoLTaxiIconSize"]
 			RGXQoLDB["FlightMapA"]				= RGXQoLLC["FlightMapA"]
 			RGXQoLDB["FlightMapR"]				= RGXQoLLC["FlightMapR"]
 			RGXQoLDB["FlightMapX"]				= RGXQoLLC["FlightMapX"]
@@ -11941,8 +11941,8 @@
 		local Side = CreateFrame("Frame", nil, UIParent)
 
 		-- Make it a system frame
-		_G["LeaPlusGlobalPanel_" .. globref] = Side
-		table.insert(UISpecialFrames, "LeaPlusGlobalPanel_" .. globref)
+		_G["RGXQoLGlobalPanel_" .. globref] = Side
+		table.insert(UISpecialFrames, "RGXQoLGlobalPanel_" .. globref)
 
 		-- Store it in the configuration panel table
 		tinsert(RGXQoLConfigList, Side)
@@ -12350,8 +12350,8 @@
 		local PageF = CreateFrame("Frame", nil, UIParent);
 
 		-- Make it a system frame
-		_G["LeaPlusGlobalPanel"] = PageF
-		table.insert(UISpecialFrames, "LeaPlusGlobalPanel")
+		_G["RGXQoLGlobalPanel"] = PageF
+		table.insert(UISpecialFrames, "RGXQoLGlobalPanel")
 
 		-- Set frame parameters
 		RGXQoLLC["PageF"] = PageF
@@ -13149,41 +13149,41 @@
 					-- Panel contents
 					local col1, col2, color1 = 10, 120, "|cffffffaa"
 					RGXQoLLC:MakeTx(frame, "RGX QoL Plus Help", col1, -10)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp", col1, -30)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol", col1, -30)
 					RGXQoLLC:MakeWD(frame, "Toggle opttions panel.", col2, -30)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp reset", col1, -50)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol reset", col1, -50)
 					RGXQoLLC:MakeWD(frame, "Reset addon panel position and scale.", col2, -50)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp wipe", col1, -70)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol wipe", col1, -70)
 					RGXQoLLC:MakeWD(frame, "Wipe all addon settings (reloads UI).", col2, -70)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp realm", col1, -90)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol realm", col1, -90)
 					RGXQoLLC:MakeWD(frame, "Show realms connected to yours.", col2, -90)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp rest", col1, -110)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol rest", col1, -110)
 					RGXQoLLC:MakeWD(frame, "Show number of rested XP bubbles remaining.", col2, -110)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp quest <id>", col1, -130)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol quest <id>", col1, -130)
 					RGXQoLLC:MakeWD(frame, "Show quest completion status for <quest id>.", col2, -130)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp quest wipe", col1, -150)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol quest wipe", col1, -150)
 					RGXQoLLC:MakeWD(frame, "Wipe your quest log.", col2, -150)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp grid", col1, -170)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol grid", col1, -170)
 					RGXQoLLC:MakeWD(frame, "Toggle a frame alignment grid.", col2, -170)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp id", col1, -190)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol id", col1, -190)
 					RGXQoLLC:MakeWD(frame, "Show a web link for whatever the pointer is over.", col2, -190)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp zygor", col1, -210)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol zygor", col1, -210)
 					RGXQoLLC:MakeWD(frame, "Toggle the Zygor addon (reloads UI).", col2, -210)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp movie <id>", col1, -230)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol movie <id>", col1, -230)
 					RGXQoLLC:MakeWD(frame, "Play a movie by its ID.", col2, -230)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp marker", col1, -250)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol marker", col1, -250)
 					RGXQoLLC:MakeWD(frame, "Block target markers (toggle) (requires assistant or leader in raid).", col2, -250)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp rsnd", col1, -270)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol rsnd", col1, -270)
 					RGXQoLLC:MakeWD(frame, "Restart the sound system.", col2, -270)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp ra", col1, -290)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol ra", col1, -290)
 					RGXQoLLC:MakeWD(frame, "Announce target in General chat channel (useful for rares).", col2, -290)
-					RGXQoLLC:MakeWD(frame, color1 .. "/ltp con", col1, -310)
+					RGXQoLLC:MakeWD(frame, color1 .. "/qol con", col1, -310)
 					RGXQoLLC:MakeWD(frame, "Launch the developer console with a large font.", col2, -310)
 					RGXQoLLC:MakeWD(frame, color1 .. "/rl", col1, -330)
 					RGXQoLLC:MakeWD(frame, "Reload the UI.", col2, -330)
 					RGXQoLLC.HelpFrame = frame
-					_G["LeaPlusGlobalHelpPanel"] = frame
-					table.insert(UISpecialFrames, "LeaPlusGlobalHelpPanel")
+					_G["RGXQoLGlobalHelpPanel"] = frame
+					table.insert(UISpecialFrames, "RGXQoLGlobalHelpPanel")
 				end
 				if RGXQoLLC.HelpFrame:IsShown() then RGXQoLLC.HelpFrame:Hide() else RGXQoLLC.HelpFrame:Show() end
 				return
@@ -13639,8 +13639,8 @@
 
 					-- Final code
 					RGXQoLLC.MuteFrame = frame
-					_G["LeaPlusGlobalMutePanel"] = frame
-					table.insert(UISpecialFrames, "LeaPlusGlobalMutePanel")
+					_G["RGXQoLGlobalMutePanel"] = frame
+					table.insert(UISpecialFrames, "RGXQoLGlobalMutePanel")
 				end
 				if RGXQoLLC.MuteFrame:IsShown() then RGXQoLLC.MuteFrame:Hide() else RGXQoLLC.MuteFrame:Show() end
 				return
@@ -13698,7 +13698,7 @@
 				-- Print saved variables
 				RGXQoLLC:Print(L["Saved Variables"] .. "|n")
 				RGXQoLLC:Print(L["The following list shows option label, setting name and currently saved value.  Enable |cffffffffIncrease chat history|r (chat) and |cffffffffRecent chat window|r (chat) to make it easier."] .. "|n")
-				RGXQoLLC:Print(L["Modifying saved variables must start with |cffffffff/ltp nosave|r to prevent your changes from being reverted during reload or logout."] .. "|n")
+				RGXQoLLC:Print(L["Modifying saved variables must start with |cffffffff/qol nosave|r to prevent your changes from being reverted during reload or logout."] .. "|n")
 				RGXQoLLC:Print(L['Syntax is |cffffffff/run RGXQoLDB[' .. '"' .. 'setting name' .. '"' .. '] = ' .. '"' .. 'value' .. '" |r(case sensitive).'])
 				RGXQoLLC:Print(L["When done, |cffffffff/reload|r to save your changes."] .. "|n")
 				-- Checkboxes
@@ -13811,11 +13811,11 @@
 				RGXQoLDB["HideRaidGroupLabels"] = "On"			-- Hide raid group labels
 
 				RGXQoLDB["MailFontChange"] = "On"				-- Resize mail text
-				RGXQoLDB["LeaPlusMailFontSize"] = 22			-- Mail font size
+				RGXQoLDB["RGXQoLMailFontSize"] = 22			-- Mail font size
 				RGXQoLDB["QuestFontChange"] = "On"				-- Resize quest text
-				RGXQoLDB["LeaPlusQuestFontSize"] = 18			-- Quest font size
+				RGXQoLDB["RGXQoLQuestFontSize"] = 18			-- Quest font size
 				RGXQoLDB["BookFontChange"] = "On"				-- Resize book text
-				RGXQoLDB["LeaPlusBookFontSize"] = 22			-- Book font size
+				RGXQoLDB["RGXQoLBookFontSize"] = 22			-- Book font size
 
 				-- Interface
 				RGXQoLDB["MinimapModder"] = "On"				-- Enhance minimap
@@ -13829,7 +13829,7 @@
 				RGXQoLDB["HideMiniLFG"] = "On"					-- Hide the Looking for Group button
 
 				RGXQoLDB["TipModEnable"] = "On"				-- Enhance tooltip
-				RGXQoLDB["LeaPlusTipSize"] = 1.25				-- Tooltip scale slider
+				RGXQoLDB["RGXQoLTipSize"] = 1.25				-- Tooltip scale slider
 				RGXQoLDB["TooltipAnchorMenu"] = 2				-- Tooltip anchor
 				RGXQoLDB["TipCursorX"] = 0						-- X offset
 				RGXQoLDB["TipCursorY"] = 0						-- Y offset
@@ -13843,8 +13843,8 @@
 				RGXQoLDB["EnhanceTrainers"] = "On"				-- Enhance trainers
 				RGXQoLDB["ShowTrainAllBtn"] = "On"				-- Show train all button
 				RGXQoLDB["EnhanceFlightMap"] = "On"			-- Enhance flight map
-				RGXQoLDB["LeaPlusTaxiMapScale"] = 1.9			-- Enhance flight map scale
-				RGXQoLDB["LeaPlusTaxiIconSize"] = 10			-- Enhance flight icon size
+				RGXQoLDB["RGXQoLTaxiMapScale"] = 1.9			-- Enhance flight map scale
+				RGXQoLDB["RGXQoLTaxiIconSize"] = 10			-- Enhance flight icon size
 				RGXQoLDB["FlightMapA"] = "TOPLEFT"				-- Enhance flight map anchor
 				RGXQoLDB["FlightMapR"] = "TOPLEFT"				-- Enhance flight map relative
 				RGXQoLDB["FlightMapX"] = 0						-- Enhance flight map X
@@ -13983,9 +13983,8 @@
 	end
 
 	-- Slash command for global function
-	_G.SLASH_RGXQoL1 = "/ltp"
-	_G.SLASH_RGXQoL2 = "/qol"
-	SlashCmdList["RGXQoL"] = function(self)
+	_G.SLASH_RGXQoL1 = "/qol"
+		SlashCmdList["RGXQoL"] = function(self)
 		-- Run slash command function
 		RGXQoLLC:SlashFunc(self)
 		-- Redirect tainted variables
@@ -14082,19 +14081,19 @@
 	end
 
 	-- Create options pages
-	RGXQoLLC["Page0"] = RGXQoLLC:MakePage("Page0", "Home"			, "LeaPlusNav0", "Home"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -72, 112, 20)
-	RGXQoLLC["Page1"] = RGXQoLLC:MakePage("Page1", "Automation"	, "LeaPlusNav1", "Automation"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -112, 112, 20)
-	RGXQoLLC["Page2"] = RGXQoLLC:MakePage("Page2", "Social"		, "LeaPlusNav2", "Social"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -132, 112, 20)
-	RGXQoLLC["Page3"] = RGXQoLLC:MakePage("Page3", "Chat"			, "LeaPlusNav3", "Chat"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -152, 112, 20)
-	RGXQoLLC["Page4"] = RGXQoLLC:MakePage("Page4", "Text"			, "LeaPlusNav4", "Text"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -172, 112, 20)
-	RGXQoLLC["Page5"] = RGXQoLLC:MakePage("Page5", "Interface"	, "LeaPlusNav5", "Interface"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -192, 112, 20)
-	RGXQoLLC["Page6"] = RGXQoLLC:MakePage("Page6", "Frames"		, "LeaPlusNav6", "Frames"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -212, 112, 20)
-	RGXQoLLC["Page7"] = RGXQoLLC:MakePage("Page7", "System"		, "LeaPlusNav7", "System"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -232, 112, 20)
-	RGXQoLLC["Page8"] = RGXQoLLC:MakePage("Page8", "Settings"		, "LeaPlusNav8", "Settings"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -272, 112, 20)
+	RGXQoLLC["Page0"] = RGXQoLLC:MakePage("Page0", "Home"			, "RGXQoLNav0", "Home"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -72, 112, 20)
+	RGXQoLLC["Page1"] = RGXQoLLC:MakePage("Page1", "Automation"	, "RGXQoLNav1", "Automation"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -112, 112, 20)
+	RGXQoLLC["Page2"] = RGXQoLLC:MakePage("Page2", "Social"		, "RGXQoLNav2", "Social"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -132, 112, 20)
+	RGXQoLLC["Page3"] = RGXQoLLC:MakePage("Page3", "Chat"			, "RGXQoLNav3", "Chat"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -152, 112, 20)
+	RGXQoLLC["Page4"] = RGXQoLLC:MakePage("Page4", "Text"			, "RGXQoLNav4", "Text"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -172, 112, 20)
+	RGXQoLLC["Page5"] = RGXQoLLC:MakePage("Page5", "Interface"	, "RGXQoLNav5", "Interface"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -192, 112, 20)
+	RGXQoLLC["Page6"] = RGXQoLLC:MakePage("Page6", "Frames"		, "RGXQoLNav6", "Frames"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -212, 112, 20)
+	RGXQoLLC["Page7"] = RGXQoLLC:MakePage("Page7", "System"		, "RGXQoLNav7", "System"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -232, 112, 20)
+	RGXQoLLC["Page8"] = RGXQoLLC:MakePage("Page8", "Settings"		, "RGXQoLNav8", "Settings"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -272, 112, 20)
 
 	-- Page navigation mechanism
 	for i = 0, RGXQoLLC["NumberOfPages"] do
-		RGXQoLLC["LeaPlusNav"..i]:SetScript("OnClick", function()
+		RGXQoLLC["RGXQoLNav"..i]:SetScript("OnClick", function()
 			RGXQoLLC:HideFrames()
 			RGXQoLLC["PageF"]:Show();
 			RGXQoLLC["Page"..i]:Show();

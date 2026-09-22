@@ -1,6 +1,6 @@
 
 	----------------------------------------------------------------------
-	-- Leatrix Plus Flight Horde for Classic Era
+	-- RGX QoL Flight Horde for WoW Forever
 	----------------------------------------------------------------------
 
 	local void, RGXQoLAddon = ...
@@ -179,7 +179,7 @@
 				["0.49:0.27:0.44:0.19"] = 139, -- Tarren Mill, Undercity (Joshua Peppiatt reported 155)
 				["0.49:0.27:0.38:0.24"] = 99, -- Tarren Mill, The Sepulcher
 				["0.49:0.27:0.62:0.31:0.55:0.57:0.43:0.93"] = 792, -- Tarren Mill, Hammerfall, Kargath, Booty Bay
-				["0.49:0.27:0.44:0.19:0.70:0.16"] = 325, -- Tarrens Mühle, Undercity, Kapelle des hoffnungsvollen Lichts
+				["0.49:0.27:0.44:0.19:0.70:0.16"] = 325, -- Tarrens Mï¿½hle, Undercity, Kapelle des hoffnungsvollen Lichts
 				["0.49:0.27:0.44:0.19:0.55:0.57:0.45:0.84"] = 862, -- Tarren Mill, Undercity, Kargath, Grom'gol
 				["0.49:0.27:0.44:0.19:0.55:0.57:0.43:0.93"] = 966, -- Tarren Mill, Undercity, Kargath, Booty Bay
 				["0.49:0.27:0.44:0.19:0.55:0.57:0.61:0.75"] = 830, -- Tarren Mill, Undercity, Kargath, Stonard
@@ -611,7 +611,7 @@
 
 				-- Horde: Shadowprey Village (Desolace)
 				["0.32:0.58:0.44:0.69:0.55:0.73:0.61:0.80"] = 395, -- Shadowprey Village, Camp Mojache, Freewind Post, Gadgetzan
-				["0.32:0.58:0.44:0.69:0.55:0.73"] = 303, -- Shadowprey Village, Camp Mojache, Freewind Post (was 382 but Heikki Juntunen, Jas A, Martin Kaminský, Samuel Peters reported 303)
+				["0.32:0.58:0.44:0.69:0.55:0.73"] = 303, -- Shadowprey Village, Camp Mojache, Freewind Post (was 382 but Heikki Juntunen, Jas A, Martin Kaminskï¿½, Samuel Peters reported 303)
 				["0.32:0.58:0.44:0.69:0.42:0.79:0.50:0.76"] = 417, -- Shadowprey Village, Camp Mojache, Cenarion Hold, Marshal's Refuge
 				["0.32:0.58:0.44:0.69:0.42:0.79"] = 326, -- Shadowprey Village, Camp Mojache, Cenarion Hold
 				["0.32:0.58:0.44:0.69"] = 196, -- Shadowprey Village, Camp Mojache
@@ -635,7 +635,7 @@
 				["0.32:0.58:0.41:0.47:0.56:0.53:0.63:0.44"] = 490, -- Shadowprey Village, Sun Rock Retreat, Crossroads, Orgrimmar
 				["0.32:0.58:0.41:0.47:0.56:0.53:0.53:0.61"] = 439, -- Shadowprey Village, Sun Rock Retreat, Crossroads, Camp Taurajo
 				["0.32:0.58:0.41:0.47:0.56:0.53"] = 349, -- Shadowprey Village, Sun Rock Retreat, Crossroads
-				["0.32:0.58:0.41:0.47:0.56:0.53:0.61:0.55"] = 400, -- Proie-de-l'Ombre, Retraite de Roche-Soleil, La Croisée, Ratchet
+				["0.32:0.58:0.41:0.47:0.56:0.53:0.61:0.55"] = 400, -- Proie-de-l'Ombre, Retraite de Roche-Soleil, La Croisï¿½e, Ratchet
 				["0.32:0.58:0.45:0.56:0.56:0.53:0.46:0.30:0.54:0.21"] = 711, -- Shadowprey Village, Thunder Bluff, Crossroads, Bloodvenom Post, Moonglade
 				["0.32:0.58:0.41:0.47:0.56:0.53:0.46:0.30"] = 602, -- Shadowprey Village, Sun Rock Retreat, Crossroads, Bloodvenom Post
 				["0.32:0.58:0.44:0.69:0.56:0.53:0.61:0.55"] = 511, -- Shadowprey Village, Camp Mojache, Crossroads, Ratchet
