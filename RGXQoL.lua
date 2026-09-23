@@ -472,9 +472,11 @@
 			end;
 		end
 
-		-- Hide options panel
-		RGXQoLLC["PageF"]:Hide();
-
+		-- Hide options panel (skip when embedded in the game options canvas;
+		-- hiding it would leave the category page blank)
+		if not RGXQoLLC.OptionsEmbedded and RGXQoLLC["PageF"] then
+			RGXQoLLC["PageF"]:Hide();
+		end
 	end
 
 	-- Find out if RGX QoL is showing (main panel or config panel)
@@ -11033,25 +11035,33 @@
 		local interPanel = CreateFrame("FRAME")
 		interPanel.name = "RGX QoL"
 
-		-- Embed the main panel content into the settings panel
-		-- The settings panel shows the same nav + option pages as /qol
-		RGXQoLLC["PageF"]:SetParent(interPanel)
-		RGXQoLLC["PageF"]:ClearAllPoints()
-		RGXQoLLC["PageF"]:SetAllPoints(interPanel)
-		RGXQoLLC["PageF"]:SetMovable(false)
-		RGXQoLLC["PageF"]:EnableMouse(false)
-		RGXQoLLC["PageF"]:Show()
+		-- Settings-integrated: the options panel always lives inside the
+		-- game options category and is never an independent window.
+		local mainFrame = RGXQoLLC["PageF"]
+		if mainFrame then
+			mainFrame:SetParent(interPanel)
+			mainFrame:ClearAllPoints()
+			mainFrame:SetAllPoints(interPanel)
+			mainFrame:SetMovable(false)
+			mainFrame:SetScript("OnDragStart", nil)
+			mainFrame:SetScript("OnDragStop", nil)
+			mainFrame:SetScript("OnShow", nil)
+			mainFrame:Show()
+			RGXQoLLC.OptionsEmbedded = true
 
-		-- Hide the standalone close button (settings panel has its own)
-		if RGXQoLCB["CloseB"] then RGXQoLCB["CloseB"]:Hide() end
+			-- Settings panel has its own close chrome
+			if RGXQoLCB["CloseB"] then RGXQoLCB["CloseB"]:Hide() end
 
-		-- Show the start page
-		if RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]] then
-			RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]]:Show()
+			-- Show the start page inside the settings canvas
+			local startPage = RGXQoLLC["Page" .. (RGXQoLLC["RGXQoLStartPage"] or 0)]
+			if startPage then startPage:Show() end
 		end
 
-		local category = Settings.RegisterCanvasLayoutCategory(interPanel, "RGX QoL")
-		Settings.RegisterAddOnCategory(category)
+		-- Register the category when the Blizzard Settings API exists
+		if Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory then
+			local category = Settings.RegisterCanvasLayoutCategory(interPanel, "RGX QoL")
+			Settings.RegisterAddOnCategory(category)
+		end
 
 	end
 
@@ -12349,27 +12359,16 @@
 		-- Create the panel
 		local PageF = CreateFrame("Frame", nil, UIParent);
 
-		-- Make it a system frame
+		-- Settings-integrated panel: registered as an options-page canvas,
+		-- never an independent floating window (see L45).
 		_G["RGXQoLGlobalPanel"] = PageF
-		table.insert(UISpecialFrames, "RGXQoLGlobalPanel")
 
 		-- Set frame parameters
 		RGXQoLLC["PageF"] = PageF
 		PageF:SetSize(570, RGXQoLLC.MainPanelHeight)
 		PageF:Hide();
-		PageF:SetFrameStrata("FULLSCREEN_DIALOG")
 		PageF:SetClampedToScreen(true)
-		PageF:SetClampRectInsets(500, -500, -300, 300)
 		PageF:EnableMouse(true)
-		PageF:SetMovable(true)
-		PageF:RegisterForDrag("LeftButton")
-		PageF:SetScript("OnDragStart", PageF.StartMoving)
-		PageF:SetScript("OnDragStop", function ()
-			PageF:StopMovingOrSizing();
-			PageF:SetUserPlaced(false);
-			-- Save panel position
-			RGXQoLLC["MainPanelA"], void, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"] = PageF:GetPoint()
-		end)
 
 		-- Add background color (RGXDesign themed)
 		local Design = _G.RGXDesign
@@ -12398,11 +12397,7 @@
 		RGXQoLLC:CreateBar("MainTexture", PageF, 440, RGXQoLLC.MainPanelHeight - 47, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "")
 		-- MenuTexture removed (framework design)
 
-		-- Set panel position when shown
-		PageF:SetScript("OnShow", function()
-			PageF:ClearAllPoints()
-			PageF:SetPoint(RGXQoLLC["MainPanelA"], UIParent, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"])
-		end)
+		-- Settings-integrated: PageF fills its options-pane parent; no float positioning.
 
 		-- Add main title (shown above menu in the corner)
 		PageF.mt = PageF:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
