@@ -11140,10 +11140,8 @@
 					RGXQoLLC["PageF"]:Hide()
 					RGXQoLLC["PageF"]:Show()
 				end
-				-- Set panel scale
-				RGXQoLLC["PageF"]:SetScale(RGXQoLLC["PlusPanelScale"])
-				-- Update music player highlight bar scale
-				RGXQoLLC:UpdateList()
+			-- Set panel scale
+			RGXQoLLC["PageF"]:SetScale(RGXQoLLC["PlusPanelScale"])
 			end
 
 			-- Set scale on startup
