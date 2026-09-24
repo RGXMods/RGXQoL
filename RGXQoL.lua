@@ -14001,14 +14001,12 @@
 				end
 
 				if id then
-					local ok = pcall(Settings.OpenToCategory, id)
-					if ok then return end
+					Settings.OpenToCategory(id)
+					return
 				end
-				if target then
-					local ok = pcall(Settings.OpenToCategory, target)
-					if ok then return end
-				end
-				pcall(Settings.OpenToCategory, "RGX QoL")
+				-- No numeric ID resolved: never pass a name (the client turns it
+				-- into an async OpenSettingsPanel call that pcall cannot contain).
+				RGXQoLLC:Print("Open |cff00ff00Options > AddOns > RGX QoL|r from the game menu.")
 			end
 			TryOpenQoLOptions()
 		end
