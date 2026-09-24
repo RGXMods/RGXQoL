@@ -11060,6 +11060,7 @@
 		-- Register the category when the Blizzard Settings API exists
 		if Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory then
 			local category = Settings.RegisterCanvasLayoutCategory(interPanel, "RGX QoL")
+			RGXQoLLC.OptionsCategory = category
 			Settings.RegisterAddOnCategory(category)
 		end
 
@@ -13971,7 +13972,45 @@
 			return
 		else
 			-- Open the Blizzard settings panel for RGX QoL
-			Settings.OpenToCategory("RGX QoL")
+			local function TryOpenQoLOptions()
+				if not (Settings and Settings.OpenToCategory) then return end
+
+				-- Forever/modern clients demand the numeric category ID; names and
+				-- table references crash OpenSettingsPanel. Try ID first, then the
+				-- category object, then legacy name — all pcall'd so no crash.
+				local target = RGXQoLLC.OptionsCategory
+				local id
+				if type(target) == "table" then
+					if type(target.GetID) == "function" then
+						local ok, v = pcall(target.GetID, target)
+						if ok and type(v) == "number" then id = v end
+					end
+					if id == nil and type(target.ID) == "number" then
+						id = target.ID
+					end
+				end
+				if id == nil and type(Settings.GetCategory) == "function" then
+					local ok, cat = pcall(Settings.GetCategory, "RGX QoL")
+					if ok and type(cat) == "table" then
+						if type(cat.GetID) == "function" then
+							local ok2, v = pcall(cat.GetID, cat)
+							if ok2 and type(v) == "number" then id = v end
+						end
+						if id == nil and type(cat.ID) == "number" then id = cat.ID end
+					end
+				end
+
+				if id then
+					local ok = pcall(Settings.OpenToCategory, id)
+					if ok then return end
+				end
+				if target then
+					local ok = pcall(Settings.OpenToCategory, target)
+					if ok then return end
+				end
+				pcall(Settings.OpenToCategory, "RGX QoL")
+			end
+			TryOpenQoLOptions()
 		end
 	end
 
