@@ -16,8 +16,5 @@
 
 RGXQoL_Library.lua
 RGXQoL_Locale.lua
-RGXQoL_Flight_Alliance.lua
-RGXQoL_Flight_Horde.lua
-RGXQoL_Mute.lua
 RGXQoL.xml
 RGXQoL.lua
