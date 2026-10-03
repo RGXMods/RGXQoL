@@ -475,63 +475,9 @@
 		end
 	end
 
-	-- Check if a name is in your friends list or guild (does not check realm as realm is unknown for some checks)
-	function RGXQoLLC:FriendCheck(name, guid)
-
-		-- Do nothing if name is empty (such as whispering from the Battle.net app)
-		if not name then return end
-
-		-- Update friends list
-		C_FriendList.ShowFriends()
-
-		-- Remove realm (since we have GUID checking)
-		name = strsplit("-", name, 2)
-
-		-- Check character friends
-		for i = 1, C_FriendList.GetNumFriends() do
-			-- Return true is character name matches and GUID matches if there is one (realm is not checked)
-			local friendInfo = C_FriendList.GetFriendInfoByIndex(i)
-			local charFriendName = C_FriendList.GetFriendInfoByIndex(i).name
-			charFriendName = strsplit("-", charFriendName, 2)
-			if (name == charFriendName) and (guid and (guid == friendInfo.guid) or true) then
-				return true
-			end
-		end
-
-		-- Check Battle.net friends
-		local numfriends = BNGetNumFriends()
-		for i = 1, numfriends do
-			local numtoons = C_BattleNet.GetFriendNumGameAccounts(i)
-			for j = 1, numtoons do
-				local gameAccountInfo = C_BattleNet.GetFriendGameAccountInfo(i, j)
-				local characterName = gameAccountInfo.characterName
-				local client = gameAccountInfo.clientProgram
-				if client == "WoW" and characterName == name then
-					return true
-				end
-			end
-		end
-
-		-- Check guild members if guild is enabled (new members may need to press J to refresh roster)
-		if RGXQoLLC["FriendlyGuild"] == "On" then
-			local gCount = GetNumGuildMembers()
-			for i = 1, gCount do
-				local gName, void, void, void, void, void, void, void, gOnline, void, void, void, void, gMobile, void, void, gGUID = GetGuildRosterInfo(i)
-				if gOnline and not gMobile then
-					gName = strsplit("-", gName, 2)
-					-- Return true if character name matches including GUID if there is one
-					if (name == gName) and (guid and (guid == gGUID) or true) then
-						return true
-					end
-				end
-			end
-		end
-
-	end
-
-----------------------------------------------------------------------
---	L02: Locks
-----------------------------------------------------------------------
+	----------------------------------------------------------------------
+	--	L02: Locks
+	----------------------------------------------------------------------
 
 	-- Function to set lock state for configuration buttons
 	function RGXQoLLC:LockOption(option, item, reloadreq)
@@ -623,54 +569,14 @@
 		----------------------------------------------------------------------
 
 
-		----------------------------------------------------------------------
-		--	Party from friends (no reload required)
-		----------------------------------------------------------------------
+	----------------------------------------------------------------------
+	--	Party from friends (no reload required)
+	----------------------------------------------------------------------
 
-		do
 
-			local frame = CreateFrame("FRAME")
-			frame:SetScript("OnEvent", function(self, event, arg1, ...)
-
-				-- If a friend, accept if you're accepting friends and not queued
-				local void, void, void, void, void, guid = ...
-				if (RGXQoLLC["AcceptPartyFriends"] == "On" and RGXQoLLC:FriendCheck(arg1, guid)) then
-					if not RGXQoLLC:IsInLFGQueue() then
-						AcceptGroup()
-						StaticPopup_ForEachShownDialog(function(self)
-							if self.which == "PARTY_INVITE" then
-								self.inviteAccepted = 1
-								StaticPopup_Hide("PARTY_INVITE")
-								return
-							elseif self.which == "PARTY_INVITE_XREALM" then
-								self.inviteAccepted = 1
-								StaticPopup_Hide("PARTY_INVITE_XREALM")
-								return
-							end
-						end)
-						return
-					end
-				end
-			end)
-
-			-- Function to set event
-			local function SetEvent()
-				if RGXQoLLC["AcceptPartyFriends"] == "On" then
-					frame:RegisterEvent("PARTY_INVITE_REQUEST")
-				else
-					frame:UnregisterEvent("PARTY_INVITE_REQUEST")
-				end
-			end
-
-			-- Set event on startup if enabled and when option is clicked
-			if RGXQoLLC["AcceptPartyFriends"] == "On" then SetEvent() end
-			RGXQoLCB["AcceptPartyFriends"]:HookScript("OnClick", SetEvent)
-
-		end
-
-		----------------------------------------------------------------------
-		--	Block party invites (no reload required)
-		----------------------------------------------------------------------
+	----------------------------------------------------------------------
+	--	Block party invites (no reload required)
+	----------------------------------------------------------------------
 
 
 		----------------------------------------------------------------------
@@ -2476,8 +2382,7 @@
 
 				-- Social
 
-				RGXQoLLC:LoadVarChk("AcceptPartyFriends", "Off")			-- Party from friends
-				RGXQoLLC:LoadVarChk("FriendlyGuild", "On")					-- Friendly guild
+
 
 				-- Chat
 
@@ -2519,7 +2424,7 @@
 				-- Removed pages: clamp a stale start page to a live page
 				do
 					local sp = RGXQoLLC["RGXQoLStartPage"]
-					if sp and (sp < 0 or (sp > 2 and sp ~= 8)) then
+					if sp and (sp < 0 or (sp > 1 and sp ~= 8)) then
 						RGXQoLLC["RGXQoLStartPage"] = 0
 					end
 				end
@@ -2641,8 +2546,7 @@
 
 			-- Social
 
-			RGXQoLDB["AcceptPartyFriends"]		= RGXQoLLC["AcceptPartyFriends"]
-			RGXQoLDB["FriendlyGuild"]			= RGXQoLLC["FriendlyGuild"]
+
 
 			-- Chat
 
@@ -4594,8 +4498,7 @@
 
 				-- Social
 
-				RGXQoLDB["AcceptPartyFriends"] = "On"			-- Party from friends
-				RGXQoLDB["FriendlyGuild"] = "On"				-- Friendly guild
+
 
 				-- Chat
 
@@ -4804,7 +4707,6 @@
 	-- Create options pages
 	RGXQoLLC["Page0"] = RGXQoLLC:MakePage("Page0", "Home"			, "RGXQoLNav0", "Home"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -72, 112, 20)
 	RGXQoLLC["Page1"] = RGXQoLLC:MakePage("Page1", "Automation"	, "RGXQoLNav1", "Automation"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -112, 112, 20)
-	RGXQoLLC["Page2"] = RGXQoLLC:MakePage("Page2", "Social"		, "RGXQoLNav2", "Social"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -132, 112, 20)
 	RGXQoLLC["Page8"] = RGXQoLLC:MakePage("Page8", "Settings"		, "RGXQoLNav8", "Settings"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -272, 112, 20)
 
 	-- Page navigation mechanism
@@ -4860,22 +4762,6 @@
 ----------------------------------------------------------------------
 -- 	LC2: Social
 ----------------------------------------------------------------------
-
-	pg = "Page2";
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Blocks"					, 	146, -72);
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Groups"					, 	340, -72);
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AcceptPartyFriends"		, 	"Party from friends"			, 	340, -92, 	false,	"If checked, party invitations from friends will be automatically accepted unless you are queued for a battleground or the Looking for Group feature.")
-
-	local FriendlyGuildFooter = RGXQoLLC:MakeFT(RGXQoLLC[pg], "For all of the social options above, you can treat guild members as friends too.", 146, 380)
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "FriendlyGuild"				, 	"Guild"							, 	146, -282, 	false,	"If checked, members of your guild will be treated as friends for all of the options on this page.")
-	RGXQoLCB["FriendlyGuild"]:ClearAllPoints()
-	RGXQoLCB["FriendlyGuild"]:SetPoint("TOPLEFT", FriendlyGuildFooter, "BOTTOMLEFT", 0, -10)
-	if RGXQoLCB["FriendlyGuild"].f:GetStringWidth() > 90 then
-		RGXQoLCB["FriendlyGuild"].f:SetWidth(90)
-		RGXQoLCB["FriendlyGuild"]:SetHitRectInsets(0, -84, 0, 0)
-	end
 
 
 ----------------------------------------------------------------------
