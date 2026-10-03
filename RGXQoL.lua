@@ -629,21 +629,6 @@
 
 
 		----------------------------------------------------------------------
-		-- Block friend requests (no reload required)
-		----------------------------------------------------------------------
-
-		-- Function to decline friend requests
-
-		-- Event frame for incoming friend requests
-		DecEvt:SetScript("OnEvent", DeclineReqs)
-
-		-- Function to register or unregister the event
-		local function ControlEvent()
-		end
-
-		-- Set event status when option is clicked and on startup
-
-		----------------------------------------------------------------------
 		--	Block duels (no reload required)
 		----------------------------------------------------------------------
 
