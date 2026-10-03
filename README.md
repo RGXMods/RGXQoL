@@ -9,6 +9,10 @@ Quality-of-life enhancements for WoW Forever and Classic Era, derived from Leatr
 - Sound muting helpers.
 - Client guards for the WoW Forever (classic beta) API surface.
 
+## Languages
+
+RGXQoL supports all 12 World of Warcraft client languages: English (enUS, base), German (deDE), Spanish (esES), Latin American Spanish (esMX), French (frFR), Italian (itIT), Korean (koKR), Brazilian Portuguese (ptBR), European Portuguese (ptPT), Russian (ruRU), Simplified Chinese (zhCN), and Traditional Chinese (zhTW). The interface follows your client language automatically; enable *Use English language* in the options panel to force English. Translations are being completed locale by locale; untranslated strings fall back to English.
+
 ## Compatibility
 
 - WoW Forever (classic beta, interface `16001`)

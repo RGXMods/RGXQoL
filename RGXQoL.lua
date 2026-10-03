@@ -4896,7 +4896,7 @@
 					local col1, col2, color1 = 10, 120, "|cffffffaa"
 					RGXQoLLC:MakeTx(frame, "RGX QoL Plus Help", col1, -10)
 					RGXQoLLC:MakeWD(frame, color1 .. "/qol", col1, -30)
-					RGXQoLLC:MakeWD(frame, "Toggle opttions panel.", col2, -30)
+					RGXQoLLC:MakeWD(frame, "Toggle options panel.", col2, -30)
 					RGXQoLLC:MakeWD(frame, color1 .. "/qol reset", col1, -50)
 					RGXQoLLC:MakeWD(frame, "Reset addon panel position and scale.", col2, -50)
 					RGXQoLLC:MakeWD(frame, color1 .. "/qol wipe", col1, -70)

@@ -14,6 +14,7 @@
 
 ## X-License: See Changelog.txt for Leatrix Plus attribution
 ## X-Discord: discord.gg/N7kdKAHVVF
+## X-Localizations: enUS,deDE,esES,esMX,frFR,itIT,koKR,ptBR,ptPT,ruRU,zhCN,zhTW
 
 RGXQoL_Library.lua
 RGXQoL_Locale.lua
