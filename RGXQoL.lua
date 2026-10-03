@@ -559,7 +559,6 @@
 		RGXQoLLC:LockOption("AutoReleasePvP", "AutoReleasePvPBtn", false)			-- Release in PvP
 		RGXQoLLC:LockOption("AutoSellJunk", "AutoSellJunkBtn", false)				-- Sell junk automatically
 		RGXQoLLC:LockOption("AutoRepairGear", "AutoRepairBtn", false)				-- Repair automatically
-		RGXQoLLC:LockOption("FilterChatMessages", "FilterChatMessagesBtn", true)	-- Filter chat messages
 	end
 
 ----------------------------------------------------------------------
@@ -570,27 +569,13 @@
 	function RGXQoLLC:ReloadCheck()
 
 		-- Chat
-		if	(RGXQoLLC["UseEasyChatResizing"]	~= RGXQoLDB["UseEasyChatResizing"])	-- Use easy resizing
-		or	(RGXQoLLC["NoCombatLogTab"]		~= RGXQoLDB["NoCombatLogTab"])			-- Hide the combat log
-		or	(RGXQoLLC["NoChatButtons"]			~= RGXQoLDB["NoChatButtons"])			-- Hide chat buttons
-		or	(RGXQoLLC["UnclampChat"]			~= RGXQoLDB["UnclampChat"])			-- Unclamp chat frame
-		or	(RGXQoLLC["MoveChatEditBoxToTop"]	~= RGXQoLDB["MoveChatEditBoxToTop"])	-- Move editbox to top
-		or	(RGXQoLLC["MoreFontSizes"]			~= RGXQoLDB["MoreFontSizes"])			-- More font sizes
-		or	(RGXQoLLC["NoStickyChat"]			~= RGXQoLDB["NoStickyChat"])			-- Disable sticky chat
-		or	(RGXQoLLC["UseArrowKeysInChat"]	~= RGXQoLDB["UseArrowKeysInChat"])		-- Use arrow keys in chat
-		or	(RGXQoLLC["NoChatFade"]			~= RGXQoLDB["NoChatFade"])				-- Disable chat fade
-		or	(RGXQoLLC["ClassColorsInChat"]		~= RGXQoLDB["ClassColorsInChat"])		-- Use class colors in chat
-		or	(RGXQoLLC["RecentChatWindow"]		~= RGXQoLDB["RecentChatWindow"])		-- Recent chat window
-		or	(RGXQoLLC["MaxChatHstory"]			~= RGXQoLDB["MaxChatHstory"])			-- Increase chat history
-		or	(RGXQoLLC["FilterChatMessages"]	~= RGXQoLDB["FilterChatMessages"])		-- Filter chat messages
-		or	(RGXQoLLC["RestoreChatMessages"]	~= RGXQoLDB["RestoreChatMessages"])	-- Restore chat messages
+
 
 		-- Text
 
 
 		-- Interface
-
-		or	(RGXQoLLC["ShowDruidStatusText"]	~= RGXQoLDB["ShowDruidStatusText"])	-- Show druid power bar status text
+		if	(RGXQoLLC["ShowDruidStatusText"]	~= RGXQoLDB["ShowDruidStatusText"])	-- Show druid power bar status text
 
 		-- Frames
 		or	(RGXQoLLC["NoGryphons"]			~= RGXQoLDB["NoGryphons"])				-- Hide gryphons
@@ -1812,45 +1797,9 @@
 
 		end
 
-		----------------------------------------------------------------------
-		-- Hide the combat log
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["NoCombatLogTab"] == "On" and not RGXQoLLockList["NoCombatLogTab"] then
-
-			-- Function to setup the combat log tab
-			local function SetupCombatLogTab()
-				ChatFrame2Tab:EnableMouse(false)
-				ChatFrame2Tab:SetText(" ") -- Needs to be something for chat settings to function
-				ChatFrame2Tab:SetScale(0.01)
-				ChatFrame2Tab:SetWidth(0.01)
-				ChatFrame2Tab:SetHeight(0.01)
-			end
-
-			local frame = CreateFrame("FRAME")
-			frame:SetScript("OnEvent", SetupCombatLogTab)
-
-			-- Ensure combat log is docked
-			if ChatFrame2.isDocked then
-				-- Set combat log attributes when chat windows are updated
-				frame:RegisterEvent("UPDATE_CHAT_WINDOWS")
-				-- Set combat log tab placement when tabs are assigned by the client
-				SafeHookSecure("FCF_SetTabPosition", function()
-					ChatFrame2Tab:SetPoint("BOTTOMLEFT", ChatFrame1Tab, "BOTTOMRIGHT", 0, 0)
-				end)
-				SetupCombatLogTab()
-			else
-				-- If combat log is undocked, do nothing but show warning
-				C_Timer.After(1, function()
-					RGXQoLLC:Print("Combat log cannot be hidden while undocked.")
-				end)
-			end
-
-		end
-
-		----------------------------------------------------------------------
-		--	Show player chain
-		----------------------------------------------------------------------
+	----------------------------------------------------------------------
+	--	Show player chain
+	----------------------------------------------------------------------
 
 
 		----------------------------------------------------------------------
@@ -1893,20 +1842,9 @@
 		----------------------------------------------------------------------
 
 
-		----------------------------------------------------------------------
-		--	Disable sticky chat
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["NoStickyChat"] == "On" and not RGXQoLLockList["NoStickyChat"] then
-			-- These taint if set to anything other than nil
-			ChatTypeInfo.WHISPER.sticky = nil
-			ChatTypeInfo.BN_WHISPER.sticky = nil
-			ChatTypeInfo.CHANNEL.sticky = nil
-		end
-
-		----------------------------------------------------------------------
-		--	Hide stance bar
-		----------------------------------------------------------------------
+	----------------------------------------------------------------------
+	--	Hide stance bar
+	----------------------------------------------------------------------
 
 		if RGXQoLLC["NoClassBar"] == "On" and not RGXQoLLockList["NoClassBar"] then
 			local stancebar = CreateFrame("FRAME", nil, UIParent)
@@ -1924,69 +1862,9 @@
 			MainMenuBarRightEndCap:Hide();
 		end
 
-		----------------------------------------------------------------------
-		--	Disable chat fade
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["NoChatFade"] == "On" and not RGXQoLLockList["NoChatFade"] then
-			-- Process normal and existing chat frames
-			for i = 1, 50 do
-				if _G["ChatFrame" .. i] then
-					_G["ChatFrame" .. i]:SetFading(false)
-				end
-			end
-			-- Process temporary frames
-			SafeHookSecure("FCF_OpenTemporaryWindow", function()
-				local cf = FCF_GetCurrentChatFrame():GetName() or nil
-				if cf then
-					_G[cf]:SetFading(false)
-				end
-			end)
-		end
-
-		----------------------------------------------------------------------
-		--	Use easy chat frame resizing
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["UseEasyChatResizing"] == "On" and not RGXQoLLockList["UseEasyChatResizing"] then
-			ChatFrame1Tab:HookScript("OnMouseDown", function(self,arg1)
-				if arg1 == "LeftButton" then
-					if select(8, GetChatWindowInfo(1)) then
-						ChatFrame1:StartSizing("TOP")
-					end
-				end
-			end)
-			ChatFrame1Tab:SetScript("OnMouseUp", function(self,arg1)
-				if arg1 == "LeftButton" then
-					ChatFrame1:StopMovingOrSizing()
-					FCF_SavePositionAndDimensions(ChatFrame1)
-				end
-			end)
-		end
-
-		----------------------------------------------------------------------
-		--	Increase chat history
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["MaxChatHstory"] == "On" and not RGXQoLLockList["MaxChatHstory"] then
-			-- Process normal and existing chat frames
-			for i = 1, 50 do
-				if _G["ChatFrame" .. i] then
-					_G["ChatFrame" .. i]:SetMaxLines(4096)
-				end
-			end
-			-- Process temporary chat frames
-			SafeHookSecure("FCF_OpenTemporaryWindow", function()
-				local cf = FCF_GetCurrentChatFrame():GetName() or nil
-				if cf then
-					_G[cf]:SetMaxLines(4096)
-				end
-			end)
-		end
-
-		----------------------------------------------------------------------
-		--	Hide error messages
-		----------------------------------------------------------------------
+	----------------------------------------------------------------------
+	--	Hide error messages
+	----------------------------------------------------------------------
 
 
 		----------------------------------------------------------------------
@@ -1994,38 +1872,9 @@
 		----------------------------------------------------------------------
 
 
-		----------------------------------------------------------------------
-		-- Unclamp chat frame
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["UnclampChat"] == "On" and not RGXQoLLockList["UnclampChat"] then
-
-			-- Process normal and existing chat frames on startup
-			for i = 1, 50 do
-				if _G["ChatFrame" .. i] then
-					_G["ChatFrame" .. i]:SetClampedToScreen(false)
-					_G["ChatFrame" .. i]:SetClampRectInsets(0, 0, 0, 0)
-				end
-			end
-
-			-- Process new chat frames and combat log
-			SafeHookSecure("FloatingChatFrame_UpdateBackgroundAnchors", function(self)
-				self:SetClampRectInsets(0, 0, 0, 0)
-			end)
-
-			-- Process temporary chat frames
-			SafeHookSecure("FCF_OpenTemporaryWindow", function()
-				local cf = FCF_GetCurrentChatFrame():GetName() or nil
-				if cf then
-					_G[cf]:SetClampRectInsets(0, 0, 0, 0)
-				end
-			end)
-
-		end
-
-		----------------------------------------------------------------------
-		-- Enhance flight map
-		----------------------------------------------------------------------
+	----------------------------------------------------------------------
+	-- Enhance flight map
+	----------------------------------------------------------------------
 
 
 		----------------------------------------------------------------------
@@ -2043,142 +1892,7 @@
 		----------------------------------------------------------------------
 
 
-		----------------------------------------------------------------------
-		-- Restore chat messages
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["RestoreChatMessages"] == "On" and not RGXQoLLockList["RestoreChatMessages"] then
-
-			local historyFrame = CreateFrame("FRAME")
-			historyFrame:RegisterEvent("PLAYER_LOGIN")
-			historyFrame:RegisterEvent("PLAYER_LOGOUT")
-
-			local FCF_IsChatWindowIndexActive = FCF_IsChatWindowIndexActive
-			local GetMessageInfo = GetMessageInfo
-			local GetNumMessages = GetNumMessages
-
-			-- Use function from Dragonflight
-			local function FCF_IsChatWindowIndexActive(chatWindowIndex)
-				local shown = select(7, FCF_GetChatWindowInfo(chatWindowIndex))
-				if shown then
-					return true
-				end
-				local chatFrame = _G["ChatFrame" .. chatWindowIndex]
-				return (chatFrame and chatFrame.isDocked)
-			end
-
-			-- Save chat messages on logout
-			historyFrame:SetScript("OnEvent", function(self, event)
-				if event == "PLAYER_LOGOUT" then
-					local name, realm = UnitFullName("player")
-					if not realm then realm = GetNormalizedRealmName() end
-					if name and realm then
-						RGXQoLDB["ChatHistoryName"] = name .. "-" .. realm
-						RGXQoLDB["ChatHistoryTime"] = GetServerTime()
-						for i = 1, 50 do
-							if i ~= 2 and _G["ChatFrame" .. i] then
-								if FCF_IsChatWindowIndexActive(i) then
-									RGXQoLDB["ChatHistory" .. i] = {}
-									local chtfrm = _G["ChatFrame" .. i]
-									local NumMsg = chtfrm:GetNumMessages()
-									local StartMsg = 1
-									if NumMsg > 256 then StartMsg = NumMsg - 255 end
-									for iMsg = StartMsg, NumMsg do
-										local chatMessage, r, g, b, chatTypeID = chtfrm:GetMessageInfo(iMsg)
-										if chatMessage then
-											if r and g and b then
-												local colorCode = RGBToColorCode(r, g, b)
-												chatMessage = colorCode .. chatMessage
-											end
-											tinsert(RGXQoLDB["ChatHistory" .. i], chatMessage)
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end)
-
-			-- Restore chat messages on login
-			local name, realm = UnitFullName("player")
-			if not realm then realm = GetNormalizedRealmName() end
-			if name and realm then
-				if RGXQoLDB["ChatHistoryName"] and RGXQoLDB["ChatHistoryTime"] then
-					local timeDiff = GetServerTime() - RGXQoLDB["ChatHistoryTime"]
-					if RGXQoLDB["ChatHistoryName"] == name .. "-" .. realm and timeDiff and timeDiff < 10 then -- reload must be done within 15 seconds
-
-						-- Store chat messages from current session and clear chat
-						for i = 1, 50 do
-							if i ~= 2 and _G["ChatFrame" .. i] and FCF_IsChatWindowIndexActive(i) then
-								RGXQoLDB["ChatTemp" .. i] = {}
-								local chtfrm = _G["ChatFrame" .. i]
-								local NumMsg = chtfrm:GetNumMessages()
-								for iMsg = 1, NumMsg do
-									local chatMessage, r, g, b, chatTypeID = chtfrm:GetMessageInfo(iMsg)
-									if chatMessage then
-										if r and g and b then
-											local colorCode = RGBToColorCode(r, g, b)
-											chatMessage = colorCode .. chatMessage
-										end
-										tinsert(RGXQoLDB["ChatTemp" .. i], chatMessage)
-									end
-								end
-								chtfrm:Clear()
-							end
-						end
-
-						-- Restore chat messages from previous session
-						for i = 1, 50 do
-							if i ~= 2 and _G["ChatFrame" .. i] and RGXQoLDB["ChatHistory" .. i] and FCF_IsChatWindowIndexActive(i) then
-								RGXQoLDB["ChatHistory" .. i .. "Count"] = 0
-								-- Add previous session messages to chat
-								for k = 1, #RGXQoLDB["ChatHistory" .. i] do
-									if RGXQoLDB["ChatHistory" .. i][k] ~= string.match(RGXQoLDB["ChatHistory" .. i][k], "|cffffd800" .. L["Restored"] .. " " .. ".*" .. " " .. L["message"] .. ".*.|r") then
-										_G["ChatFrame" .. i]:AddMessage(RGXQoLDB["ChatHistory" .. i][k])
-										RGXQoLDB["ChatHistory" .. i .. "Count"] = RGXQoLDB["ChatHistory" .. i .. "Count"] + 1
-									end
-								end
-								-- Show how many messages were restored
-								if RGXQoLDB["ChatHistory" .. i .. "Count"] == 1 then
-									_G["ChatFrame" .. i]:AddMessage("|cffffd800" .. L["Restored"] .. " " .. RGXQoLDB["ChatHistory" .. i .. "Count"] .. " " .. L["message from previous session"] .. ".|r")
-								else
-									_G["ChatFrame" .. i]:AddMessage("|cffffd800" .. L["Restored"] .. " " .. RGXQoLDB["ChatHistory" .. i .. "Count"] .. " " .. L["messages from previous session"] .. ".|r")
-								end
-							else
-								-- No messages to restore
-								RGXQoLDB["ChatHistory" .. i] = nil
-							end
-						end
-
-						-- Restore chat messages from this session
-						for i = 1, 50 do
-							if i ~= 2 and _G["ChatFrame" .. i] and RGXQoLDB["ChatTemp" .. i] and FCF_IsChatWindowIndexActive(i) then
-								for k = 1, #RGXQoLDB["ChatTemp" .. i] do
-									_G["ChatFrame" .. i]:AddMessage(RGXQoLDB["ChatTemp" .. i][k])
-								end
-							end
-						end
-
-					end
-				end
-			end
-
-		else
-
-			-- Option is disabled so clear any messages from saved variables
-			RGXQoLDB["ChatHistoryName"] = nil
-			RGXQoLDB["ChatHistoryTime"] = nil
-			for i = 1, 50 do
-				RGXQoLDB["ChatHistory" .. i] = nil
-				RGXQoLDB["ChatTemp" .. i] = nil
-				RGXQoLDB["ChatHistory" .. i .. "Count"] = nil
-			end
-
-		end
-
-		----------------------------------------------------------------------
-		-- Manage timer
+		----------------------------------------------------------------------\r\n\t-- Manage timer
 		----------------------------------------------------------------------
 
 
@@ -2197,101 +1911,7 @@
 		----------------------------------------------------------------------
 
 
-		----------------------------------------------------------------------
-		-- Filter chat messages
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["FilterChatMessages"] == "On" and not RGXQoLLockList["FilterChatMessages"] then
-
-			-- Load LibChatAnims
-			RGXQoLAddon:RGXQoLLCA()
-
-			-- Create configuration panel
-			local ChatFilterPanel = RGXQoLLC:CreatePanel("Filter chat messages", "ChatFilterPanel")
-
-			RGXQoLLC:MakeTx(ChatFilterPanel, "Settings", 16, -72)
-			RGXQoLLC:MakeCB(ChatFilterPanel, "BlockDrunkenSpam", "Block drunken spam", 16, -92, false, "If checked, drunken messages will be blocked unless they apply to your character.|n|nThis applies to the system channel.")
-
-			-- Lock block drunken spam option for zhTW
-			if GameLocale == "zhTW" then
-				RGXQoLLC:LockItem(RGXQoLCB["BlockDrunkenSpam"], true)
-				RGXQoLLC["BlockDrunkenSpam"] = "Off"
-				RGXQoLDB["BlockDrunkenSpam"] = "Off"
-				RGXQoLCB["BlockDrunkenSpam"].tiptext = RGXQoLCB["BlockDrunkenSpam"].tiptext .. "|n|n|cff00AAFF" .. L["Cannot use this with your locale."]
-			end
-
-			-- Help button hidden
-			ChatFilterPanel.h:Hide()
-
-			-- Back button handler
-			ChatFilterPanel.b:SetScript("OnClick", function()
-				ChatFilterPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page3"]:Show()
-				return
-			end)
-
-			local charName = GetUnitName("player")
-			local charRealm = GetNormalizedRealmName()
-			local nameRealm = charName .. "%%-" .. charRealm
-
-			-- Chat filter
-			local function ChatFilterFunc(self, event, msg)
-				-- Block duel spam
-				-- Block drunken spam
-				if RGXQoLLC["BlockDrunkenSpam"] == "On" then
-					for i = 1, 4 do
-						local drunk1 = _G["DRUNK_MESSAGE_ITEM_OTHER"..i]:gsub("%%s", "%s-")
-						local drunk2 = _G["DRUNK_MESSAGE_OTHER"..i]:gsub("%%s", "%s-")
-						if msg:match(drunk1) or msg:match(drunk2) then
-							return true
-						end
-					end
-				end
-			end
-
-			-- Enable or disable chat filter settings
-			local function SetChatFilter()
-				if RGXQoLLC["BlockDrunkenSpam"] == "On" or RGXQoLLC["BlockDuelSpam"] == "On" then
-					ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterFunc)
-				else
-					ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterFunc)
-				end
-			end
-
-			-- Set chat filter when settings are clicked and on startup
-			RGXQoLCB["BlockDrunkenSpam"]:HookScript("OnClick", SetChatFilter)
-			RGXQoLCB["BlockDuelSpam"]:HookScript("OnClick", SetChatFilter)
-			SetChatFilter()
-
-			-- Reset button handler
-			ChatFilterPanel.r:SetScript("OnClick", function()
-
-				-- Reset controls
-				RGXQoLLC["BlockDrunkenSpam"] = "Off"
-				RGXQoLLC["BlockDuelSpam"] = "Off"
-				SetChatFilter()
-
-				-- Refresh configuration panel
-				ChatFilterPanel:Hide(); ChatFilterPanel:Show()
-
-			end)
-
-			-- Show configuration panal when options panel button is clicked
-			RGXQoLCB["FilterChatMessagesBtn"]:SetScript("OnClick", function()
-				if IsShiftKeyDown() and IsControlKeyDown() then
-					-- Preset profile
-					RGXQoLLC["BlockDrunkenSpam"] = "On"
-					RGXQoLLC["BlockDuelSpam"] = "On"
-					SetChatFilter()
-				else
-					ChatFilterPanel:Show()
-					RGXQoLLC:HideFrames()
-				end
-			end)
-
-		end
-
-		----------------------------------------------------------------------
-		-- Automatically accept resurrection requests (no reload required)
+		----------------------------------------------------------------------\r\n\t-- Automatically accept resurrection requests (no reload required)
 		----------------------------------------------------------------------
 
 		do
@@ -2404,14 +2024,6 @@
 		-- Hide macro text
 		----------------------------------------------------------------------
 
-
-		----------------------------------------------------------------------
-		-- More font sizes
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["MoreFontSizes"] == "On" and not RGXQoLLockList["MoreFontSizes"] then
-			RunScript('CHAT_FONT_HEIGHTS = {[1] = 10, [2] = 12, [3] = 14, [4] = 16, [5] = 18, [6] = 20, [7] = 22, [8] = 24, [9] = 26, [10] = 28}')
-		end
 
 		----------------------------------------------------------------------
 		--	Show druid power bar
@@ -2546,24 +2158,6 @@
 
 
 		----------------------------------------------------------------------
-		--	Use class colors in chat
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["ClassColorsInChat"] == "On" and not RGXQoLLockList["ClassColorsInChat"] then
-
-			SetCVar("chatClassColorOverride", "0")
-
-			for void, v in ipairs({"SAY", "EMOTE", "YELL", "GUILD", "OFFICER", "WHISPER", "PARTY", "PARTY_LEADER", "RAID", "RAID_LEADER", "RAID_WARNING", "INSTANCE_CHAT", "INSTANCE_CHAT_LEADER", "VOICE_TEXT"}) do
-				SetChatColorNameByClass(v, true)
-			end
-
-			for i = 1, 50 do
-				SetChatColorNameByClass("CHANNEL" .. i, true)
-			end
-
-		end
-
-		----------------------------------------------------------------------
 		-- Disable screen glow (no reload required)
 		----------------------------------------------------------------------
 
@@ -2572,29 +2166,6 @@
 		-- Disable screen effects (no reload required)
 		----------------------------------------------------------------------
 
-
-		----------------------------------------------------------------------
-		-- Universal group chat color (no reload required)
-		----------------------------------------------------------------------
-
-		do
-
-			-- Function to set chat colors
-			local function SetCol()
-				if RGXQoLLC["UnivGroupColor"] == "On" then
-					ChangeChatColor("RAID", 0.67, 0.67, 1)
-					ChangeChatColor("RAID_LEADER", 0.46, 0.78, 1)
-				else
-					ChangeChatColor("RAID", 1, 0.50, 0)
-					ChangeChatColor("RAID_LEADER", 1, 0.28, 0.04)
-				end
-			end
-
-			-- Set chat colors when option is clicked and on startup (if enabled)
-			RGXQoLCB["UnivGroupColor"]:HookScript("OnClick", SetCol)
-			if RGXQoLLC["UnivGroupColor"] == "On" then	SetCol() end
-
-		end
 
 		----------------------------------------------------------------------
 		-- Minimap button (no reload required)
@@ -2731,390 +2302,9 @@
 
 
 		----------------------------------------------------------------------
-		--	Use arrow keys in chat
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["UseArrowKeysInChat"] == "On" and not RGXQoLLockList["UseArrowKeysInChat"] then
-			-- Enable arrow keys for normal and existing chat frames
-			for i = 1, 50 do
-				if _G["ChatFrame" .. i] then
-					_G["ChatFrame" .. i .. "EditBox"]:SetAltArrowKeyMode(false)
-				end
-			end
-			-- Enable arrow keys for temporary chat frames
-			SafeHookSecure("FCF_OpenTemporaryWindow", function()
-				local cf = FCF_GetCurrentChatFrame():GetName() or nil
-				if cf then
-					_G[cf .. "EditBox"]:SetAltArrowKeyMode(false)
-				end
-			end)
-		end
-
-		----------------------------------------------------------------------
 		-- L43: Manage widget
 		----------------------------------------------------------------------
 
-
-		----------------------------------------------------------------------
-		-- Hide chat buttons
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["NoChatButtons"] == "On" and not RGXQoLLockList["NoChatButtons"] then
-
-			-- Create hidden frame to store unwanted frames (more efficient than creating functions)
-			local tframe = CreateFrame("FRAME")
-			tframe:Hide()
-
-			-- Function to enable mouse scrolling with CTRL and SHIFT key modifiers
-			local function AddMouseScroll(chtfrm)
-				if _G[chtfrm] then
-					_G[chtfrm]:SetScript("OnMouseWheel", function(self, direction)
-						if direction == 1 then
-							if IsControlKeyDown() then
-								self:ScrollToTop()
-							elseif IsShiftKeyDown() then
-								self:PageUp()
-							else
-								self:ScrollUp()
-							end
-						else
-							if IsControlKeyDown() then
-								self:ScrollToBottom()
-							elseif IsShiftKeyDown() then
-								self:PageDown()
-							else
-								self:ScrollDown()
-							end
-						end
-					end)
-					_G[chtfrm]:EnableMouseWheel(true)
-				end
-			end
-
-			-- Function to hide chat buttons
-			local function HideButtons(chtfrm)
-				_G[chtfrm .. "ButtonFrameUpButton"]:SetParent(tframe)
-				_G[chtfrm .. "ButtonFrameDownButton"]:SetParent(tframe)
-				_G[chtfrm .. "ButtonFrameUpButton"]:Hide()
-				_G[chtfrm .. "ButtonFrameDownButton"]:Hide()
-				_G[chtfrm .. "ButtonFrame"]:SetSize(0.1, 0.1)
-				_G[chtfrm .. "MinimizeButton"]:SetParent(tframe)
-			end
-
-			FriendsMicroButton:Hide()
-
-			-- Function to highlight chat tabs and click to scroll to bottom
-			local function HighlightTabs(chtfrm)
-
-				-- Hide bottom button
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetSize(0.1, 0.1) -- Positions it away
-
-				-- Remove click from the bottom button
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetScript("OnClick", nil)
-
-				-- Remove textures
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetNormalTexture("")
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetHighlightTexture("")
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetPushedTexture("")
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetDisabledTexture("")
-
-				-- Resize bottom button according to tab size
-				_G[chtfrm .. "Tab"]:SetScript("OnSizeChanged", function()
-					for j = 1, 50 do
-						-- Resize bottom button to tab width
-						if _G["ChatFrame" .. j .. "ButtonFrameBottomButton"] then
-							_G["ChatFrame" .. j .. "ButtonFrameBottomButton"]:SetWidth(_G["ChatFrame" .. j .. "Tab"]:GetWidth()-10)
-						end
-					end
-					-- If combat log is hidden, resize it's bottom button
-					if RGXQoLLC["NoCombatLogTab"] == "On" and not RGXQoLLockList["NoCombatLogTab"] then
-						if _G["ChatFrame2ButtonFrameBottomButton"] then
-							-- Resize combat log bottom button
-							_G["ChatFrame2ButtonFrameBottomButton"]:SetWidth(0.1);
-						end
-					end
-				end)
-
-				-- Remove click from the bottom button
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetScript("OnClick", nil)
-
-				-- Remove textures
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetNormalTexture("")
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetHighlightTexture("")
-				_G[chtfrm .. "ButtonFrameBottomButton"]:SetPushedTexture("")
-
-				-- Always scroll to bottom when clicking a tab
-				_G[chtfrm .. "Tab"]:HookScript("OnClick", function(self,arg1)
-					if arg1 == "LeftButton" then
-						_G[chtfrm]:ScrollToBottom()
-					end
-				end)
-
-				-- Create new bottom button under tab
-				_G[chtfrm .. "Tab"].newglow = _G[chtfrm .. "Tab"]:CreateTexture(nil, "BACKGROUND")
-				_G[chtfrm .. "Tab"].newglow:ClearAllPoints()
-				_G[chtfrm .. "Tab"].newglow:SetAllPoints()
-				_G[chtfrm .. "Tab"].newglow:SetTexture("Interface\\ChatFrame\\ChatFrameTab-NewMessage")
-				_G[chtfrm .. "Tab"].newglow:SetVertexColor(0.6, 0.6, 1, 0.7)
-				_G[chtfrm .. "Tab"].newglow:SetBlendMode("ADD")
-				_G[chtfrm .. "Tab"].newglow:Hide()
-
-				-- Show new bottom button when old one glows
-				_G[chtfrm .. "ButtonFrameBottomButtonFlash"]:HookScript("OnShow", function(self,arg1)
-					_G[chtfrm .. "Tab"].newglow:Show()
-				end)
-
-				_G[chtfrm .. "ButtonFrameBottomButtonFlash"]:HookScript("OnHide", function(self,arg1)
-					_G[chtfrm .. "Tab"].newglow:Hide()
-				end)
-
-			end
-
-			-- Hide chat menu buttons
-			ChatFrameMenuButton:SetParent(tframe)
-			ChatFrameChannelButton:SetParent(tframe)
-
-			-- Set options for normal and existing chat frames
-			for i = 1, 50 do
-				if _G["ChatFrame" .. i] then
-					AddMouseScroll("ChatFrame" .. i)
-					HideButtons("ChatFrame" .. i)
-					HighlightTabs("ChatFrame" .. i)
-				end
-			end
-
-			-- Do the functions above for temporary chat frames
-			SafeHookSecure("FCF_OpenTemporaryWindow", function(chatType)
-				local cf = FCF_GetCurrentChatFrame():GetName() or nil
-				if cf then
-
-					-- Set options for temporary frame
-					AddMouseScroll(cf)
-					HideButtons(cf)
-					HighlightTabs(cf)
-
-					-- Create new bottom button under tab
-					_G[cf .. "Tab"].newglow = _G[cf .. "Tab"]:CreateTexture(nil, "BACKGROUND")
-					_G[cf .. "Tab"].newglow:ClearAllPoints()
-					_G[cf .. "Tab"].newglow:SetAllPoints()
-					_G[cf .. "Tab"].newglow:SetTexture("Interface\\ChatFrame\\ChatFrameTab-NewMessage")
-					_G[cf .. "Tab"].newglow:SetVertexColor(0.6, 0.6, 1, 1)
-					_G[cf .. "Tab"].newglow:SetBlendMode("ADD")
-					_G[cf .. "Tab"].newglow:Hide()
-
-					-- Show new bottom button when old one glows
-					_G[cf].ScrollToBottomButton.Flash:HookScript("OnShow", function(self,arg1)
-						_G[cf .. "Tab"].newglow:Show()
-					end)
-
-					_G[cf].ScrollToBottomButton.Flash:HookScript("OnHide", function(self,arg1)
-						_G[cf .. "Tab"].newglow:Hide()
-					end)
-
-				end
-			end)
-
-		end
-
-		----------------------------------------------------------------------
-		-- Recent chat window
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["RecentChatWindow"] == "On" and not RGXQoLLockList["RecentChatWindow"] then
-
-			-- Create recent chat frame
-			local editFrame = CreateFrame("ScrollFrame", nil, UIParent, "RGXQoLRecentChatScrollFrameTemplate")
-
-			-- Set frame parameters
-			editFrame:ClearAllPoints()
-			editFrame:SetPoint("BOTTOM", 0, 130)
-			editFrame:SetSize(600, RGXQoLLC["RecentChatSize"])
-			editFrame:SetFrameStrata("MEDIUM")
-			editFrame:SetToplevel(true)
-			editFrame:Hide()
-
-			-- Add background color
-			editFrame.t = editFrame:CreateTexture(nil, "BACKGROUND")
-			editFrame.t:SetAllPoints()
-			editFrame.t:SetColorTexture(0.00, 0.00, 0.0, 0.6)
-
-			-- Create character count
-			editFrame.CharCount = editFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-			editFrame.CharCount:Hide()
-
-			-- Create title bar
-			local titleFrame = CreateFrame("Frame", nil, editFrame)
-			titleFrame:ClearAllPoints()
-			titleFrame:SetPoint("TOP", 0, 24)
-			titleFrame:SetSize(600, 24)
-			titleFrame:SetFrameStrata("MEDIUM")
-			titleFrame:SetToplevel(true)
-			titleFrame:SetHitRectInsets(-6, -6, -6, -6)
-			titleFrame.t = titleFrame:CreateTexture(nil, "BACKGROUND")
-			titleFrame.t:SetAllPoints()
-			titleFrame.t:SetColorTexture(0.00, 0.00, 0.0, 0.8)
-
-			-- Add message count
-			titleFrame.m = titleFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-			titleFrame.m:SetPoint("LEFT", 4, 0)
-			titleFrame.m:SetText(L["Messages"] .. ": 0")
-			titleFrame.m:SetFont(titleFrame.m:GetFont(), 16, nil)
-
-			-- Add right-click to close message
-			titleFrame.x = titleFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-			titleFrame.x:SetPoint("RIGHT", -4, 0)
-			titleFrame.x:SetText(L["Drag to size"] .. " | " .. L["Right-click to close"])
-			titleFrame.x:SetFont(titleFrame.x:GetFont(), 16, nil)
-			titleFrame.x:SetWidth(600 - titleFrame.m:GetStringWidth() - 30)
-			titleFrame.x:SetWordWrap(false)
-			titleFrame.x:SetJustifyH("RIGHT")
-
-			-- Drag to resize
-			editFrame:SetResizable(true)
-			editFrame:SetResizeBounds(600, 170, 600, 560)
-
-			titleFrame:HookScript("OnMouseDown", function(self, btn)
-				if btn == "LeftButton" then
-					editFrame:StartSizing("TOP")
-				end
-			end)
-			titleFrame:HookScript("OnMouseUp", function(self, btn)
-				if btn == "LeftButton" then
-					editFrame:StopMovingOrSizing()
-					RGXQoLLC["RecentChatSize"] = editFrame:GetHeight()
-				elseif btn == "MiddleButton" then
-					-- Reset frame size
-					RGXQoLLC["RecentChatSize"] = 170
-					editFrame:SetSize(600, RGXQoLLC["RecentChatSize"])
-					editFrame:ClearAllPoints()
-					editFrame:SetPoint("BOTTOM", 0, 130)
-				end
-			end)
-
-			-- Create editbox
-			local editBox = editFrame.EditBox
-			editBox:SetAltArrowKeyMode(false)
-			editBox:SetTextInsets(4, 4, 4, 4)
-			editBox:SetWidth(editFrame:GetWidth() - 30)
-			editBox:SetSecurityDisablePaste()
-			editBox:SetMaxLetters(0)
-
-			editFrame:SetScrollChild(editBox)
-
-			-- Manage focus
-			editBox:HookScript("OnEditFocusLost", function()
-				if MouseIsOver(titleFrame) and IsMouseButtonDown("LeftButton") then
-					editBox:SetFocus()
-				end
-			end)
-
-			-- Close frame with right-click of editframe or editbox
-			local function CloseRecentChatWindow()
-				editBox:SetText("")
-				editBox:ClearFocus()
-				editFrame:Hide()
-			end
-
-			editFrame:SetScript("OnMouseDown", function(self, btn)
-				if btn == "RightButton" then CloseRecentChatWindow() end
-			end)
-
-			editBox:SetScript("OnMouseDown", function(self, btn)
-				if btn == "RightButton" then CloseRecentChatWindow() end
-			end)
-
-			titleFrame:HookScript("OnMouseDown", function(self, btn)
-				if btn == "RightButton" then CloseRecentChatWindow() end
-			end)
-
-			-- Disable text changes while still allowing editing controls to work
-			editBox:EnableKeyboard(false)
-			editBox:SetScript("OnKeyDown", function() end)
-
-			-- Populate recent chat frame with chat messages
-			local function ShowChatbox(chtfrm)
-				editBox:SetText("")
-				local NumMsg = chtfrm:GetNumMessages()
-				local StartMsg = 1
-				if NumMsg > 256 then StartMsg = NumMsg - 255 end
-				local totalMsgCount = 0
-				for iMsg = StartMsg, NumMsg do
-					local chatMessage, r, g, b, chatTypeID = chtfrm:GetMessageInfo(iMsg)
-					if chatMessage then
-
-						-- Handle Battle.net
-						if string.match(chatMessage, "k:(%d+):(%d+):BN_WHISPER:")
-						or string.match(chatMessage, "k:(%d+):(%d+):BN_INLINE_TOAST_ALERT:")
-						or string.match(chatMessage, "k:(%d+):(%d+):BN_INLINE_TOAST_BROADCAST:")
-						then
-							local ctype
-							if string.match(chatMessage, "k:(%d+):(%d+):BN_WHISPER:") then
-								ctype = "BN_WHISPER"
-							elseif string.match(chatMessage, "k:(%d+):(%d+):BN_INLINE_TOAST_ALERT:") then
-								ctype = "BN_INLINE_TOAST_ALERT"
-							elseif string.match(chatMessage, "k:(%d+):(%d+):BN_INLINE_TOAST_BROADCAST:") then
-								ctype = "BN_INLINE_TOAST_BROADCAST"
-							end
-							local id = tonumber(string.match(chatMessage, "k:(%d+):%d+:" .. ctype .. ":"))
-							local totalBNFriends = BNGetNumFriends()
-							for friendIndex = 1, totalBNFriends do
-								local bnetAccountID, void, battleTag = BNGetFriendInfo(friendIndex)
-								if id == bnetAccountID then
-									battleTag = strsplit("#", battleTag)
-									chatMessage = chatMessage:gsub("(|HBNplayer%S-|k)(%d-)(:%S-" .. ctype .. "%S-|h)%[(%S-)%](|?h?)(:?)", "[" .. battleTag .. "]:")
-								end
-							end
-						end
-
-						-- Handle colors
-						if r and g and b then
-							local colorCode = RGBToColorCode(r, g, b)
-							-- chatMessage = string.gsub(chatMessage, "|r", "|r" .. colorCode) -- Needed for Classic only
-							chatMessage = colorCode .. chatMessage .. "|r"
-						end
-
-						chatMessage = gsub(chatMessage, "|T.-|t", "") -- Remove textures
-						chatMessage = gsub(chatMessage, "|A.-|a", "") -- Remove atlases
-						editBox:Insert(chatMessage .. "|r|n")
-
-					end
-					totalMsgCount = totalMsgCount + 1
-				end
-				titleFrame.m:SetText(L["Messages"] .. ": " .. totalMsgCount)
-				editFrame:SetVerticalScroll(0)
-				editFrame.ScrollBar:ScrollToEnd()
-				editFrame:Show()
-				editBox:ClearFocus()
-			end
-
-			-- Hook normal chat frame tab clicks
-			for i = 1, 50 do
-				if _G["ChatFrame" .. i] then
-					_G["ChatFrame" .. i .. "Tab"]:HookScript("OnClick", function()
-						if IsControlKeyDown() then
-							editBox:SetFont(_G["ChatFrame" .. i]:GetFont())
-							editFrame:SetPanExtent(select(2, _G["ChatFrame" .. i]:GetFont()))
-							ShowChatbox(_G["ChatFrame" .. i])
-						end
-					end)
-				end
-			end
-
-			-- Hook temporary chat frame tab clicks
-			SafeHookSecure("FCF_OpenTemporaryWindow", function()
-				local cf = FCF_GetCurrentChatFrame():GetName() or nil
-				if cf then
-					_G[cf .. "Tab"]:HookScript("OnClick", function()
-						if IsControlKeyDown() then
-							editBox:SetFont(_G[cf]:GetFont())
-							editFrame:SetPanExtent(select(2, _G[cf]:GetFont()))
-							ShowChatbox(_G[cf])
-						end
-					end)
-				end
-			end)
-
-		end
 
 		----------------------------------------------------------------------
 		-- Show cooldowns
@@ -3130,37 +2320,6 @@
 		-- Enhance tooltip
 		----------------------------------------------------------------------
 
-
-		----------------------------------------------------------------------
-		--	Move chat editbox to top
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["MoveChatEditBoxToTop"] == "On" then
-
-			-- Set options for normal chat frames
-			for i = 1, 50 do
-				if _G["ChatFrame" .. i] then
-					-- Position the editbox
-					_G["ChatFrame" .. i .. "EditBox"]:ClearAllPoints()
-					_G["ChatFrame" .. i .. "EditBox"]:SetPoint("TOP", _G["ChatFrame" .. i], "TOP", 0, 0)
-					_G["ChatFrame" .. i .. "EditBox"]:SetPoint("LEFT", _G["ChatFrame" .. i], "LEFT", 0, 0)
-					_G["ChatFrame" .. i .. "EditBox"]:SetPoint("RIGHT", _G["ChatFrame" .. i], "RIGHT", 0, 0)
-				end
-			end
-
-			-- Do the functions above for other chat frames (pet battles, whispers, etc)
-			SafeHookSecure("FCF_OpenTemporaryWindow", function()
-				local cf = FCF_GetCurrentChatFrame():GetName() or nil
-				if cf then
-					-- Position the editbox
-					_G[cf .. "EditBox"]:ClearAllPoints()
-					_G[cf .. "EditBox"]:SetPoint("TOP", cf, "TOP", 0, 0)
-					_G[cf .. "EditBox"]:SetPoint("LEFT", cf, "LEFT", 0, 0)
-					_G[cf .. "EditBox"]:SetPoint("RIGHT", cf, "RIGHT", 0, 0)
-				end
-			end)
-
-		end
 
 		----------------------------------------------------------------------
 		-- Show borders
@@ -3321,24 +2480,8 @@
 				RGXQoLLC:LoadVarChk("FriendlyGuild", "On")					-- Friendly guild
 
 				-- Chat
-				RGXQoLLC:LoadVarChk("UseEasyChatResizing", "Off")			-- Use easy resizing
-				RGXQoLLC:LoadVarChk("NoCombatLogTab", "Off")				-- Hide the combat log
-				RGXQoLLC:LoadVarChk("NoChatButtons", "Off")				-- Hide chat buttons
-				RGXQoLLC:LoadVarChk("UnclampChat", "Off")					-- Unclamp chat frame
-				RGXQoLLC:LoadVarChk("MoveChatEditBoxToTop", "Off")			-- Move editbox to top
-				RGXQoLLC:LoadVarChk("MoreFontSizes", "Off")				-- More font sizes
 
-				RGXQoLLC:LoadVarChk("NoStickyChat", "Off")					-- Disable sticky chat
-				RGXQoLLC:LoadVarChk("UseArrowKeysInChat", "Off")			-- Use arrow keys in chat
-				RGXQoLLC:LoadVarChk("NoChatFade", "Off")					-- Disable chat fade
-				RGXQoLLC:LoadVarChk("UnivGroupColor", "Off")				-- Universal group color
-				RGXQoLLC:LoadVarChk("ClassColorsInChat", "Off")			-- Use class colors in chat
-				RGXQoLLC:LoadVarChk("RecentChatWindow", "Off")				-- Recent chat window
-				RGXQoLLC:LoadVarNum("RecentChatSize", 170, 170, 600)		-- Recent chat size
-				RGXQoLLC:LoadVarChk("MaxChatHstory", "Off")				-- Increase chat history
-				RGXQoLLC:LoadVarChk("FilterChatMessages", "Off")			-- Filter chat messages
-				RGXQoLLC:LoadVarChk("BlockDrunkenSpam", "Off")				-- Block drunken spam
-				RGXQoLLC:LoadVarChk("RestoreChatMessages", "Off")			-- Restore chat messages
+
 
 				-- Text
 
@@ -3376,7 +2519,7 @@
 				-- Removed pages: clamp a stale start page to a live page
 				do
 					local sp = RGXQoLLC["RGXQoLStartPage"]
-					if sp and (sp < 0 or (sp > 3 and sp ~= 8)) then
+					if sp and (sp < 0 or (sp > 2 and sp ~= 8)) then
 						RGXQoLLC["RGXQoLStartPage"] = 0
 					end
 				end
@@ -3401,48 +2544,20 @@
 						end
 					end
 
-					-- Disable items that conflict with Easy Frames
-					if C_AddOns.IsAddOnLoaded("EasyFrames") then
-					end
+				-- Disable items that conflict with Easy Frames
+				if C_AddOns.IsAddOnLoaded("EasyFrames") then
+				end
 
-					-- Disable items that conflict with Glass
-					if C_AddOns.IsAddOnLoaded("Glass") then
-						local reason = L["Cannot be used with Glass"]
-						Lock("UseEasyChatResizing", reason) -- Use easy resizing
-						Lock("NoCombatLogTab", reason) -- Hide the combat log
-						Lock("NoChatButtons", reason) -- Hide chat buttons
-						Lock("UnclampChat", reason) -- Unclamp chat frame
-						Lock("MoveChatEditBoxToTop", reason) -- Move editbox to top
-						Lock("MoreFontSizes", reason) --  More font sizes
-						Lock("NoChatFade", reason) --  Disable chat fade
-						Lock("ClassColorsInChat", reason) -- Use class colors in chat
-						Lock("RecentChatWindow", reason) -- Recent chat window
-					end
+				-- Disable items that conflict with ElvUI
+				if RGXQoLLC.ElvUI then
+					local E = RGXQoLLC.ElvUI
+					if E and E.private then
 
-					-- Disable items that conflict with ElvUI
-					if RGXQoLLC.ElvUI then
-						local E = RGXQoLLC.ElvUI
-						if E and E.private then
+						-- Chat
 
-							local reason = L["Cannot be used with ElvUI"]
-
-							-- Chat
-							if E.private.chat.enable then
-								Lock("UseEasyChatResizing", reason, "Chat") -- Use easy resizing
-								Lock("NoCombatLogTab", reason, "Chat") -- Hide the combat log
-								Lock("NoChatButtons", reason, "Chat") -- Hide chat buttons
-								Lock("UnclampChat", reason, "Chat") -- Unclamp chat frame
-								Lock("MoreFontSizes", reason, "Chat") --  More font sizes
-								Lock("NoStickyChat", reason, "Chat") -- Disable sticky chat
-								Lock("UseArrowKeysInChat", reason, "Chat") -- Use arrow keys in chat
-								Lock("NoChatFade", reason, "Chat") -- Disable chat fade
-								Lock("MaxChatHstory", reason, "Chat") -- Increase chat history
-								Lock("RestoreChatMessages", reason, "Chat") -- Restore chat messages
-							end
-
-							-- Minimap
-							if E.private.general.minimap.enable then
-							end
+						-- Minimap
+						if E.private.general.minimap.enable then
+						end
 
 							-- UnitFrames
 							if E.private.unitframe.enable then
@@ -3530,25 +2645,8 @@
 			RGXQoLDB["FriendlyGuild"]			= RGXQoLLC["FriendlyGuild"]
 
 			-- Chat
-			RGXQoLDB["UseEasyChatResizing"]	= RGXQoLLC["UseEasyChatResizing"]
-			RGXQoLDB["NoCombatLogTab"]			= RGXQoLLC["NoCombatLogTab"]
-			RGXQoLDB["NoChatButtons"]			= RGXQoLLC["NoChatButtons"]
-			RGXQoLDB["UnclampChat"]			= RGXQoLLC["UnclampChat"]
-			RGXQoLDB["MoveChatEditBoxToTop"]	= RGXQoLLC["MoveChatEditBoxToTop"]
-			RGXQoLDB["MoreFontSizes"]			= RGXQoLLC["MoreFontSizes"]
 
-			RGXQoLDB["NoStickyChat"] 			= RGXQoLLC["NoStickyChat"]
-			RGXQoLDB["UseArrowKeysInChat"]		= RGXQoLLC["UseArrowKeysInChat"]
-			RGXQoLDB["NoChatFade"]				= RGXQoLLC["NoChatFade"]
-			RGXQoLDB["UnivGroupColor"]			= RGXQoLLC["UnivGroupColor"]
-			RGXQoLDB["ClassColorsInChat"]		= RGXQoLLC["ClassColorsInChat"]
-			RGXQoLDB["RecentChatWindow"]		= RGXQoLLC["RecentChatWindow"]
-			RGXQoLDB["RecentChatSize"]			= RGXQoLLC["RecentChatSize"]
-			RGXQoLDB["MaxChatHstory"]			= RGXQoLLC["MaxChatHstory"]
-			RGXQoLDB["FilterChatMessages"]		= RGXQoLLC["FilterChatMessages"]
-			RGXQoLDB["BlockDrunkenSpam"]		= RGXQoLLC["BlockDrunkenSpam"]
-			RGXQoLDB["BlockDuelSpam"]			= RGXQoLLC["BlockDuelSpam"]
-			RGXQoLDB["RestoreChatMessages"]	= RGXQoLLC["RestoreChatMessages"]
+
 
 			-- Text
 
@@ -3613,31 +2711,11 @@
 		-- Restore default values for options that require reloads
 		----------------------------------------------------------------------
 
-		-- Use class colors in chat
-		if RGXQoLDB["ClassColorsInChat"] == "On" and not RGXQoLLockList["ClassColorsInChat"] then
-			if wipe or (not wipe and RGXQoLLC["ClassColorsInChat"] == "Off") then
-				SetCVar("chatClassColorOverride", "1")
-				for void, v in ipairs({"SAY", "EMOTE", "YELL", "GUILD", "OFFICER", "WHISPER", "PARTY", "PARTY_LEADER", "RAID", "RAID_LEADER", "RAID_WARNING", "INSTANCE_CHAT", "INSTANCE_CHAT_LEADER", "VOICE_TEXT"}) do
-					SetChatColorNameByClass(v, false)
-				end
-				for i = 1, 50 do
-					SetChatColorNameByClass("CHANNEL" .. i, false)
-				end
-			end
-		end
-
 		-- Enhance minimap restore round minimap if wipe or enhance minimap is toggled off
 
 		-- Silence rested emotes
 
 		-- Show free bag slos
-
-		-- More font sizes
-		if RGXQoLDB["MoreFontSizes"] == "On" and not RGXQoLLockList["MoreFontSizes"] then
-			if wipe or (not wipe and RGXQoLLC["MoreFontSizes"] == "Off") then
-				RunScript('for i = 1, 50 do if _G["ChatFrame" .. i] then local void, fontSize = FCF_GetChatWindowInfo(i); if fontSize and fontSize ~= 12 and fontSize ~= 14 and fontSize ~= 16 and fontSize ~= 18 then FCF_SetChatWindowFontSize(self, _G["ChatFrame" .. i], CHAT_FRAME_DEFAULT_FONT_SIZE) end end end')
-			end
-		end
 
 		----------------------------------------------------------------------
 		-- Do other stuff during logout
@@ -5440,7 +4518,7 @@
 			elseif str == "svars" then
 				-- Print saved variables
 				RGXQoLLC:Print(L["Saved Variables"] .. "|n")
-				RGXQoLLC:Print(L["The following list shows option label, setting name and currently saved value.  Enable |cffffffffIncrease chat history|r (chat) and |cffffffffRecent chat window|r (chat) to make it easier."] .. "|n")
+				RGXQoLLC:Print(L["The following list shows option label, setting name and currently saved value."] .. "|n")
 				RGXQoLLC:Print(L["Modifying saved variables must start with |cffffffff/qol nosave|r to prevent your changes from being reverted during reload or logout."] .. "|n")
 				RGXQoLLC:Print(L['Syntax is |cffffffff/run RGXQoLDB[' .. '"' .. 'setting name' .. '"' .. '] = ' .. '"' .. 'value' .. '" |r(case sensitive).'])
 				RGXQoLLC:Print(L["When done, |cffffffff/reload|r to save your changes."] .. "|n")
@@ -5520,24 +4598,8 @@
 				RGXQoLDB["FriendlyGuild"] = "On"				-- Friendly guild
 
 				-- Chat
-				RGXQoLDB["UseEasyChatResizing"] = "On"			-- Use easy resizing
-				RGXQoLDB["NoCombatLogTab"] = "On"				-- Hide the combat log
-				RGXQoLDB["NoChatButtons"] = "On"				-- Hide chat buttons
-				RGXQoLDB["UnclampChat"] = "On"					-- Unclamp chat frame
-				RGXQoLDB["MoveChatEditBoxToTop"] = "On"		-- Move editbox to top
-				RGXQoLDB["MoreFontSizes"] = "On"				-- More font sizes
 
-				RGXQoLDB["NoStickyChat"] = "On"				-- Disable sticky chat
-				RGXQoLDB["UseArrowKeysInChat"] = "On"			-- Use arrow keys in chat
-				RGXQoLDB["NoChatFade"] = "On"					-- Disable chat fade
-				RGXQoLDB["UnivGroupColor"] = "On"				-- Universal group color
-				RGXQoLDB["ClassColorsInChat"] = "On"			-- Use class colors in chat
-				RGXQoLDB["RecentChatWindow"] = "On"			-- Recent chat window
-				RGXQoLDB["RecentChatSize"] = 170				-- Recent chat size
-				RGXQoLDB["MaxChatHstory"] = "Off"				-- Increase chat history
-				RGXQoLDB["FilterChatMessages"] = "On"			-- Filter chat messages
-				RGXQoLDB["BlockDrunkenSpam"] = "On"			-- Block drunken spam
-				RGXQoLDB["RestoreChatMessages"] = "On"			-- Restore chat messages
+
 
 				-- Text
 
@@ -5743,7 +4805,6 @@
 	RGXQoLLC["Page0"] = RGXQoLLC:MakePage("Page0", "Home"			, "RGXQoLNav0", "Home"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -72, 112, 20)
 	RGXQoLLC["Page1"] = RGXQoLLC:MakePage("Page1", "Automation"	, "RGXQoLNav1", "Automation"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -112, 112, 20)
 	RGXQoLLC["Page2"] = RGXQoLLC:MakePage("Page2", "Social"		, "RGXQoLNav2", "Social"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -132, 112, 20)
-	RGXQoLLC["Page3"] = RGXQoLLC:MakePage("Page3", "Chat"			, "RGXQoLNav3", "Chat"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -152, 112, 20)
 	RGXQoLLC["Page8"] = RGXQoLLC:MakePage("Page8", "Settings"		, "RGXQoLNav8", "Settings"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -272, 112, 20)
 
 	-- Page navigation mechanism
@@ -5821,37 +4882,10 @@
 -- 	LC3: Chat
 ----------------------------------------------------------------------
 
-	pg = "Page3";
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Chat Frame"				, 	146, -72);
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UseEasyChatResizing"		,	"Use easy resizing"				,	146, -92,	true,	"If checked, dragging the General chat tab while the chat frame is locked will expand the chat frame upwards.|n|nIf the chat frame is unlocked, dragging the General chat tab will move the chat frame.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoCombatLogTab" 			, 	"Hide the combat log"			, 	146, -112, 	true,	"If checked, the combat log will be hidden.|n|nThe combat log must be docked in order for this option to work.|n|nIf the combat log is undocked, you can dock it by dragging the tab (and reloading your UI) or by resetting the chat windows (from the chat menu).")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoChatButtons"				,	"Hide chat buttons"				,	146, -132,	true,	"If checked, chat frame buttons will be hidden.|n|nClicking chat tabs will automatically show the latest messages.|n|nUse the mouse wheel to scroll through the chat history.  Hold down SHIFT for page jump or CTRL to jump to the top or bottom of the chat history.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UnclampChat"				,	"Unclamp chat frame"			,	146, -152,	true,	"If checked, you will be able to drag the chat frame to the edge of the screen.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MoveChatEditBoxToTop" 		, 	"Move editbox to top"			,	146, -172, 	true,	"If checked, the editbox will be moved to the top of the chat frame.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MoreFontSizes"		 		, 	"More font sizes"				,	146, -192, 	true,	"If checked, additional font sizes will be available in the chat frame font size menu.")
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Mechanics"					, 	340, -72);
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoStickyChat"				, 	"Disable sticky chat"			,	340, -92,	true,	"If checked, sticky chat will be disabled.|n|nNote that this does not apply to temporary chat windows.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UseArrowKeysInChat"		, 	"Use arrow keys in chat"		, 	340, -112, 	true,	"If checked, you can press the arrow keys to move the insertion point left and right in the chat frame.|n|nIf unchecked, the arrow keys will use the default keybind setting.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "NoChatFade"				, 	"Disable chat fade"				, 	340, -132, 	true,	"If checked, chat text will not fade out after a time period.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UnivGroupColor"			,	"Universal group color"			,	340, -152,	false,	"If checked, raid chat will be colored blue (to match the default party chat color).")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ClassColorsInChat"			,	"Use class colors in chat"		,	340, -172,	true,	"If checked, class colors will be used in the chat frame.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "RecentChatWindow"			,	"Recent chat window"			, 	340, -192, 	true,	"If checked, you can hold down the control key and click a chat tab to view recent chat in a copy-friendly window.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "MaxChatHstory"				,	"Increase chat history"			, 	340, -212, 	true,	"If checked, your chat history will increase to 4096 lines.  If unchecked, the default will be used (128 lines).|n|nEnabling this option may prevent some chat text from showing during login.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "FilterChatMessages"		, 	"Filter chat messages"			,	340, -232, 	true,	"If checked, you can block drunken spam and duel spam.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "RestoreChatMessages"		, 	"Restore chat messages"			,	340, -252, 	true,	"If checked, recent chat will be restored when you reload your interface.")
-
-	RGXQoLLC:CfgBtn("FilterChatMessagesBtn", RGXQoLCB["FilterChatMessages"])
 
 ----------------------------------------------------------------------
 -- 	LC4: Text
 ----------------------------------------------------------------------
-
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Visibility"				, 	146, -72);
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Text Size"					, 	340, -72);
 
 
 ----------------------------------------------------------------------
@@ -5859,31 +4893,14 @@
 ----------------------------------------------------------------------
 
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Enhancements"				, 	146, -72);
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Extras"					, 	146, -252);
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Extras"					, 	340, -72);
-
-
 ----------------------------------------------------------------------
 -- 	LC6: Frames
 ----------------------------------------------------------------------
 
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Features"					, 	146, -72);
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Visibility"				, 	340, -72);
-
-
 ----------------------------------------------------------------------
 -- 	LC7: System
 ----------------------------------------------------------------------
-
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Graphics and Sound"		, 	146, -72);
-
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Game Options"				, 	340, -72);
 
 
 ----------------------------------------------------------------------
