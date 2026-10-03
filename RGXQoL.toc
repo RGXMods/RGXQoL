@@ -7,6 +7,7 @@
 ## Author: RealmGX, derived from Leatrix Plus by Leatrix
 ## SavedVariables: RGXQoLDB
 ## LoadSavedVariablesFirst: true
+## X-RGX-Framework-MinVersion: 2.5.0
 ## RequiredDeps: RGX-Framework
 
 ## IconTexture: Interface\AddOns\RGX-Framework\media\logo.tga
@@ -15,7 +16,5 @@
 ## X-License: See Changelog.txt for Leatrix Plus attribution
 ## X-Discord: discord.gg/N7kdKAHVVF
 
-RGXQoL_Library.lua
 RGXQoL_Locale.lua
-RGXQoL.xml
 RGXQoL.lua

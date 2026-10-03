@@ -13,7 +13,9 @@
 	_G.RGXQoLDB = _G.RGXQoLDB or {}
 
 	-- Create locals
-	local RGXQoLLC, RGXQoLCB, RGXQoLDropList, RGXQoLConfigList, RGXQoLLockList = {}, {}, {}, {}, {}
+	-- Create locals
+	local RGXQoLLC = {}
+	RGXQoLLC.FeatureSetup = {}          -- option -> setup hook, wired from feature blocks
 
 	-- WoW Forever beta safety: guarded hook helper for functions this
 	-- client may lack. Scopes to RGXQoL only -- does NOT replace the
@@ -82,8 +84,6 @@
 
 	-- Initialise variables
 	RGXQoLLC["ShowErrorsFlag"] = 1
-	RGXQoLLC["NumberOfPages"] = 8
-	RGXQoLLC["MainPanelHeight"] = 370
 
 	-- Class colors
 	do
@@ -112,112 +112,6 @@
 	function RGXQoLLC:Print(text)
 		DEFAULT_CHAT_FRAME:AddMessage(L[text], 1.0, 0.85, 0.0)
 	end
-
-	-- Lock and unlock an item
-	function RGXQoLLC:LockItem(item, lock)
-		if not item then return end
-		if lock then
-			item:Disable()
-			item:SetAlpha(0.3)
-		else
-			item:Enable()
-			item:SetAlpha(1.0)
-		end
-	end
-
-	-- Hide configuration panels
-	function RGXQoLLC:HideConfigPanels()
-		for k, v in pairs(RGXQoLConfigList) do
-			v:Hide()
-		end
-	end
-
-	-- Decline a shared quest if needed
-
-	-- Show a single line prefilled editbox with copy functionality
-	function RGXQoLLC:ShowSystemEditBox(word, focuschat)
-		if not RGXQoLLC.FactoryEditBox then
-			-- Create frame for first time
-			local eFrame = CreateFrame("FRAME", nil, UIParent)
-			RGXQoLLC.FactoryEditBox = eFrame
-			eFrame:SetSize(700, 110)
-			eFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 150)
-			eFrame:SetFrameStrata("FULLSCREEN_DIALOG")
-			eFrame:SetFrameLevel(5000)
-			eFrame:SetScript("OnMouseDown", function(self, btn)
-				if btn == "RightButton" then
-					eFrame:Hide()
-				end
-			end)
-			-- Add background color
-			eFrame.t = eFrame:CreateTexture(nil, "BACKGROUND")
-			eFrame.t:SetAllPoints()
-			eFrame.t:SetColorTexture(0.05, 0.05, 0.05, 0.9)
-			-- Add copy title
-			eFrame.f = eFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
-			eFrame.f:SetPoint("TOPLEFT", x, y)
-			eFrame.f:SetPoint("TOPLEFT", eFrame, "TOPLEFT", 12, -52)
-			eFrame.f:SetWidth(676)
-			eFrame.f:SetJustifyH("LEFT")
-			eFrame.f:SetWordWrap(false)
-			-- Add copy label
-			eFrame.c = eFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
-			eFrame.c:SetPoint("TOPLEFT", x, y)
-			eFrame.c:SetText(L["Press CTRL/C to copy"])
-			eFrame.c:SetPoint("TOPLEFT", eFrame, "TOPLEFT", 12, -82)
-			-- Add cancel label
-			eFrame.x = eFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
-			eFrame.x:SetPoint("TOPRIGHT", x, y)
-			eFrame.x:SetText(L["Right-click to close"])
-			eFrame.x:SetPoint("TOPRIGHT", eFrame, "TOPRIGHT", -12, -82)
-			-- Create editbox
-			eFrame.b = CreateFrame("EditBox", nil, eFrame, "InputBoxTemplate")
-			eFrame.b:ClearAllPoints()
-			eFrame.b:SetPoint("TOPLEFT", eFrame, "TOPLEFT", 16, -12)
-			eFrame.b:SetSize(672, 24)
-			eFrame.b:SetFontObject("GameFontNormalLarge")
-			eFrame.b:SetTextColor(1.0, 1.0, 1.0, 1)
-			eFrame.b:SetBlinkSpeed(0)
-			eFrame.b:SetHitRectInsets(99, 99, 99, 99)
-			eFrame.b:SetAutoFocus(true)
-			eFrame.b:SetAltArrowKeyMode(true)
-			-- Editbox texture
-			eFrame.t = CreateFrame("FRAME", nil, eFrame.b, "BackdropTemplate")
-			eFrame.t:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = false, tileSize = 16, edgeSize = 16, insets = { left = 5, right = 5, top = 5, bottom = 5 }})
-			eFrame.t:SetPoint("LEFT", -6, 0)
-			eFrame.t:SetWidth(eFrame.b:GetWidth() + 6)
-			eFrame.t:SetHeight(eFrame.b:GetHeight())
-			eFrame.t:SetBackdropColor(1.0, 1.0, 1.0, 0.3)
-			-- Handler
-			eFrame.b:SetScript("OnKeyDown", function(void, key)
-				if key == "C" and (IsControlKeyDown() or IsMetaKeyDown()) then
-					C_Timer.After(0.1, function()
-						eFrame:Hide()
-						ActionStatus_DisplayMessage(L["Copied to clipboard."], true)
-						if RGXQoLLC.FactoryEditBoxFocusChat then
-							local eBox = ChatEdit_ChooseBoxForSend()
-							ChatEdit_ActivateChat(eBox)
-						end
-					end)
-				end
-			end)
-			-- Prevent changes
-			eFrame.b:SetScript("OnEscapePressed", function() eFrame:Hide() end)
-			eFrame.b:SetScript("OnEnterPressed", eFrame.b.HighlightText)
-			eFrame.b:SetScript("OnMouseDown", eFrame.b.ClearFocus)
-			eFrame.b:SetScript("OnMouseUp", eFrame.b.HighlightText)
-			eFrame.b:SetFocus(true)
-			eFrame.b:HighlightText()
-			eFrame:Show()
-		end
-		if focuschat then RGXQoLLC.FactoryEditBoxFocusChat = true else RGXQoLLC.FactoryEditBoxFocusChat = nil end
-		RGXQoLLC.FactoryEditBox:Show()
-		RGXQoLLC.FactoryEditBox.b:SetText(word)
-		RGXQoLLC.FactoryEditBox.b:HighlightText()
-		RGXQoLLC.FactoryEditBox.b:SetScript("OnChar", function() RGXQoLLC.FactoryEditBox.b:SetFocus(true) RGXQoLLC.FactoryEditBox.b:SetText(word) RGXQoLLC.FactoryEditBox.b:HighlightText() end)
-		RGXQoLLC.FactoryEditBox.b:SetScript("OnKeyUp", function() RGXQoLLC.FactoryEditBox.b:SetFocus(true) RGXQoLLC.FactoryEditBox.b:SetText(word) RGXQoLLC.FactoryEditBox.b:HighlightText() end)
-	end
-
 	-- Load a string variable or set it to default if it's not set to "On" or "Off"
 	function RGXQoLLC:LoadVarChk(var, def)
 		if RGXQoLDB[var] and type(RGXQoLDB[var]) == "string" and RGXQoLDB[var] == "On" or RGXQoLDB[var] == "Off" then
@@ -257,109 +151,6 @@
 			RGXQoLDB[var] = def
 		end
 	end
-
-	-- Show tooltips for checkboxes
-	function RGXQoLLC:TipSee()
-		GameTooltip:SetOwner(self, "ANCHOR_NONE")
-		local parent = self:GetParent()
-		if parent:GetParent() and parent:GetParent():GetObjectType() == "ScrollFrame" then
-			-- Scrolling frame tooltips have different parent
-			parent = self:GetParent():GetParent():GetParent():GetParent()
-		end
-		local pscale = parent:GetEffectiveScale()
-		local gscale = UIParent:GetEffectiveScale()
-		local tscale = GameTooltip:GetEffectiveScale()
-		local gap = ((UIParent:GetRight() * gscale) - (parent:GetRight() * pscale))
-		if gap < (250 * tscale) then
-			GameTooltip:SetPoint("TOPRIGHT", parent, "TOPLEFT", 0, 0)
-		else
-			GameTooltip:SetPoint("TOPLEFT", parent, "TOPRIGHT", 0, 0)
-		end
-		GameTooltip:SetText(self.tiptext, nil, nil, nil, nil, true)
-	end
-
-	-- Show tooltips for dropdown menu tooltips
-	function RGXQoLLC:ShowDropTip()
-		GameTooltip:SetOwner(self, "ANCHOR_NONE")
-		local parent = self:GetParent():GetParent():GetParent()
-		local pscale = parent:GetEffectiveScale()
-		local gscale = UIParent:GetEffectiveScale()
-		local tscale = GameTooltip:GetEffectiveScale()
-		local gap = ((UIParent:GetRight() * gscale) - (parent:GetRight() * pscale))
-		if gap < (250 * tscale) then
-			GameTooltip:SetPoint("TOPRIGHT", parent, "TOPLEFT", 0, 0)
-		else
-			GameTooltip:SetPoint("TOPLEFT", parent, "TOPRIGHT", 0, 0)
-		end
-		GameTooltip:SetText(self.tiptext, nil, nil, nil, nil, true)
-	end
-
-	-- Show tooltips for configuration buttons and dropdown menus
-	function RGXQoLLC:ShowTooltip()
-		GameTooltip:SetOwner(self, "ANCHOR_NONE")
-		local parent = RGXQoLLC["PageF"]
-		local pscale = parent:GetEffectiveScale()
-		local gscale = UIParent:GetEffectiveScale()
-		local tscale = GameTooltip:GetEffectiveScale()
-		local gap = ((UIParent:GetRight() * gscale) - (RGXQoLLC["PageF"]:GetRight() * pscale))
-		if gap < (250 * tscale) then
-			GameTooltip:SetPoint("TOPRIGHT", parent, "TOPLEFT", 0, 0)
-		else
-			GameTooltip:SetPoint("TOPLEFT", parent, "TOPRIGHT", 0, 0)
-		end
-		GameTooltip:SetText(self.tiptext, nil, nil, nil, nil, true)
-	end
-
-	-- Create configuration button
-	function RGXQoLLC:CfgBtn(name, parent)
-		local CfgBtn = CreateFrame("BUTTON", nil, parent)
-		RGXQoLCB[name] = CfgBtn
-		CfgBtn:SetWidth(20)
-		CfgBtn:SetHeight(20)
-		CfgBtn:SetPoint("LEFT", parent.f, "RIGHT", 0, 0)
-
-		CfgBtn.t = CfgBtn:CreateTexture(nil, "BORDER")
-		CfgBtn.t:SetAllPoints()
-		CfgBtn.t:SetTexture("Interface\\WorldMap\\Gear_64.png")
-		CfgBtn.t:SetTexCoord(0, 0.50, 0, 0.50);
-		CfgBtn.t:SetVertexColor(1.0, 0.82, 0, 1.0)
-
-		CfgBtn:SetHighlightTexture("Interface\\WorldMap\\Gear_64.png")
-		CfgBtn:GetHighlightTexture():SetTexCoord(0, 0.50, 0, 0.50);
-
-		CfgBtn.tiptext = L["Click to configure the settings for this option."]
-		CfgBtn:SetScript("OnEnter", RGXQoLLC.ShowTooltip)
-		CfgBtn:SetScript("OnLeave", GameTooltip_Hide)
-	end
-
-	-- Create a help button to the right of a fontstring
-	function RGXQoLLC:CreateHelpButton(frame, panel, parent, tip)
-		RGXQoLLC:CfgBtn(frame, panel)
-		RGXQoLCB[frame]:ClearAllPoints()
-		RGXQoLCB[frame]:SetPoint("LEFT", parent, "RIGHT", -parent:GetWidth() + parent:GetStringWidth(), 0)
-		RGXQoLCB[frame]:SetSize(25, 25)
-		RGXQoLCB[frame].t:SetTexture("Interface\\COMMON\\help-i.blp")
-		RGXQoLCB[frame].t:SetTexCoord(0, 1, 0, 1)
-		RGXQoLCB[frame].t:SetVertexColor(0.9, 0.8, 0.0)
-		RGXQoLCB[frame]:SetHighlightTexture("Interface\\COMMON\\help-i.blp")
-		RGXQoLCB[frame]:GetHighlightTexture():SetTexCoord(0, 1, 0, 1)
-		RGXQoLCB[frame].tiptext = L[tip]
-		RGXQoLCB[frame]:SetScript("OnEnter", RGXQoLLC.TipSee)
-	end
-
-	-- Show a footer
-	function RGXQoLLC:MakeFT(frame, text, left, width)
-		local footer = RGXQoLLC:MakeTx(frame, text, left, 96)
-		footer:SetWidth(width); footer:SetJustifyH("LEFT"); footer:SetWordWrap(true); footer:ClearAllPoints()
-		footer:SetPoint("BOTTOMLEFT", left, 96)
-		return footer
-	end
-
-	-- Capitalise first character in a string
-	function RGXQoLLC:CapFirst(str)
-		return gsub(string.lower(str), "^%l", strupper)
-	end
-
 	-- Toggle Zygor addon
 	function RGXQoLLC:ZygorToggle()
 		if select(2, C_AddOns.GetAddOnInfo("ZygorGuidesViewerClassic")) then
@@ -380,48 +171,6 @@
 		end
 		return
 	end
-
-	-- Show memory usage stat
-	function RGXQoLLC:ShowMemoryUsage(frame, anchor, x, y)
-
-		-- Create frame
-		local memframe = CreateFrame("FRAME", nil, frame)
-		memframe:ClearAllPoints()
-		memframe:SetPoint(anchor, x, y)
-		memframe:SetWidth(100)
-		memframe:SetHeight(20)
-
-		-- Create labels
-		local pretext = memframe:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-		pretext:SetPoint("TOPLEFT", 0, 0)
-		pretext:SetText(L["Memory Usage"])
-
-		local memtext = memframe:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-		memtext:SetPoint("TOPLEFT", 0, 0 - 30)
-
-		-- Create stat
-		local memstat = memframe:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-		memstat:SetPoint("BOTTOMLEFT", memtext, "BOTTOMRIGHT")
-		memstat:SetText("(calculating...)")
-
-		-- Create update script
-		local memtime = -1
-		memframe:SetScript("OnUpdate", function(self, elapsed)
-			if memtime > 2 or memtime == -1 then
-				UpdateAddOnMemoryUsage();
-				memtext = GetAddOnMemoryUsage("RGXQoL")
-				memtext = math.floor(memtext + .5) .. " KB"
-				memstat:SetText(memtext);
-				memtime = 0;
-			end
-			memtime = memtime + elapsed;
-		end)
-
-		-- Release memory
-		RGXQoLLC.ShowMemoryUsage = nil
-
-	end
-
 	-- Check if player is in LFG queue (battleground)
 	function RGXQoLLC:IsInLFGQueue()
 
@@ -439,97 +188,12 @@
 		end
 
 	end
-
-	-- Check if player is in combat
-	function RGXQoLLC:PlayerInCombat()
-		if (UnitAffectingCombat("player")) then
-			RGXQoLLC:Print("You cannot do that in combat.")
-			return true
-		end
-	end
-
-	--  Hide panel and pages
-	function RGXQoLLC:HideFrames()
-
-		-- Hide option pages
-		for i = 0, RGXQoLLC["NumberOfPages"] do
-			if RGXQoLLC["Page"..i] then
-				RGXQoLLC["Page"..i]:Hide();
-			end;
-		end
-
-		-- Hide options panel (skip when embedded in the game options canvas;
-		-- hiding it would leave the category page blank)
-		if not RGXQoLLC.OptionsEmbedded and RGXQoLLC["PageF"] then
-			RGXQoLLC["PageF"]:Hide();
-		end
-	end
-
-	-- Find out if RGX QoL is showing (main panel or config panel)
-	function RGXQoLLC:IsPlusShowing()
-		if RGXQoLLC["PageF"]:IsShown() then return true end
-		for k, v in pairs(RGXQoLConfigList) do
-			if v:IsShown() then
-				return true
-			end
-		end
-	end
-
-
 ----------------------------------------------------------------------
 --	L02: Locks
 ----------------------------------------------------------------------
-
-	-- Function to set lock state for configuration buttons
-	function RGXQoLLC:LockOption(option, item, reloadreq)
-		if reloadreq then
-			-- Option change requires UI reload
-			if RGXQoLLC[option] ~= RGXQoLDB[option] or RGXQoLLC[option] == "Off" then
-				RGXQoLLC:LockItem(RGXQoLCB[item], true)
-			else
-				RGXQoLLC:LockItem(RGXQoLCB[item], false)
-			end
-		else
-			-- Option change does not require UI reload
-			if RGXQoLLC[option] == "Off" then
-				RGXQoLLC:LockItem(RGXQoLCB[item], true)
-			else
-				RGXQoLLC:LockItem(RGXQoLCB[item], false)
-			end
-		end
-	end
-
---	Set lock state for configuration buttons
-	function RGXQoLLC:SetDim()
-		RGXQoLLC:LockOption("AutomateQuests", "AutomateQuestsBtn", false)			-- Automate quests
-		RGXQoLLC:LockOption("AutoAcceptRes", "AutoAcceptResBtn", false)			-- Accept resurrection
-		RGXQoLLC:LockOption("AutoReleasePvP", "AutoReleasePvPBtn", false)			-- Release in PvP
-		RGXQoLLC:LockOption("AutoSellJunk", "AutoSellJunkBtn", false)				-- Sell junk automatically
-		RGXQoLLC:LockOption("AutoRepairGear", "AutoRepairBtn", false)				-- Repair automatically
-	end
-
 ----------------------------------------------------------------------
 --	L03: Restarts
 ----------------------------------------------------------------------
-
-	-- Set the reload button state
-	function RGXQoLLC:ReloadCheck()
-
-		-- Settings
-		if	(RGXQoLLC["UseEnglishLanguage"]	~= RGXQoLDB["UseEnglishLanguage"])		-- Use English language
-
-		then
-			-- Enable the reload button
-			RGXQoLLC:LockItem(RGXQoLCB["ReloadUIButton"], false)
-			RGXQoLCB["ReloadUIButton"].f:Show()
-		else
-			-- Disable the reload button
-			RGXQoLLC:LockItem(RGXQoLCB["ReloadUIButton"], true)
-			RGXQoLCB["ReloadUIButton"].f:Hide()
-		end
-
-	end
-
 ----------------------------------------------------------------------
 --	L40: Player
 ----------------------------------------------------------------------
@@ -539,11 +203,6 @@
 		-- RGXQoLLC.NewPatch - Set WorldFrame level to ensure world frame mouse events work (WorldFrame:IsMouseMotionFocus())
 		-- In case invalid WorldFrame frame level is stored in layout-local cache
 		WorldFrame:SetFrameLevel(1)
-
-		----------------------------------------------------------------------
-		-- Hide raid group labels
-		----------------------------------------------------------------------
-
 
 		----------------------------------------------------------------------
 		--	Automatic summon (no reload required)
@@ -580,36 +239,11 @@
 				end
 			end
 
-			-- Set event on startup if enabled and when option is clicked
-			if RGXQoLLC["AutoAcceptSummon"] == "On" then SetEvent() end
-			RGXQoLCB["AutoAcceptSummon"]:HookScript("OnClick", SetEvent)
+			-- Register the setup hook (options bridge calls it on change); run at load
+			RGXQoLLC.FeatureSetup.AutoAcceptSummon = SetEvent
+			SetEvent()
 
 		end
-
-		----------------------------------------------------------------------
-		--	Disable loot warnings
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Mute mount sounds (no reload required)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Mute game sounds (no reload required) (MuteGameSounds)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Faster movie skip
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Wowhead Links
-		----------------------------------------------------------------------
-
 
 		----------------------------------------------------------------------
 		-- Automate gossip (no reload required)
@@ -638,9 +272,9 @@
 				end
 			end
 
-			-- Setup events when option is clicked and on startup (if option is enabled)
-			RGXQoLCB["AutomateGossip"]:HookScript("OnClick", SetupEvents)
-			if RGXQoLLC["AutomateGossip"] == "On" then SetupEvents() end
+			-- Register the setup hook (options bridge calls it on change); run at load
+			RGXQoLLC.FeatureSetup.AutomateGossip = SetupEvents
+			SetupEvents()
 
 			-- Create tables for specific NPC IDs (these are automatically selected with no alt key requirement)
 			local npcTable = {
@@ -698,67 +332,10 @@
 		end
 
 		----------------------------------------------------------------------
-		--	Faster looting
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Disable bag automation
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
 		--	Automate quests (no reload required)
 		----------------------------------------------------------------------
 
 		do
-
-			-- Create configuration panel
-			local QuestPanel = RGXQoLLC:CreatePanel("Automate quests", "QuestPanel")
-
-			RGXQoLLC:MakeTx(QuestPanel, "Settings", 16, -72)
-			RGXQoLLC:MakeCB(QuestPanel, "AutoQuestAvailable", "Accept available quests automatically", 16, -92, false, "If checked, available quests will be accepted automatically.")
-			RGXQoLLC:MakeCB(QuestPanel, "AutoQuestCompleted", "Turn-in completed quests automatically", 16, -112, false, "If checked, completed quests will be turned-in automatically.")
-			RGXQoLLC:MakeCB(QuestPanel, "AutoQuestShift", "Require override key for quest automation", 16, -132, false, "If checked, you will need to hold the override key down for quests to be automated.|n|nIf unchecked, holding the override key will prevent quests from being automated.")
-
-			RGXQoLLC:CreateDropdown("AutoQuestKeyMenu", "Override key", 146, "TOPLEFT", QuestPanel, "TOPLEFT", 356, -92, {{L["SHIFT"], 1}, {L["ALT"], 2}, {L["CONTROL"], 3}, {L["CMD (MAC)"], 4}})
-
-			-- Help button hidden
-			QuestPanel.h:Hide()
-
-			-- Back button handler
-			QuestPanel.b:SetScript("OnClick", function()
-				QuestPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
-				return
-			end)
-
-			-- Reset button handler
-			QuestPanel.r:SetScript("OnClick", function()
-
-				-- Reset checkboxes
-				RGXQoLLC["AutoQuestShift"] = "Off"
-				RGXQoLLC["AutoQuestAvailable"] = "On"
-				RGXQoLLC["AutoQuestCompleted"] = "On"
-				RGXQoLLC["AutoQuestKeyMenu"] = 1
-
-				-- Refresh panel
-				QuestPanel:Hide(); QuestPanel:Show()
-
-			end)
-
-			-- Show panal when options panel button is clicked
-			RGXQoLCB["AutomateQuestsBtn"]:SetScript("OnClick", function()
-				if IsShiftKeyDown() and IsControlKeyDown() then
-					-- Preset profile
-					RGXQoLLC["AutoQuestShift"] = "Off"
-					RGXQoLLC["AutoQuestAvailable"] = "On"
-					RGXQoLLC["AutoQuestCompleted"] = "On"
-					RGXQoLLC["AutoQuestKeyMenu"] = 1
-				else
-					QuestPanel:Show()
-					RGXQoLLC:HideFrames()
-				end
-			end)
 
 			-- Function to determine if override key is being held
 			local function IsOverrideKeyDown()
@@ -1037,9 +614,9 @@
 				end
 			end
 
-			-- Setup events when option is clicked and on startup (if option is enabled)
-			RGXQoLCB["AutomateQuests"]:HookScript("OnClick", SetupEvents)
-			if RGXQoLLC["AutomateQuests"] == "On" then SetupEvents() end
+			-- Register the setup hook (options bridge calls it on change); run at load
+			RGXQoLLC.FeatureSetup.AutomateQuests = SetupEvents
+			SetupEvents()
 
 			-- Event handler
 			qFrame:SetScript("OnEvent", function(self, event, arg1)
@@ -1239,42 +816,8 @@
 			end
 
 			-- Create configuration panel
-			local SellJunkFrame = RGXQoLLC:CreatePanel("Sell junk automatically", "SellJunkFrame")
-			RGXQoLLC:MakeTx(SellJunkFrame, "Settings", 16, -72)
-			RGXQoLLC:MakeCB(SellJunkFrame, "AutoSellShowSummary", "Show vendor summary in chat", 16, -92, false, "If checked, a vendor summary will be shown in chat when junk is automatically sold.")
-
-			-- Help button hidden
-			SellJunkFrame.h:Hide()
-
-			-- Back button handler
-			SellJunkFrame.b:SetScript("OnClick", function()
-				SellJunkFrame:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
-				return
-			end)
-
-			-- Reset button handler
-			SellJunkFrame.r.tiptext = SellJunkFrame.r.tiptext .. "|n|n" .. L["Note that this will not reset your exclusions list."]
-			SellJunkFrame.r:SetScript("OnClick", function()
-
-				-- Reset checkboxes
-				RGXQoLLC["AutoSellShowSummary"] = "On"
-
-				-- Refresh panel
-				SellJunkFrame:Hide(); SellJunkFrame:Show()
-
-			end)
-
-			-- Show panal when options panel button is clicked
-			RGXQoLCB["AutoSellJunkBtn"]:SetScript("OnClick", function()
-				if IsShiftKeyDown() and IsControlKeyDown() then
-					-- Preset profile
-					RGXQoLLC["AutoSellShowSummary"] = "On"
-				else
-					SellJunkFrame:Show()
-					RGXQoLLC:HideFrames()
-				end
-			end)
-
+			-- Pure event frame (configuration panel removed; options live in the framework panel)
+			local SellJunkFrame = CreateFrame("FRAME")
 			-- Function to stop selling
 			local function StopSelling()
 				if SellJunkTicker then SellJunkTicker._cancelled = true; end
@@ -1282,207 +825,18 @@
 				SellJunkFrame:UnregisterEvent("ITEM_LOCKED")
 				SellJunkFrame:UnregisterEvent("UI_ERROR_MESSAGE")
 			end
-
-			-- Create excluded box
-			local titleTX = RGXQoLLC:MakeTx(SellJunkFrame, "Exclusions", 356, -72)
-			titleTX:SetWidth(200)
-			titleTX:SetWordWrap(false)
-			titleTX:SetJustifyH("LEFT")
-
-			-- Show help button for exclusions
-			RGXQoLLC:CreateHelpButton("SellJunkExcludeHelpButton", SellJunkFrame, titleTX, "Enter item IDs separated by commas.  Item IDs can be found in item tooltips while this panel is showing.|n|nJunk items entered here will not be sold automatically.|n|nWhite items entered here will be sold automatically.|n|nThe editbox tooltip will show you more information about the items you have entered.")
-
-			local eb = CreateFrame("Frame", nil, SellJunkFrame, "BackdropTemplate")
-			eb:SetSize(200, RGXQoLLC.MainPanelHeight - 180)
-			eb:SetPoint("TOPLEFT", 350, -92)
-			eb:SetBackdrop({
-				bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-				edgeFile = "Interface\\PVPFrame\\UI-Character-PVP-Highlight",
-				edgeSize = 16,
-				insets = {left = 8, right = 6, top = 8, bottom = 8},
-			})
-			eb:SetBackdropBorderColor(1.0, 0.85, 0.0, 0.5)
-
-			eb.scroll = CreateFrame("ScrollFrame", nil, eb, "RGXQoLSellJunkScrollFrameTemplate")
-			eb.scroll:SetPoint("TOPLEFT", eb, 12, -10)
-			eb.scroll:SetPoint("BOTTOMRIGHT", eb, -30, 10)
-			eb.scroll:SetPanExtent(16)
-
-			-- Create character count
-			eb.scroll.CharCount = eb.scroll:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-			eb.scroll.CharCount:Hide()
-
-			eb.Text = eb.scroll.EditBox
-			eb.Text:SetWidth(150)
-			eb.Text:SetPoint("TOPLEFT", eb.scroll)
-			eb.Text:SetPoint("BOTTOMRIGHT", eb.scroll, -12, 0)
-			eb.Text:SetMaxLetters(2000)
-			eb.Text:SetFontObject(GameFontNormalLarge)
-			eb.Text:SetAutoFocus(false)
-			eb.scroll:SetScrollChild(eb.Text)
-
-			-- Set focus on the editbox text when clicking the editbox
-			eb:SetScript("OnMouseDown", function()
-				eb.Text:SetFocus()
-				eb.Text:SetCursorPosition(eb.Text:GetMaxLetters())
-			end)
-
-			-- Function to create whitelist
+			-- Saved-value whitelist (the saved AutoSellExcludeList string drives it; no editbox)
 			local whiteList = {}
 			local function UpdateWhiteList()
 				wipe(whiteList)
-
-				local whiteString = eb.Text:GetText()
-				if whiteString and whiteString ~= "" then
-					whiteString = whiteString:gsub("[^,%d]", "")
-					local tList = {strsplit(",", whiteString)}
-					for i = 1, #tList do
-						if tList[i] then
-							tList[i] = tonumber(tList[i])
-							if tList[i] then
-								whiteList[tList[i]] = true
-							end
-						end
-					end
+				local whiteString = (RGXQoLLC["AutoSellExcludeList"] or ""):gsub("[^,%d]", "")
+				local tList = {strsplit(",", whiteString)}
+				for k = 1, #tList do
+					local id = tonumber(tList[k])
+					if id then whiteList[id] = true end
 				end
-
-				RGXQoLLC["AutoSellExcludeList"] = whiteString
-				eb.Text:SetText(RGXQoLLC["AutoSellExcludeList"])
-
 			end
-
-			-- Save the excluded list when it changes and at startup
-			eb.Text:SetScript("OnTextChanged", UpdateWhiteList)
-			eb.Text:SetText(RGXQoLLC["AutoSellExcludeList"])
 			UpdateWhiteList()
-
-			-- Create whitelist on startup and option or preset is clicked
-			UpdateWhiteList()
-			RGXQoLCB["AutoSellJunkBtn"]:HookScript("OnClick", function()
-				if IsShiftKeyDown() and IsControlKeyDown() then
-					-- Preset profile
-					UpdateWhiteList()
-				end
-			end)
-
-			-- Function to make tooltip string
-			local function MakeTooltipString()
-
-				local keepMsg = ""
-				local sellMsg = ""
-				local dupMsg = ""
-				local novalueMsg = ""
-				local incompatMsg = ""
-
-				local tipString = eb.Text:GetText()
-				if tipString and tipString ~= "" then
-					tipString = tipString:gsub("[^,%d]", "")
-					local tipList = {strsplit(",", tipString)}
-					for i = 1, #tipList do
-						if tipList[i] then
-							tipList[i] = tonumber(tipList[i])
-							if tipList[i] and tipList[i] > 0 and tipList[i] < 999999999 then
-								local void, tLink, Rarity, void, void, void, void, void, void, void, ItemPrice = C_Item.GetItemInfo(tipList[i])
-								if tLink and tLink ~= "" then
-									local linkCol = string.sub(tLink, 1, 10)
-									if linkCol then
-										local linkName = tLink:match("%[(.-)%]")
-										if linkName and ItemPrice then
-											if ItemPrice > 0 then
-												if Rarity == 0 then
-													-- Junk item
-													if string.find(keepMsg, "%(" .. tipList[i] .. "%)") then
-														-- Duplicate (ID appears more than once in list)
-														dupMsg = dupMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
-													else
-														-- Add junk item to keep list
-														keepMsg = keepMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
-													end
-												elseif Rarity == 1 then
-													-- White item
-													if string.find(sellMsg, "%(" .. tipList[i] .. "%)") then
-														-- Duplicate (ID appears more than once in list)
-														dupMsg = dupMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
-													else
-														-- Add non-junk item to sell list
-														sellMsg = sellMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
-													end
-												else
-													-- Incompatible item (not junk or white)
-													if string.find(incompatMsg, "%(" .. tipList[i] .. "%)") then
-														-- Duplicate (ID appears more than once in list)
-														dupMsg = dupMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
-													else
-														-- Add item to incompatible list
-														incompatMsg = incompatMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
-													end
-												end
-											else
-												-- Item has no sell price so cannot be sold
-												if string.find(novalueMsg, "%(" .. tipList[i] .. "%)") then
-													-- Duplicate (ID appears more than once in list)
-													dupMsg = dupMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
-												else
-													-- Add item to cannot be sold list
-													novalueMsg = novalueMsg .. linkCol .. linkName .. " (" .. tipList[i] .. ")" .. "|r|n"
-												end
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-
-				if keepMsg ~= "" then keepMsg = "|n" .. L["Keep"] .. "|n" .. keepMsg end
-				if sellMsg ~= "" then sellMsg = "|n" .. L["Sell"] .. "|n" .. sellMsg end
-				if dupMsg ~= "" then dupMsg = "|n" .. L["Duplicates"] .. "|n" .. dupMsg end
-				if novalueMsg ~= "" then novalueMsg = "|n" .. L["Cannot be sold"] .. "|n" .. novalueMsg end
-				if incompatMsg ~= "" then incompatMsg = "|n" .. L["Incompatible"] .. "|n" .. incompatMsg end
-
-				eb.tiptext = L["Exclusions"] .. "|n" .. keepMsg .. sellMsg .. dupMsg .. novalueMsg .. incompatMsg
-				eb.Text.tiptext = L["Exclusions"] .. "|n" .. keepMsg .. sellMsg .. dupMsg .. novalueMsg .. incompatMsg
-				if eb.tiptext == L["Exclusions"] .. "|n" then eb.tiptext = eb.tiptext .. "|n" .. L["Nothing to see here."] end
-				if eb.Text.tiptext == L["Exclusions"] .. "|n" then eb.Text.tiptext = "-" end
-
-				if GameTooltip:IsShown() then
-					if MouseIsOver(eb) or MouseIsOver(eb.Text) then
-						GameTooltip:SetText(eb.tiptext, nil, nil, nil, nil, false)
-					end
-				end
-
-			end
-
-			eb.Text:HookScript("OnTextChanged", MakeTooltipString)
-			eb.Text:HookScript("OnTextChanged", function()
-				C_Timer.After(0.1, function()
-					MakeTooltipString()
-				end)
-			end)
-
-			-- Show the button tooltip for the editbox
-			eb:SetScript("OnEnter", MakeTooltipString)
-			eb:HookScript("OnEnter", RGXQoLLC.TipSee)
-			eb:HookScript("OnEnter", function() GameTooltip:SetText(eb.tiptext, nil, nil, nil, nil, false) end)
-			eb:SetScript("OnLeave", GameTooltip_Hide)
-			eb.Text:SetScript("OnEnter", MakeTooltipString)
-			eb.Text:HookScript("OnEnter", RGXQoLLC.ShowDropTip)
-			eb.Text:HookScript("OnEnter", function() GameTooltip:SetText(eb.tiptext, nil, nil, nil, nil, false) end)
-			eb.Text:SetScript("OnLeave", GameTooltip_Hide)
-
-			-- Show item ID in item tooltips while configuration panel is showing
-			if GameTooltip:HasScript("OnTooltipSetItem") then
-				GameTooltip:HookScript("OnTooltipSetItem", function(self)
-					if SellJunkFrame:IsShown() then
-						local void, itemLink = self:GetItem()
-						if itemLink then
-							local itemID = GetItemInfoFromHyperlink(itemLink)
-							if itemID then self:AddLine(L["Item ID"] .. ": " .. itemID) end
-						end
-					end
-				end)
-			end
 
 			-- Vendor function
 			local function SellJunkFunc()
@@ -1553,8 +907,8 @@
 				end
 			end
 
-			-- Setup events when option is clicked and on startup (if option is enabled)
-			RGXQoLCB["AutoSellJunk"]:HookScript("OnClick", SetupEvents)
+			-- Register the setup hook (options bridge calls it on change); run at load
+			RGXQoLLC.FeatureSetup.AutoSellJunk = function() SetupEvents(); UpdateWhiteList() end
 			if RGXQoLLC["AutoSellJunk"] == "On" then SetupEvents() end
 
 			-- Event handler
@@ -1623,166 +977,14 @@
 				end
 			end
 
-			-- Setup event when option is clicked and on startup (if option is enabled)
-			RGXQoLCB["AutoRepairGear"]:HookScript("OnClick", SetupEvent)
-			if RGXQoLLC["AutoRepairGear"] == "On" then SetupEvent() end
+			-- Register the setup hook (options bridge calls it on change); run at load
+			RGXQoLLC.FeatureSetup.AutoRepairGear = SetupEvent
+			SetupEvent()
 
 			-- Event handler
 			RepairFrame:SetScript("OnEvent", RepairFunc)
 
-			-- Create configuration panel
-			local RepairPanel = RGXQoLLC:CreatePanel("Repair automatically", "RepairPanel")
-
-			RGXQoLLC:MakeTx(RepairPanel, "Settings", 16, -72)
-			RGXQoLLC:MakeCB(RepairPanel, "AutoRepairShowSummary", "Show repair summary in chat", 16, -92, false, "If checked, a repair summary will be shown in chat when your gear is automatically repaired.")
-
-			-- Help button hidden
-			RepairPanel.h:Hide()
-
-			-- Back button handler
-			RepairPanel.b:SetScript("OnClick", function()
-				RepairPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
-				return
-			end)
-
-			-- Reset button handler
-			RepairPanel.r:SetScript("OnClick", function()
-
-				-- Reset checkboxes
-				RGXQoLLC["AutoRepairShowSummary"] = "On"
-
-				-- Refresh panel
-				RepairPanel:Hide(); RepairPanel:Show()
-
-			end)
-
-			-- Show panal when options panel button is clicked
-			RGXQoLCB["AutoRepairBtn"]:SetScript("OnClick", function()
-				if IsShiftKeyDown() and IsControlKeyDown() then
-					-- Preset profile
-					RGXQoLLC["AutoRepairShowSummary"] = "On"
-				else
-					RepairPanel:Show()
-					RGXQoLLC:HideFrames()
-				end
-			end)
-
 		end
-
-		----------------------------------------------------------------------
-		--	Show player chain
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Show raid frame toggle button
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Hide hit indicators (portrait text)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Class colored frames
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Quest text size
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Resize mail text
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Resize book text
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Show durability status
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Hide zone text
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Hide stance bar
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["NoClassBar"] == "On" and not RGXQoLLockList["NoClassBar"] then
-			local stancebar = CreateFrame("FRAME", nil, UIParent)
-			stancebar:Hide()
-			StanceBar:UnregisterAllEvents()
-			StanceBar:SetParent(stancebar)
-		end
-
-		----------------------------------------------------------------------
-		--	Hide gryphons
-		----------------------------------------------------------------------
-
-		if RGXQoLLC["NoGryphons"] == "On" and not RGXQoLLockList["NoGryphons"] then
-			MainMenuBarLeftEndCap:Hide();
-			MainMenuBarRightEndCap:Hide();
-		end
-
-		----------------------------------------------------------------------
-		--	Hide error messages
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Easy item destroy
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Enhance flight map
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Keep audio synced
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Mute custom sounds (no reload required)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Block shared quests (no reload needed)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Manage timer
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Show ready timer
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Show flight times
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Enhance minimap
-		----------------------------------------------------------------------
-
 
 		----------------------------------------------------------------------
 		-- Automatically accept resurrection requests (no reload required)
@@ -1790,42 +992,8 @@
 
 		do
 
-			-- Create configuration panel
-			local AcceptResPanel = RGXQoLLC:CreatePanel("Accept resurrection", "AcceptResPanel")
-
-			RGXQoLLC:MakeTx(AcceptResPanel, "Settings", 16, -72)
-			RGXQoLLC:MakeCB(AcceptResPanel, "AutoResNoCombat", "Exclude combat resurrection", 16, -92, false, "If checked, resurrection requests will not be automatically accepted if the player resurrecting you is in combat.")
-
-			-- Help button hidden
-			AcceptResPanel.h:Hide()
-
-			-- Back button handler
-			AcceptResPanel.b:SetScript("OnClick", function()
-				AcceptResPanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
-				return
-			end)
-
-			-- Reset button handler
-			AcceptResPanel.r:SetScript("OnClick", function()
-
-				-- Reset checkboxes
-				RGXQoLLC["AutoResNoCombat"] = "On"
-
-				-- Refresh panel
-				AcceptResPanel:Hide(); AcceptResPanel:Show()
-
-			end)
-
-			-- Show panal when options panel button is clicked
-			RGXQoLCB["AutoAcceptResBtn"]:SetScript("OnClick", function()
-				if IsShiftKeyDown() and IsControlKeyDown() then
-					-- Preset profile
-					RGXQoLLC["AutoResNoCombat"] = "On"
-				else
-					AcceptResPanel:Show()
-					RGXQoLLC:HideFrames()
-				end
-			end)
+			-- Event frame (configuration panel removed)
+			local AcceptResPanel = CreateFrame("FRAME")
 
 			-- Function to set resurrect event
 			local function SetResEvent()
@@ -1836,9 +1004,9 @@
 				end
 			end
 
-			-- Run function when option is clicked and on startup if option is enabled
-			RGXQoLCB["AutoAcceptRes"]:HookScript("OnClick", SetResEvent)
-			if RGXQoLLC["AutoAcceptRes"] == "On" then SetResEvent() end
+			-- Register the setup hook (options bridge calls it on change); run at load
+			RGXQoLLC.FeatureSetup.AutoAcceptRes = SetResEvent
+			SetResEvent()
 
 			-- Handle event
 			AcceptResPanel:SetScript("OnEvent", function(self, event, arg1)
@@ -1890,77 +1058,10 @@
 		end
 
 		----------------------------------------------------------------------
-		-- Hide keybind text
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Hide macro text
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Show druid power bar
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Show vanity controls (must be before Enhance dressup)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Enhance dressup
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
 		-- Automatically release in battlegrounds
 		----------------------------------------------------------------------
 
 		do
-
-			-- Create configuration panel
-			local ReleasePanel = RGXQoLLC:CreatePanel("Release in PvP", "ReleasePanel")
-
-			RGXQoLLC:MakeTx(ReleasePanel, "Settings", 16, -72)
-			RGXQoLLC:MakeCB(ReleasePanel, "AutoReleaseNoAlterac", "Exclude Alterac Valley", 16, -92, false, "If checked, you will not release automatically in Alterac Valley.")
-
-			RGXQoLLC:MakeTx(ReleasePanel, "Delay", 356, -72)
-			RGXQoLLC:MakeSL(ReleasePanel, "AutoReleaseDelay", "Drag to set the number of milliseconds before you are automatically released.|n|nYou can hold down shift as the timer is ending to cancel the automatic release.", 200, 3000, 100, 356, -92, "%.0f")
-
-			-- Help button hidden
-			ReleasePanel.h:Hide()
-
-			-- Back button handler
-			ReleasePanel.b:SetScript("OnClick", function()
-				ReleasePanel:Hide(); RGXQoLLC["PageF"]:Show(); RGXQoLLC["Page1"]:Show();
-				return
-			end)
-
-			-- Reset button handler
-			ReleasePanel.r:SetScript("OnClick", function()
-
-				-- Reset checkboxes
-				RGXQoLLC["AutoReleaseNoAlterac"] = "Off"
-				RGXQoLLC["AutoReleaseDelay"] = 200
-
-				-- Refresh panel
-				ReleasePanel:Hide(); ReleasePanel:Show()
-
-			end)
-
-			-- Show panal when options panel button is clicked
-			RGXQoLCB["AutoReleasePvPBtn"]:SetScript("OnClick", function()
-				if IsShiftKeyDown() and IsControlKeyDown() then
-					-- Preset profile
-					RGXQoLLC["AutoReleaseNoAlterac"] = "Off"
-					RGXQoLLC["AutoReleaseDelay"] = 200
-				else
-					ReleasePanel:Show()
-					RGXQoLLC:HideFrames()
-				end
-			end)
 
 			-- Release in battlegrounds
 			SafeHookSecure("StaticPopup_Show", function(sType)
@@ -1992,143 +1093,14 @@
 		end
 
 		----------------------------------------------------------------------
-		--	Enhance trainers
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Set weather density (no reload required)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Enhance professions
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Show free bag slots
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Enhance quest log
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Show bag search box
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Show vendor price
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		--	Dismount me
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Disable screen glow (no reload required)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Disable screen effects (no reload required)
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Minimap button (no reload required)
+		--	Minimap button (framework module)
 		----------------------------------------------------------------------
 
 		do
 
-			-- Minimap button click function
-			local function MiniBtnClickFunc(arg1)
-				-- Prevent options panel from showing if chat configuration panel is showing
-				if ChatConfigFrame:IsShown() then return end
-				-- Prevent options panel from showing if Blizzard Store is showing
-				if StoreFrame and StoreFrame:GetAttribute("isshown") then return end
-				-- Left button down
-				if arg1 == "LeftButton" then
-
-					-- Shift key toggles music
-					if IsShiftKeyDown() and not IsControlKeyDown() and not IsAltKeyDown() then
-						Sound_ToggleMusic()
-						return
-					end
-
-					-- Control key does nothing
-					if IsControlKeyDown() and not IsShiftKeyDown() and not IsAltKeyDown() then
-						return
-					end
-
-					-- Alt key toggles error messages
-					if IsAltKeyDown() and not IsControlKeyDown() and not IsShiftKeyDown() then
-						return
-					end
-
-					-- Shift key does nothing
-					if IsShiftKeyDown() and not IsControlKeyDown() then
-						return
-					end
-
-					-- Control key and alt key toggles Zygor addon
-					if IsControlKeyDown() and IsAltKeyDown() and not IsShiftKeyDown() then
-						RGXQoLLC:ZygorToggle()
-						return
-					end
-
-					-- Control key and shift key toggles maximised window mode
-					if IsControlKeyDown() and IsShiftKeyDown() and not IsAltKeyDown() then
-						if RGXQoLLC:PlayerInCombat() then
-							return
-						else
-							SetCVar("gxMaximize", tostring(1 - GetCVar("gxMaximize")))
-							UpdateWindow()
-						end
-						return
-					end
-
-					-- No modifier key toggles the options panel
-					if RGXQoLLC:IsPlusShowing() then
-						RGXQoLLC:HideFrames()
-						RGXQoLLC:HideConfigPanels()
-					else
-						RGXQoLLC:HideFrames()
-						RGXQoLLC["PageF"]:Show()
-					end
-					RGXQoLLC["Page"..RGXQoLLC["RGXQoLStartPage"]]:Show()
-				end
-
-				-- Right button down
-				if arg1 == "RightButton" then
-
-					-- No modifier key toggles the options panel
-					if RGXQoLLC:IsPlusShowing() then
-						RGXQoLLC:HideFrames()
-						RGXQoLLC:HideConfigPanels()
-					else
-						RGXQoLLC:HideFrames()
-						RGXQoLLC["PageF"]:Show()
-					end
-					RGXQoLLC["Page" .. RGXQoLLC["RGXQoLStartPage"]]:Show()
-
-				end
-
-			end
-
-			-- Assign global scope for function
-			_G.RGXQoLMiniBtnClickFunc = MiniBtnClickFunc
-
-			-- Create the RGX minimap button (framework-owned positioning)
-			local RGX = _G.RGXFramework
-			if RGX and RGX.GetMinimap and not RGXQoLLC.minimapButton then
-				local MM = RGX:GetMinimap()
+			-- Framework minimap button; left-click opens the options panel
+			local MM = _G.RGXFramework and _G.RGXFramework.GetMinimap and _G.RGXFramework:GetMinimap()
+			if MM and not RGXQoLLC.minimapButton then
 				RGXQoLLC.minimapButton = MM:Create({
 					name = "RGXQoL_MinimapButton",
 					icon = "Interface\\AddOns\\RGX-Framework\\media\\logo.tga",
@@ -2143,9 +1115,7 @@
 							{ left = "|cffe74c3cCtrl+Right-Click|r", right = "|cffffffffHide minimap icon|r" },
 						},
 					},
-					onLeftClick = function(btn, mouseButton)
-						MiniBtnClickFunc("LeftButton")
-					end,
+					onLeftClick = function() if OpenOptionsShared then OpenOptionsShared() end end,
 					onCtrlRight = function(btn)
 						btn:SetVisible(false)
 						RGXQoLLC["ShowMinimapIcon"] = "Off"
@@ -2153,128 +1123,17 @@
 				})
 			end
 
-			-- Show or hide the minimap button when the option is clicked
-			RGXQoLCB["ShowMinimapIcon"]:HookScript("OnClick", function()
+			-- Bridge the visibility toggle and apply it
+			RGXQoLLC.FeatureSetup.ShowMinimapIcon = function()
 				if RGXQoLLC.minimapButton then
 					RGXQoLLC.minimapButton:SetVisible(RGXQoLLC["ShowMinimapIcon"] == "On")
 				end
-			end)
-			if RGXQoLLC.minimapButton then
-				RGXQoLLC.minimapButton:SetVisible(RGXQoLLC["ShowMinimapIcon"] == "On")
 			end
+			RGXQoLLC.FeatureSetup.ShowMinimapIcon()
 
 		end
 
-		----------------------------------------------------------------------
 		-- Auction House Extras
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Show volume control on character frame
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Show cooldowns
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Combat plates
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Enhance tooltip
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Show borders
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Silence rested emotes
-		----------------------------------------------------------------------
-
-		-- Manage emotes
-
-		----------------------------------------------------------------------
-		--	Max camera zoom (no reload required)
-		----------------------------------------------------------------------
-
-
-	----------------------------------------------------------------------
-	-- L45: Create panel in game options panel
-	----------------------------------------------------------------------
-
-	do
-
-		local interPanel = CreateFrame("FRAME")
-		interPanel.name = "RGX QoL"
-
-		-- Settings-integrated: the options panel always lives inside the
-		-- game options category and is never an independent window.
-		local mainFrame = RGXQoLLC["PageF"]
-		if mainFrame then
-			mainFrame:SetParent(interPanel)
-			mainFrame:ClearAllPoints()
-			mainFrame:SetAllPoints(interPanel)
-			mainFrame:SetMovable(false)
-			mainFrame:SetScript("OnDragStart", nil)
-			mainFrame:SetScript("OnDragStop", nil)
-			mainFrame:SetScript("OnShow", nil)
-			mainFrame:Show()
-			RGXQoLLC.OptionsEmbedded = true
-
-			-- Show the start page inside the settings canvas
-			local startPage = RGXQoLLC["Page" .. (RGXQoLLC["RGXQoLStartPage"] or 0)]
-			if startPage then startPage:Show() end
-		end
-
-		-- Register the category when the Blizzard Settings API exists
-		if Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory then
-			local category = Settings.RegisterCanvasLayoutCategory(interPanel, "RGX QoL")
-			RGXQoLLC.OptionsCategory = category
-			Settings.RegisterAddOnCategory(category)
-		end
-
-	end
-
-		----------------------------------------------------------------------
-		-- Frame alignment grid
-		----------------------------------------------------------------------
-
-
-		----------------------------------------------------------------------
-		-- Media player
-		----------------------------------------------------------------------
-
-
-
-		----------------------------------------------------------------------
-		-- Panel alpha
-		----------------------------------------------------------------------
-
-		do
-
-			-- Function to set panel alpha
-			local function SetPlusAlpha()
-				-- Set panel alpha
-				-- Show formatted value
-			end
-
-			-- Set alpha on startup
-			SetPlusAlpha()
-
-			-- Set alpha after changing slider
-
-		end
-
-		----------------------------------------------------------------------
-		-- Panel scale
 		----------------------------------------------------------------------
 
 
@@ -2347,26 +1206,10 @@
 				RGXQoLLC:LoadVarChk("ShowMinimapIcon", "On")				-- Show minimap button
 				RGXQoLLC:LoadVarChk("UseEnglishLanguage", "Off")			-- Use English language
 
-				-- Panel position
-				RGXQoLLC:LoadVarAnc("MainPanelA", "CENTER")				-- Panel anchor
-				RGXQoLLC:LoadVarAnc("MainPanelR", "CENTER")				-- Panel relative
-				RGXQoLLC:LoadVarNum("MainPanelX", 0, -5000, 5000)			-- Panel X axis
-				RGXQoLLC:LoadVarNum("MainPanelY", 0, -5000, 5000)			-- Panel Y axis
 
-				-- Start page
-				RGXQoLLC:LoadVarNum("RGXQoLStartPage", 0, 0, RGXQoLLC["NumberOfPages"])
 
-				-- Removed pages: clamp a stale start page to a live page
-				do
-					local sp = RGXQoLLC["RGXQoLStartPage"]
-					if sp and not (sp == 0 or sp == 1 or sp == 8) then
-						RGXQoLLC["RGXQoLStartPage"] = 0
-					end
-				end
-
-				-- Run other startup items
-				RGXQoLLC:SetDim()
-
+				-- Build the framework options page and sync the boolean bridge
+				RGXQoLLC:BuildOptionsCanvas()
 			end
 			return
 		end
@@ -2409,14 +1252,6 @@
 			RGXQoLDB["ShowMinimapIcon"] 		= RGXQoLLC["ShowMinimapIcon"]
 			RGXQoLDB["UseEnglishLanguage"] 	= RGXQoLLC["UseEnglishLanguage"]
 
-			-- Panel position
-			RGXQoLDB["MainPanelA"]				= RGXQoLLC["MainPanelA"]
-			RGXQoLDB["MainPanelR"]				= RGXQoLLC["MainPanelR"]
-			RGXQoLDB["MainPanelX"]				= RGXQoLLC["MainPanelX"]
-			RGXQoLDB["MainPanelY"]				= RGXQoLLC["MainPanelY"]
-
-			-- Start page
-			RGXQoLDB["RGXQoLStartPage"]			= RGXQoLLC["RGXQoLStartPage"]
 
 
 
@@ -2460,33 +1295,6 @@
 ----------------------------------------------------------------------
 -- 	Options panel functions
 ----------------------------------------------------------------------
-
-	-- Function to add textures to panels
-	function RGXQoLLC:BuildHeaderBand(parent, height)
-		local Design = _G.RGXDesign
-		local header = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-		header:SetHeight(height or 52)
-		header:SetPoint("TOPLEFT", 0, 0)
-		header:SetPoint("TOPRIGHT", 0, 0)
-		header:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8x8", edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1 })
-		local br, bgc, bb = 0.055, 0.055, 0.071
-		local er, eg, eb = 0.137, 0.137, 0.173
-		local pr, pg, pb = 0.545, 0.082, 0.220
-		if Design then
-			br, bgc, bb = Design:Unpack("background")
-			er, eg, eb = Design:Unpack("border")
-			pr, pg, pb = Design:Unpack("primary")
-		end
-		header:SetBackdropColor(br, bgc, bb, 0.95)
-		header:SetBackdropBorderColor(er, eg, eb, 1)
-		local accent = header:CreateTexture(nil, "ARTWORK")
-		accent:SetHeight(2)
-		accent:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", 0, 0)
-		accent:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", 0, 0)
-		accent:SetColorTexture(pr, pg, pb, 1)
-		return header
-	end
-
 	function RGXQoLLC:GetAddonVersion()
 		if C_AddOns and C_AddOns.GetAddOnMetadata then
 			local ok, v = pcall(C_AddOns.GetAddOnMetadata, "RGXQoL", "Version")
@@ -2494,563 +1302,6 @@
 		end
 		return RGXQoLLC["AddonVer"]
 	end
-
-	function RGXQoLLC:CreateBar(name, parent, width, height, anchor, r, g, b, alp, tex)
-		local ft = parent:CreateTexture(nil, "BORDER")
-		ft:SetTexture(tex)
-		ft:SetSize(width, height)
-		ft:SetPoint(anchor)
-		ft:SetVertexColor(r ,g, b, alp)
-		if name == "MainTexture" then
-			ft:SetTexCoord(0.09, 1, 0, 1);
-		end
-	end
-
-	-- Create a configuration panel
-	function RGXQoLLC:CreatePanel(title, globref, scrolling)
-
-		-- Create the panel
-		local Side = CreateFrame("Frame", nil, UIParent)
-
-		-- Make it a system frame
-		_G["RGXQoLGlobalPanel_" .. globref] = Side
-		table.insert(UISpecialFrames, "RGXQoLGlobalPanel_" .. globref)
-
-		-- Store it in the configuration panel table
-		tinsert(RGXQoLConfigList, Side)
-
-		-- Set frame parameters
-		Side:Hide();
-		Side:SetSize(570, RGXQoLLC.MainPanelHeight)
-		Side:SetClampedToScreen(true)
-		Side:SetClampRectInsets(500, -500, -300, 300)
-		Side:SetFrameStrata("FULLSCREEN_DIALOG")
-
-		-- Set the background color
-		Side.t = Side:CreateTexture(nil, "BACKGROUND")
-		Side.t:SetAllPoints()
-		local Design = _G.RGXDesign
-		if Design then
-			Side.t:SetColorTexture(Design:Unpack("surface"))
-		else
-			Side.t:SetColorTexture(0.05, 0.05, 0.05, 0.9)
-		end
-		local sBorder = CreateFrame("Frame", nil, Side, "BackdropTemplate")
-		sBorder:SetAllPoints()
-		sBorder:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1 })
-		if Design then
-			sBorder:SetBackdropBorderColor(Design:Unpack("border"))
-		else
-			sBorder:SetBackdropBorderColor(0.137, 0.137, 0.173)
-		end
-		sBorder:SetFrameLevel(0)
-
-		-- Add a close Button
-		Side.c = CreateFrame("Button", nil, Side, "UIPanelCloseButton")
-		Side.c:SetSize(30, 30)
-		Side.c:SetPoint("TOPRIGHT", 0, 0)
-		Side.c:SetScript("OnClick", function() Side:Hide() end)
-
-		-- Add reset, help and back buttons
-		Side.r = RGXQoLLC:CreateButton("ResetButton", Side, "Reset", "BOTTOMLEFT", 16, 53, 0, 25, true, "Click to reset the settings on this page.")
-		Side.h = RGXQoLLC:CreateButton("HelpButton", Side, "Help", "BOTTOMLEFT", 76, 53, 0, 25, true, "No help is available for this page.")
-		Side.b = RGXQoLLC:CreateButton("BackButton", Side, "Back to Main Menu", "BOTTOMRIGHT", -16, 53, 0, 25, true, "Click to return to the main menu.")
-
-		-- Reposition help button so it doesn't overlap reset button
-		Side.h:ClearAllPoints()
-		Side.h:SetPoint("LEFT", Side.r, "RIGHT", 10, 0)
-
-		-- Remove the click texture from the help button
-		Side.h:SetPushedTextOffset(0, 0)
-
-		-- Add a reload button and syncronise it with the main panel reload button
-		local reloadb = RGXQoLLC:CreateButton("ConfigReload", Side, "Reload", "BOTTOMRIGHT", -16, 10, 0, 25, true, RGXQoLCB["ReloadUIButton"].tiptext)
-		RGXQoLLC:LockItem(reloadb,true)
-		reloadb:SetScript("OnClick", ReloadUI)
-
-		reloadb.f = reloadb:CreateFontString(nil, 'ARTWORK', 'GameFontNormalSmall')
-		reloadb.f:SetHeight(32);
-		reloadb.f:SetPoint('RIGHT', reloadb, 'LEFT', -10, 0)
-		reloadb.f:SetText(RGXQoLCB["ReloadUIButton"].f:GetText())
-		reloadb.f:Hide()
-
-		RGXQoLCB["ReloadUIButton"]:HookScript("OnEnable", function()
-			RGXQoLLC:LockItem(reloadb, false)
-			reloadb.f:Show()
-		end)
-
-		RGXQoLCB["ReloadUIButton"]:HookScript("OnDisable", function()
-			RGXQoLLC:LockItem(reloadb, true)
-			reloadb.f:Hide()
-		end)
-
-		-- Allow movement
-		Side:EnableMouse(true)
-		Side:SetMovable(true)
-		Side:RegisterForDrag("LeftButton")
-		Side:SetScript("OnDragStart", Side.StartMoving)
-		Side:SetScript("OnDragStop", function ()
-			Side:StopMovingOrSizing();
-			Side:SetUserPlaced(false);
-			-- Save panel position
-			RGXQoLLC["MainPanelA"], void, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"] = Side:GetPoint()
-		end)
-
-		-- Set panel attributes when shown
-		Side:SetScript("OnShow", function()
-			Side:ClearAllPoints()
-			Side:SetPoint(RGXQoLLC["MainPanelA"], UIParent, RGXQoLLC["MainPanelR"], RGXQoLLC["MainPanelX"], RGXQoLLC["MainPanelY"])
-			Side:SetScale(1)
-			Side.t:SetAlpha(1)
-		end)
-
-		-- RGXMods header band
-		local header = RGXQoLLC:BuildHeaderBand(Side)
-
-		-- Add title
-		Side.f = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-		Side.f:SetPoint("TOPLEFT", 16, -10)
-		Side.f:SetText(L[title])
-
-		-- Add description
-		Side.v = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-		Side.v:SetPoint("TOPLEFT", Side.f, "BOTTOMLEFT", 0, -2)
-		Side.v:SetText(L["Configuration Panel"])
-
-		local sver = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		sver:SetPoint("TOPRIGHT", header, "TOPRIGHT", -46, -12)
-		sver:SetJustifyH("RIGHT")
-		sver:SetText("v" .. tostring(RGXQoLLC:GetAddonVersion()))
-
-		if _G.RGXDesign then
-			Side.f:SetTextColor(_G.RGXDesign:Unpack("text"))
-			Side.v:SetTextColor(_G.RGXDesign:Unpack("subtext"))
-			sver:SetTextColor(_G.RGXDesign:Unpack("primary"))
-		end
-
-		-- Prevent options panel from showing while side panel is showing
-		RGXQoLLC["PageF"]:HookScript("OnShow", function()
-			if Side:IsShown() then RGXQoLLC["PageF"]:Hide(); end
-		end)
-
-		-- Create scroll frame if needed
-		if scrolling then
-
-			-- Create backdrop
-			Side.backFrame = CreateFrame("FRAME", nil, Side, "BackdropTemplate")
-			Side.backFrame:SetSize(Side:GetSize())
-			Side.backFrame:SetPoint("TOPLEFT", 16, -68)
-			Side.backFrame:SetPoint("BOTTOMRIGHT", -16, 98)
-			Side.backFrame:SetBackdrop({bgFile = "Interface\\Buttons\\WHITE8x8"})
-			if _G.RGXDesign then
-				local br, bgc, bb = _G.RGXDesign:Unpack("background")
-				Side.backFrame:SetBackdropColor(br, bgc, bb, 0.4)
-			else
-				Side.backFrame:SetBackdropColor(0.055, 0.055, 0.071, 0.4)
-			end
-
-			-- Create scroll frame
-			Side.scrollFrame = CreateFrame("ScrollFrame", nil, Side.backFrame, "RGXQoLConfigurationPanelScrollFrameTemplate")
-			Side.scrollChild = CreateFrame("Frame", nil, Side.scrollFrame)
-
-			Side.scrollChild:SetSize(1, 1)
-			Side.scrollFrame:SetScrollChild(Side.scrollChild)
-			Side.scrollFrame:SetPoint("TOPLEFT", -8, -6)
-			Side.scrollFrame:SetPoint("BOTTOMRIGHT", -29, 6)
-			Side.scrollFrame:SetPanExtent(20)
-
-			-- Set scroll list to top when shown
-			Side.scrollFrame:HookScript("OnShow", function()
-				Side.scrollFrame:SetVerticalScroll(0)
-			end)
-
-			-- Add scroll for more message
-			local footMessage = RGXQoLLC:MakeTx(Side, "(scroll the list for more)", 16, 0)
-			footMessage:ClearAllPoints()
-			footMessage:SetPoint("TOPRIGHT", Side.scrollFrame, "TOPRIGHT", 28, 24)
-
-			-- Give child a file level scope (it's used in RGXQoLLC.TipSee)
-			RGXQoLLC[globref .. "ScrollChild"] = Side.scrollChild
-
-		end
-
-		-- Return the frame
-		return Side
-
-	end
-
-	-- Define subheadings
-	function RGXQoLLC:MakeTx(frame, title, x, y)
-		local text = frame:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-		text:SetPoint("TOPLEFT", x, y)
-		text:SetText(L[title])
-		if _G.RGXDesign then
-			text:SetTextColor(_G.RGXDesign:Unpack("primary"))
-		end
-		return text
-	end
-
-	-- Define text
-	function RGXQoLLC:MakeWD(frame, title, x, y)
-		local text = frame:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
-		text:SetPoint("TOPLEFT", x, y)
-		text:SetText(L[title])
-		text:SetJustifyH"LEFT";
-		return text
-	end
-
-	-- Create a slider control (uses standard template)
-	function RGXQoLLC:MakeSL(frame, field, caption, low, high, step, x, y, form)
-
-		-- Create slider control
-		local Slider = CreateFrame("Slider", nil, frame, "RGXQoLConfigurationPanelSliderTemplate") -- Old is UISliderTemplate
-		RGXQoLCB[field] = Slider
-		Slider:SetMinMaxValues(low, high)
-		Slider:SetValueStep(step)
-		Slider:EnableMouseWheel(true)
-		Slider:SetPoint('TOPLEFT', x, y)
-		Slider:SetWidth(100)
-		Slider:SetHeight(20)
-		Slider:SetHitRectInsets(0, 0, 0, 0)
-		Slider.tiptext = L[caption]
-		Slider:SetScript("OnEnter", RGXQoLLC.TipSee)
-		Slider:SetScript("OnLeave", GameTooltip_Hide)
-
-		-- Create slider label
-		Slider.f = Slider:CreateFontString(nil, 'BACKGROUND')
-		Slider.f:SetFontObject('GameFontHighlight')
-		Slider.f:SetPoint('LEFT', Slider, 'RIGHT', 12, 0)
-		Slider.f:SetFormattedText("%.2f", Slider:GetValue())
-		if _G.RGXDesign then
-			Slider.f:SetTextColor(_G.RGXDesign:Unpack("text"))
-		end
-
-		-- Process mousewheel scrolling
-		Slider:SetScript("OnMouseWheel", function(self, arg1)
-			if Slider:IsEnabled() then
-				local step = step * arg1
-				local value = self:GetValue()
-				if step > 0 then
-					self:SetValue(min(value + step, high))
-				else
-					self:SetValue(max(value + step, low))
-				end
-			end
-		end)
-
-		-- Process value changed
-		Slider:SetScript("OnValueChanged", function(self, value)
-			local value = floor((value - low) / step + 0.5) * step + low
-			Slider.f:SetFormattedText(form, value)
-			RGXQoLLC[field] = value
-		end)
-
-		-- Set slider value when shown
-		Slider:SetScript("OnShow", function(self)
-			self:SetValue(RGXQoLLC[field])
-		end)
-
-	end
-
-	-- Create a checkbox control (uses standard template)
- 	function RGXQoLLC:MakeCB(parent, field, caption, x, y, reload, tip, tipstyle)
-
-		-- Create the checkbox
-		local Cbox = CreateFrame('CheckButton', nil, parent, "ChatConfigCheckButtonTemplate")
-		RGXQoLCB[field] = Cbox
-		Cbox:SetPoint("TOPLEFT",x, y)
-		Cbox:SetScript("OnEnter", RGXQoLLC.TipSee)
-		Cbox:SetScript("OnLeave", GameTooltip_Hide)
-
-		-- Add label and tooltip
-		Cbox.f = Cbox:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
-		Cbox.f:SetPoint('LEFT', 20, 0)
-
-		-- RGXDesign: theme the checkbox label
-		local Design = _G.RGXDesign
-		if Design then
-			Cbox.f:SetTextColor(Design:Unpack("text"))
-		end
-
-		if reload then
-			-- Checkbox requires UI reload
-			Cbox.f:SetText(L[caption] .. "*")
-			Cbox.tiptext = L[tip] .. "|n|n* " .. L["Requires UI reload."]
-		else
-			-- Checkbox does not require UI reload
-			Cbox.f:SetText(L[caption])
-			Cbox.tiptext = L[tip]
-		end
-
-		-- Set label parameters
-		Cbox.f:SetJustifyH("LEFT")
-		Cbox.f:SetWordWrap(false)
-
-		-- Set maximum label width
-		if parent:GetParent() == RGXQoLLC["PageF"] then
-			-- Main panel checkbox labels
-			if Cbox.f:GetWidth() > 152 then
-				Cbox.f:SetWidth(152)
-				RGXQoLLC["TruncatedLabelsList"] = RGXQoLLC["TruncatedLabelsList"] or {}
-				RGXQoLLC["TruncatedLabelsList"][Cbox.f] = L[caption]
-			end
-			-- Set checkbox click width
-			if Cbox.f:GetStringWidth() > 152 then
-				Cbox:SetHitRectInsets(0, -142, 0, 0)
-			else
-				Cbox:SetHitRectInsets(0, -Cbox.f:GetStringWidth() + 4, 0, 0)
-			end
-		else
-			-- Configuration panel checkbox labels (other checkboxes either have custom functions or blank labels)
-			if Cbox.f:GetWidth() > 302 then
-				Cbox.f:SetWidth(302)
-				RGXQoLLC["TruncatedLabelsList"] = RGXQoLLC["TruncatedLabelsList"] or {}
-				RGXQoLLC["TruncatedLabelsList"][Cbox.f] = L[caption]
-			end
-			-- Set checkbox click width
-			if Cbox.f:GetStringWidth() > 302 then
-				Cbox:SetHitRectInsets(0, -292, 0, 0)
-			else
-				Cbox:SetHitRectInsets(0, -Cbox.f:GetStringWidth() + 4, 0, 0)
-			end
-		end
-
-		-- Set default checkbox state and click area
-		Cbox:SetScript('OnShow', function(self)
-			if RGXQoLLC[field] == "On" then
-				self:SetChecked(true)
-			else
-				self:SetChecked(false)
-			end
-		end)
-
-		-- Process clicks
-		Cbox:SetScript('OnClick', function()
-			if Cbox:GetChecked() then
-				RGXQoLLC[field] = "On"
-			else
-				RGXQoLLC[field] = "Off"
-			end
-			RGXQoLLC:SetDim(); -- Lock invalid options
-			RGXQoLLC:ReloadCheck(); -- Show reload button if needed
-		end)
-	end
-
-	-- Create an editbox (uses standard template)
-	function RGXQoLLC:CreateEditBox(frame, parent, width, maxchars, anchor, x, y, tab, shifttab)
-
-		-- Create editbox
-        local eb = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
-		RGXQoLCB[frame] = eb
-		eb:SetPoint(anchor, x, y)
-		eb:SetWidth(width)
-		eb:SetHeight(24)
-		eb:SetFontObject("GameFontNormal")
-		eb:SetTextColor(1.0, 1.0, 1.0)
-		eb:SetAutoFocus(false)
-		eb:SetMaxLetters(maxchars)
-		eb:SetScript("OnEscapePressed", eb.ClearFocus)
-		eb:SetScript("OnEnterPressed", eb.ClearFocus)
-
-		-- Add editbox border and backdrop
-		eb.f = CreateFrame("FRAME", nil, eb, "BackdropTemplate")
-		eb.f:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = false, tileSize = 16, edgeSize = 16, insets = { left = 5, right = 5, top = 5, bottom = 5 }})
-		eb.f:SetPoint("LEFT", -6, 0)
-		eb.f:SetWidth(eb:GetWidth()+6)
-		eb.f:SetHeight(eb:GetHeight())
-		eb.f:SetBackdropColor(1.0, 1.0, 1.0, 0.3)
-
-		-- Move onto next editbox when tab key is pressed
-		eb:SetScript("OnTabPressed", function(self)
-			self:ClearFocus()
-			if IsShiftKeyDown() then
-				RGXQoLCB[shifttab]:SetFocus()
-			else
-				RGXQoLCB[tab]:SetFocus()
-			end
-		end)
-
-		return eb
-
-	end
-
-	-- Create a standard button (using standard button template)
-	function RGXQoLLC:CreateButton(name, frame, label, anchor, x, y, width, height, reskin, tip, naked)
-		local mbtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-		RGXQoLCB[name] = mbtn
-		mbtn:SetSize(width, height)
-		mbtn:SetPoint(anchor, x, y)
-		mbtn:SetHitRectInsets(0, 0, 0, 0)
-		mbtn:SetText(L[label])
-
-		-- Create fontstring so the button can be sized correctly
-		mbtn.f = mbtn:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-		mbtn.f:SetText(L[label])
-		if width > 0 then
-			-- Button should have static width
-			mbtn:SetWidth(width)
-		else
-			-- Button should have variable width
-			mbtn:SetWidth(mbtn.f:GetStringWidth() + 20)
-		end
-
-		-- Tooltip handler
-		mbtn.tiptext = L[tip]
-		mbtn:SetScript("OnEnter", RGXQoLLC.TipSee)
-		mbtn:SetScript("OnLeave", GameTooltip_Hide)
-
-		-- Texture the button
-		if reskin then
-
-			-- Set skinned button textures
-			if not naked then
-				mbtn:SetNormalTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
-				mbtn:GetNormalTexture():SetTexCoord(0.125, 0.25, 0.21875, 0.25)
-			end
-			mbtn:SetHighlightTexture("Interface\\AddOns\\RGXQoL\\RGXQoL.blp")
-			mbtn:GetHighlightTexture():SetTexCoord(0, 0.125, 0.21875, 0.25)
-
-			-- Hide the default textures
-			mbtn:HookScript("OnShow", function() mbtn.Left:Hide(); mbtn.Middle:Hide(); mbtn.Right:Hide() end)
-			mbtn:HookScript("OnEnable", function() mbtn.Left:Hide(); mbtn.Middle:Hide(); mbtn.Right:Hide() end)
-			mbtn:HookScript("OnDisable", function() mbtn.Left:Hide(); mbtn.Middle:Hide(); mbtn.Right:Hide() end)
-			mbtn:HookScript("OnMouseDown", function() mbtn.Left:Hide(); mbtn.Middle:Hide(); mbtn.Right:Hide() end)
-			mbtn:HookScript("OnMouseUp", function() mbtn.Left:Hide(); mbtn.Middle:Hide(); mbtn.Right:Hide() end)
-
-		end
-
-		return mbtn
-	end
-
-	-- Create a dropdown menu (using standard dropdown template)
-	function RGXQoLLC:CreateDropdown(frame, label, width, anchor, parent, relative, x, y, items)
-
-		local RadioDropdown = CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
-		RGXQoLCB[frame] = RadioDropdown
-		RadioDropdown:SetPoint(anchor, parent, relative, x, y)
-		RadioDropdown:SetWidth(width)
-
-		local function IsSelected(value)
-			return value == RGXQoLLC[frame]
-		end
-
-		local function SetSelected(value)
-			RGXQoLLC[frame] = value
-		end
-
-		MenuUtil.CreateRadioMenu(RadioDropdown, IsSelected, SetSelected, unpack(items))
-
-		local lf = RadioDropdown:CreateFontString(nil, "OVERLAY", "GameFontNormal"); lf:SetPoint("TOPLEFT", RadioDropdown, 0, 20); lf:SetPoint("TOPRIGHT", RadioDropdown, -5, 20); lf:SetJustifyH("LEFT"); lf:SetText(L[label])
-
-	end
-
-----------------------------------------------------------------------
--- 	Create main options panel frame
-----------------------------------------------------------------------
-
-	function RGXQoLLC:CreateMainPanel()
-
-		-- Create the panel
-		local PageF = CreateFrame("Frame", nil, UIParent);
-
-		-- Settings-integrated panel: registered as an options-page canvas,
-		-- never an independent floating window (see L45).
-		_G["RGXQoLGlobalPanel"] = PageF
-
-		-- Set frame parameters
-		RGXQoLLC["PageF"] = PageF
-		PageF:SetSize(570, RGXQoLLC.MainPanelHeight)
-		PageF:Hide();
-		PageF:SetClampedToScreen(true)
-		PageF:EnableMouse(true)
-
-		-- Add background color (RGXDesign themed)
-		local Design = _G.RGXDesign
-		PageF.t = PageF:CreateTexture(nil, "BACKGROUND")
-		PageF.t:SetAllPoints()
-		if Design then
-			PageF.t:SetColorTexture(Design:Unpack("surface"))
-		else
-			PageF.t:SetColorTexture(0.05, 0.05, 0.05, 0.9)
-		end
-		local border = CreateFrame("Frame", nil, PageF, "BackdropTemplate")
-		border:SetAllPoints()
-		border:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1 })
-		if Design then
-			border:SetBackdropBorderColor(Design:Unpack("border"))
-		else
-			border:SetBackdropBorderColor(0.137, 0.137, 0.173)
-		end
-		border:SetFrameLevel(0)
-
-		-- Settings-integrated: PageF fills its options-pane parent; no float positioning.
-
-		-- RGXMods header band: dark strip, accent line, identity column
-		local header = RGXQoLLC:BuildHeaderBand(PageF)
-		PageF.header = header
-
-		local icon = header:CreateTexture(nil, "ARTWORK")
-		icon:SetSize(30, 30)
-		icon:SetPoint("LEFT", 12, 0)
-		icon:SetTexture("Interface\\AddOns\\RGX-Framework\\media\\logo.tga")
-
-		PageF.mt = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-		PageF.mt:SetPoint("LEFT", header, "TOPLEFT", 52, -14)
-		PageF.mt:SetText("|cff8B1538RGX|r |cffffffffQoL|r")
-
-		PageF.v = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		PageF.v:SetPoint("LEFT", header, "TOPLEFT", 52, -27)
-		PageF.v:SetText("Quality of life enhancements for WoW Forever")
-
-		local discord = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-		discord:SetPoint("LEFT", header, "TOPLEFT", 52, -39)
-		local dInvite = "discord.gg/N7kdKAHVVF"
-		if C_AddOns and C_AddOns.GetAddOnMetadata then
-			local ok, v = pcall(C_AddOns.GetAddOnMetadata, "RGXQoL", "X-Discord")
-			if ok and v and v ~= "" then dInvite = v end
-		end
-		discord:SetText("|cff7289daDiscord:|r |cffffd700" .. dInvite .. "|r")
-		discord:SetTextColor(0.85, 0.85, 0.85)
-
-		local ver = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		ver:SetPoint("TOPRIGHT", header, "TOPRIGHT", -14, -12)
-		ver:SetJustifyH("RIGHT")
-		ver:SetText("v" .. tostring(RGXQoLLC.GetAddonVersion and RGXQoLLC:GetAddonVersion() or RGXQoLLC["AddonVer"]))
-
-		local auth = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-		auth:SetPoint("TOPRIGHT", header, "TOPRIGHT", -14, -25)
-		auth:SetJustifyH("RIGHT")
-		auth:SetText("by donniedice")
-
-		local brand = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		brand:SetPoint("TOPRIGHT", header, "TOPRIGHT", -14, -38)
-		brand:SetJustifyH("RIGHT")
-		brand:SetText("|cff8B1538RGX|r |cffffd700Mods|r")
-
-		if Design then
-			PageF.mt:SetTextColor(Design:Unpack("text"))
-			PageF.v:SetTextColor(Design:Unpack("subtext"))
-			ver:SetTextColor(Design:Unpack("primary"))
-			auth:SetTextColor(Design:Unpack("subtext"))
-		end
-
-		-- Add reload UI Button
-		local reloadb = RGXQoLLC:CreateButton("ReloadUIButton", PageF, "Reload", "BOTTOMRIGHT", -16, 10, 0, 25, true, "Your UI needs to be reloaded for some of the changes to take effect.|n|nYou don't have to click the reload button immediately but you do need to click it when you are done making changes and you want the changes to take effect.")
-		RGXQoLLC:LockItem(reloadb,true)
-		reloadb:SetScript("OnClick", ReloadUI)
-
-		reloadb.f = reloadb:CreateFontString(nil, 'ARTWORK', 'GameFontNormalSmall')
-		reloadb.f:SetHeight(32);
-		reloadb.f:SetPoint('RIGHT', reloadb, 'LEFT', -10, 0)
-		reloadb.f:SetText(L["Your UI needs to be reloaded."])
-		reloadb.f:Hide()
-
-		-- Release memory
-		RGXQoLLC.CreateMainPanel = nil
-
-	end
-
-	RGXQoLLC:CreateMainPanel();
 
 ----------------------------------------------------------------------
 -- 	L80: Commands
@@ -3074,24 +1325,8 @@
 				RGXQoLLC:Print("RGX QoL will not overwrite RGXQoLDB at next logout.")
 				return
 			elseif str == "reset" then
-				-- Reset panel positions
-				RGXQoLLC["PageF"]:SetScale(1)
-				-- Refresh panels
-				RGXQoLLC["PageF"]:ClearAllPoints()
-				RGXQoLLC["PageF"]:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-				-- Reset currently showing configuration panel
-				for k, v in pairs(RGXQoLConfigList) do
-					if v:IsShown() then
-						v:ClearAllPoints()
-						v:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-						v:SetScale(1)
-					end
-				end
-				-- Refresh RGX QoL Plus settings menu only
-				if RGXQoLLC["Page8"]:IsShown() then
-					RGXQoLLC["Page8"]:Hide()
-					RGXQoLLC["Page8"]:Show()
-				end
+				-- Panel preferences are framework-managed now; nothing position/scale to reset
+				RGXQoLLC:Print("The options panel is hosted in the game settings window; there is no panel position to reset. Use /qol wipe to reset all settings.")
 				return
 			elseif str == "taint" then
 				-- Set taint log level
@@ -3259,7 +1494,6 @@
 				end)
 			elseif str == "rsnd" then
 				-- Restart sound system
-				if RGXQoLCB["StopMusicBtn"] then RGXQoLCB["StopMusicBtn"]:Click() end
 				Sound_GameSystem_RestartSoundSystem()
 				RGXQoLLC:Print("Sound system restarted.")
 				return
@@ -3686,59 +1920,22 @@
 				end
 				return
 			elseif str == "help" then
-				-- Help panel
-				if not RGXQoLLC.HelpFrame then
-					local frame = CreateFrame("FRAME", nil, UIParent)
-					frame:SetSize(570, 360); frame:SetFrameStrata("FULLSCREEN_DIALOG"); frame:SetFrameLevel(100)
-					frame.tex = frame:CreateTexture(nil, "BACKGROUND"); frame.tex:SetAllPoints(); frame.tex:SetColorTexture(0.05, 0.05, 0.05, 0.9)
-					frame.close = CreateFrame("Button", nil, frame, "UIPanelCloseButton"); frame.close:SetSize(30, 30); frame.close:SetPoint("TOPRIGHT", 0, 0); frame.close:SetScript("OnClick", function() frame:Hide() end)
-					frame:ClearAllPoints(); frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-					frame:SetClampedToScreen(true)
-					frame:SetClampRectInsets(450, -450, -300, 300)
-					frame:EnableMouse(true)
-					frame:SetMovable(true)
-					frame:RegisterForDrag("LeftButton")
-					frame:SetScript("OnDragStart", frame.StartMoving)
-					frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() frame:SetUserPlaced(false) end)
-					frame:Hide()
-					RGXQoLLC:CreateBar("HelpPanelMainTexture", frame, 570, 360, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "")
-					-- Panel contents
-					local col1, col2, color1 = 10, 120, "|cffffffaa"
-					RGXQoLLC:MakeTx(frame, "RGX QoL Plus Help", col1, -10)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol", col1, -30)
-					RGXQoLLC:MakeWD(frame, "Toggle opttions panel.", col2, -30)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol reset", col1, -50)
-					RGXQoLLC:MakeWD(frame, "Reset addon panel position and scale.", col2, -50)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol wipe", col1, -70)
-					RGXQoLLC:MakeWD(frame, "Wipe all addon settings (reloads UI).", col2, -70)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol realm", col1, -90)
-					RGXQoLLC:MakeWD(frame, "Show realms connected to yours.", col2, -90)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol rest", col1, -110)
-					RGXQoLLC:MakeWD(frame, "Show number of rested XP bubbles remaining.", col2, -110)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol quest <id>", col1, -130)
-					RGXQoLLC:MakeWD(frame, "Show quest completion status for <quest id>.", col2, -130)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol quest wipe", col1, -150)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol grid", col1, -170)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol id", col1, -190)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol zygor", col1, -210)
-					RGXQoLLC:MakeWD(frame, "Toggle the Zygor addon (reloads UI).", col2, -210)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol movie <id>", col1, -230)
-					RGXQoLLC:MakeWD(frame, "Play a movie by its ID.", col2, -230)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol marker", col1, -250)
-					RGXQoLLC:MakeWD(frame, "Block target markers (toggle) (requires assistant or leader in raid).", col2, -250)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol rsnd", col1, -270)
-					RGXQoLLC:MakeWD(frame, "Restart the sound system.", col2, -270)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol ra", col1, -290)
-					RGXQoLLC:MakeWD(frame, "Announce target in General chat channel (useful for rares).", col2, -290)
-					RGXQoLLC:MakeWD(frame, color1 .. "/qol con", col1, -310)
-					RGXQoLLC:MakeWD(frame, "Launch the developer console with a large font.", col2, -310)
-					RGXQoLLC:MakeWD(frame, color1 .. "/rl", col1, -330)
-					RGXQoLLC:MakeWD(frame, "Reload the UI.", col2, -330)
-					RGXQoLLC.HelpFrame = frame
-					_G["RGXQoLGlobalHelpPanel"] = frame
-					table.insert(UISpecialFrames, "RGXQoLGlobalHelpPanel")
-				end
-				if RGXQoLLC.HelpFrame:IsShown() then RGXQoLLC.HelpFrame:Hide() else RGXQoLLC.HelpFrame:Show() end
+				-- Command list (chat output; legacy help window removed with the old UI)
+				local color1 = "|cffffffaa"
+				RGXQoLLC:Print(color1 .. "/qol|r Toggle options panel")
+				RGXQoLLC:Print(color1 .. "/qol wipe|r Wipe all addon settings (reloads UI)")
+				RGXQoLLC:Print(color1 .. "/qol realm|r Show realms connected to yours")
+				RGXQoLLC:Print(color1 .. "/qol rest|r Show number of rested XP bubbles remaining")
+				RGXQoLLC:Print(color1 .. "/qol quest <id>|r Show quest completion status")
+				RGXQoLLC:Print(color1 .. "/qol grid|r Toggle frame alignment grid")
+				RGXQoLLC:Print(color1 .. "/qol id|r Print NPC ID")
+				RGXQoLLC:Print(color1 .. "/qol zygor|r Toggle the Zygor addon (reloads UI)")
+				RGXQoLLC:Print(color1 .. "/qol movie <id>|r Play a movie by its ID")
+				RGXQoLLC:Print(color1 .. "/qol marker|r Block target markers (toggle)")
+				RGXQoLLC:Print(color1 .. "/qol rsnd|r Restart the sound system")
+				RGXQoLLC:Print(color1 .. "/qol ra|r Announce target in chat (rares)")
+				RGXQoLLC:Print(color1 .. "/qol con|r Launch the developer console")
+				RGXQoLLC:Print(color1 .. "/rl|r Reload the UI")
 				return
 			elseif str == "ra" then
 				-- Announce target name, health percentage, coordinates and map pin link in General chat channel
@@ -4004,217 +2201,10 @@
 					RGXQoLLC:Print("You cannot do that while in group finder.")
 				end
 				return
-			elseif str == "limit" then
-				-- Sound Limit
-				if not RGXQoLLC.MuteFrame then
-					-- Panel frame
-					local frame = CreateFrame("FRAME", nil, UIParent)
-					frame:SetSize(294, 86); frame:SetFrameStrata("FULLSCREEN_DIALOG"); frame:SetFrameLevel(100); frame:SetScale(2)
-					frame.tex = frame:CreateTexture(nil, "BACKGROUND"); frame.tex:SetAllPoints(); frame.tex:SetColorTexture(0.05, 0.05, 0.05, 0.9)
-					frame.close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-					frame.close:SetSize(30, 30)
-					frame.close:SetPoint("TOPRIGHT", 0, 0)
-					frame.close:SetScript("OnClick", function() frame:Hide() end)
-					frame:ClearAllPoints(); frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-					frame:SetClampedToScreen(true)
-					frame:EnableMouse(true)
-					frame:SetMovable(true)
-					frame:RegisterForDrag("LeftButton")
-					frame:SetScript("OnDragStart", frame.StartMoving)
-					frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() frame:SetUserPlaced(false) end)
-					frame:Hide()
-					RGXQoLLC:CreateBar("MutePanelMainTexture", frame, 294, 86, "TOPRIGHT", 0.7, 0.7, 0.7, 0.7,  "")
-					-- Panel contents
-					RGXQoLLC:MakeTx(frame, "Sound Limit", 16, -12)
-					local endBox = RGXQoLLC:CreateEditBox("SoundEndBox", frame, 116, 10, "TOPLEFT", 16, -32, "SoundEndBox", "SoundEndBox")
-					endBox:SetText(9000000)
-					endBox:SetScript("OnMouseWheel", function(self, delta)
-						local endSound = tonumber(endBox:GetText())
-						if endSound then
-							if delta == 1 then endSound = endSound + RGXQoLLC.SoundByte else endSound = endSound - RGXQoLLC.SoundByte end
-							if endSound < 1 then endSound = 1 elseif endSound >= 9000000 then endSound = 9000000 end
-							endBox:SetText(endSound)
-						else
-							endSound = 100000
-							endBox:SetText(endSound)
-						end
-					end)
-					-- Set limit button
-					frame.btn = RGXQoLLC:CreateButton("muteRangeButton", frame, "SET LIMIT", "TOPLEFT", 16, -72, 0, 25, true, "Click to set the sound file limit.  Use the mousewheel on the editbox along with the step buttons below to adjust the sound limit.  Acceptable range is from 1 to 9000000.  Sound files higher than this limit will be muted.")
-					frame.btn:ClearAllPoints()
-					frame.btn:SetPoint("LEFT", endBox, "RIGHT", 10, 0)
-					frame.btn:SetScript("OnClick", function()
-						local endSound = tonumber(endBox:GetText())
-						if endSound then
-							if endSound > 9000000 then endSound = 9000000 endBox:SetText(endSound) end
-							frame.btn:SetText("WAIT")
-							C_Timer.After(0.1, function()
-								for i = 1, 9000000 do
-									MuteSoundFile(i)
-								end
-								for i = 1, endSound do
-									UnmuteSoundFile(i)
-								end
-								Sound_GameSystem_RestartSoundSystem()
-								frame.btn:SetText("SET LIMIT")
-							end)
-						else
-							frame.btn:SetText("INVALID")
-							frame.btn:EnableMouse(false)
-							C_Timer.After(2, function()
-								frame.btn:SetText("SET LIMIT")
-								frame.btn:EnableMouse(true)
-							end)
-						end
-					end)
-					-- Mute all button
-					frame.MuteAllBtn = RGXQoLLC:CreateButton("muteMuteAllButton", frame, "MUTE ALL", "TOPLEFT", 16, -92, 0, 25, true, "Click to mute every sound in the game.")
-					frame.MuteAllBtn:SetScale(0.5)
-					frame.MuteAllBtn:ClearAllPoints()
-					frame.MuteAllBtn:SetPoint("TOPLEFT", frame.btn, "TOPRIGHT", 20, 0)
-					frame.MuteAllBtn:SetScript("OnClick", function()
-						frame.MuteAllBtn:SetText("WAIT")
-						C_Timer.After(0.1, function()
-							for i = 1, 9000000 do
-								MuteSoundFile(i)
-							end
-							Sound_GameSystem_RestartSoundSystem()
-							frame.MuteAllBtn:SetText("MUTE ALL")
-						end)
-						return
-					end)
-					-- Unmute all button
-					frame.UnmuteAllBtn = RGXQoLLC:CreateButton("muteUnmuteAllButton", frame, "UNMUTE ALL", "TOPLEFT", 16, -92, 0, 25, true, "Click to unmute every sound in the game.")
-					frame.UnmuteAllBtn:SetScale(0.5)
-					frame.UnmuteAllBtn:ClearAllPoints()
-					frame.UnmuteAllBtn:SetPoint("TOPLEFT", frame.MuteAllBtn, "BOTTOMLEFT", 0, -10)
-					frame.UnmuteAllBtn:SetScript("OnClick", function()
-						frame.UnmuteAllBtn:SetText("WAIT")
-						C_Timer.After(0.1, function()
-							for i = 1, 9000000 do
-								UnmuteSoundFile(i)
-							end
-							Sound_GameSystem_RestartSoundSystem()
-							frame.UnmuteAllBtn:SetText("UNMUTE ALL")
-						end)
-						return
-					end)
-					-- Step buttons
-					frame.millionBtn = RGXQoLLC:CreateButton("SoundMillionButton", frame, "1000000", "TOPLEFT", 26, -122, 0, 25, true, "Set the editbox step value to 1000000.")
-					frame.millionBtn:SetScale(0.5)
-
-					frame.hundredThousandBtn = RGXQoLLC:CreateButton("SoundHundredThousandButton", frame, "100000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 100000.")
-					frame.hundredThousandBtn:ClearAllPoints()
-					frame.hundredThousandBtn:SetPoint("LEFT", frame.millionBtn, "RIGHT", 10, 0)
-					frame.hundredThousandBtn:SetScale(0.5)
-
-					frame.tenThousandBtn = RGXQoLLC:CreateButton("SoundTenThousandButton", frame, "10000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 10000.")
-					frame.tenThousandBtn:ClearAllPoints()
-					frame.tenThousandBtn:SetPoint("LEFT", frame.hundredThousandBtn, "RIGHT", 10, 0)
-					frame.tenThousandBtn:SetScale(0.5)
-
-					frame.thousandBtn = RGXQoLLC:CreateButton("SoundThousandButton", frame, "1000", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 1000.")
-					frame.thousandBtn:ClearAllPoints()
-					frame.thousandBtn:SetPoint("LEFT", frame.tenThousandBtn, "RIGHT", 10, 0)
-					frame.thousandBtn:SetScale(0.5)
-
-					frame.hundredBtn = RGXQoLLC:CreateButton("SoundHundredButton", frame, "100", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 100.")
-					frame.hundredBtn:ClearAllPoints()
-					frame.hundredBtn:SetPoint("LEFT", frame.thousandBtn, "RIGHT", 10, 0)
-					frame.hundredBtn:SetScale(0.5)
-
-					frame.tenBtn = RGXQoLLC:CreateButton("SoundTenButton", frame, "10", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 10.")
-					frame.tenBtn:ClearAllPoints()
-					frame.tenBtn:SetPoint("LEFT", frame.hundredBtn, "RIGHT", 10, 0)
-					frame.tenBtn:SetScale(0.5)
-
-					frame.oneBtn = RGXQoLLC:CreateButton("SoundTenButton", frame, "1", "TOPLEFT", 16, -112, 0, 25, true, "Set the editbox step value to 1.")
-					frame.oneBtn:ClearAllPoints()
-					frame.oneBtn:SetPoint("LEFT", frame.tenBtn, "RIGHT", 10, 0)
-					frame.oneBtn:SetScale(0.5)
-
-					local function DimAllBoxes()
-						frame.millionBtn:SetAlpha(0.3)
-						frame.hundredThousandBtn:SetAlpha(0.3)
-						frame.tenThousandBtn:SetAlpha(0.3)
-						frame.thousandBtn:SetAlpha(0.3)
-						frame.hundredBtn:SetAlpha(0.3)
-						frame.tenBtn:SetAlpha(0.3)
-						frame.oneBtn:SetAlpha(0.3)
-					end
-
-					RGXQoLLC.SoundByte = 1000000
-					DimAllBoxes()
-					frame.millionBtn:SetAlpha(1)
-
-					-- Step button handlers
-					frame.millionBtn:SetScript("OnClick", function()
-						RGXQoLLC.SoundByte = 1000000
-						DimAllBoxes()
-						frame.millionBtn:SetAlpha(1)
-					end)
-
-					frame.hundredThousandBtn:SetScript("OnClick", function()
-						RGXQoLLC.SoundByte = 100000
-						DimAllBoxes()
-						frame.hundredThousandBtn:SetAlpha(1)
-					end)
-
-					frame.tenThousandBtn:SetScript("OnClick", function()
-						RGXQoLLC.SoundByte = 10000
-						DimAllBoxes()
-						frame.tenThousandBtn:SetAlpha(1)
-					end)
-
-					frame.thousandBtn:SetScript("OnClick", function()
-						RGXQoLLC.SoundByte = 1000
-						DimAllBoxes()
-						frame.thousandBtn:SetAlpha(1)
-					end)
-
-					frame.hundredBtn:SetScript("OnClick", function()
-						RGXQoLLC.SoundByte = 100
-						DimAllBoxes()
-						frame.hundredBtn:SetAlpha(1)
-					end)
-
-					frame.tenBtn:SetScript("OnClick", function()
-						RGXQoLLC.SoundByte = 10
-						DimAllBoxes()
-						frame.tenBtn:SetAlpha(1)
-					end)
-
-					frame.oneBtn:SetScript("OnClick", function()
-						RGXQoLLC.SoundByte = 1
-						DimAllBoxes()
-						frame.oneBtn:SetAlpha(1)
-					end)
-
-					-- Final code
-					RGXQoLLC.MuteFrame = frame
-					_G["RGXQoLGlobalMutePanel"] = frame
-					table.insert(UISpecialFrames, "RGXQoLGlobalMutePanel")
-				end
-				if RGXQoLLC.MuteFrame:IsShown() then RGXQoLLC.MuteFrame:Hide() else RGXQoLLC.MuteFrame:Show() end
-				return
 			elseif str == "mem" or str == "m" then
-				-- Show addon panel with memory usage
-				if RGXQoLLC.ShowMemoryUsage then
-					RGXQoLLC:ShowMemoryUsage(RGXQoLLC["Page8"], "TOPLEFT", 146, -262)
-				end
-				-- Prevent options panel from showing if a chat configuration panel is showing
-				if ChatConfigFrame:IsShown() then return end
-				-- Prevent options panel from showing if Blizzard Store is showing
-				if StoreFrame and StoreFrame:GetAttribute("isshown") then return end
-				-- Toggle the options panel if game options panel is not showing
-				if RGXQoLLC:IsPlusShowing() then
-					RGXQoLLC:HideFrames()
-					RGXQoLLC:HideConfigPanels()
-				else
-					RGXQoLLC:HideFrames()
-					RGXQoLLC["PageF"]:Show()
-				end
-				RGXQoLLC["Page"..RGXQoLLC["RGXQoLStartPage"]]:Show()
+				-- Print this addon's memory usage in chat
+				UpdateAddOnMemoryUsage()
+				RGXQoLLC:Print("Memory usage: |cffffffff" .. string.format("%.2f", GetAddOnMemoryUsage("RGXQoL") / 1024) .. "|r MB")
 				return
 			elseif str == "gossinfo" then
 				-- Print gossip frame information
@@ -4248,39 +2238,13 @@
 				end
 				return
 			elseif str == "svars" then
-				-- Print saved variables
+				-- Print saved variables (checkbox/slider/dropdown browser was removed with the legacy UI)
 				RGXQoLLC:Print(L["Saved Variables"] .. "|n")
-				RGXQoLLC:Print(L["The following list shows option label, setting name and currently saved value.  Enable |cffffffffIncrease chat history|r (chat) and |cffffffffRecent chat window|r (chat) to make it easier."] .. "|n")
 				RGXQoLLC:Print(L["Modifying saved variables must start with |cffffffff/qol nosave|r to prevent your changes from being reverted during reload or logout."] .. "|n")
 				RGXQoLLC:Print(L['Syntax is |cffffffff/run RGXQoLDB[' .. '"' .. 'setting name' .. '"' .. '] = ' .. '"' .. 'value' .. '" |r(case sensitive).'])
 				RGXQoLLC:Print(L["When done, |cffffffff/reload|r to save your changes."] .. "|n")
-				-- Checkboxes
-				RGXQoLLC:Print(L["Checkboxes"] .. "|n")
-				RGXQoLLC:Print(L["Checkboxes can be set to On or Off."] .. "|n")
 				for key, value in pairs(RGXQoLDB) do
-					if RGXQoLCB[key] and RGXQoLCB[key].f then
-						if RGXQoLCB[key]:GetObjectType() ~= "Slider" and RGXQoLCB[key]:GetObjectType() ~= "Button" then
-							RGXQoLLC:Print(string.gsub(RGXQoLCB[key].f:GetText(), "%*$", "") .. ": |cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r")
-						end
-					end
-				end
-				-- Sliders
-				RGXQoLLC:Print("|n" .. L["Sliders"] .. "|n")
-				RGXQoLLC:Print(L["Sliders can be set to a numeric value which must be in the range supported by the slider."] .. "|n")
-				for key, value in pairs(RGXQoLDB) do
-					if RGXQoLCB[key] and RGXQoLCB[key].f then
-						if RGXQoLCB[key]:GetObjectType() == "Slider" then
-							RGXQoLLC:Print("Slider: " .. "|cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r" .. " (" .. string.gsub(RGXQoLCB[key].f:GetText(), "%*$", "") .. ")" )
-						end
-					end
-				end
-				-- Dropdowns
-				RGXQoLLC:Print("|n" .. L["Dropdowns"] .. "|n")
-				RGXQoLLC:Print(L["Dropdowns can be set to a numeric value which must be in the range supported by the dropdown."] .. "|n")
-				for key, value in pairs(RGXQoLDB) do
-					if RGXQoLCB[key] and RGXQoLCB[key]:GetObjectType() == "Button" and RGXQoLLC[key] then
-						RGXQoLLC:Print("Dropdown: " .. "|cffffffff" .. key .. "|r |cff1eff0c(" .. value .. ")|r")
-					end
+					RGXQoLLC:Print("|cffffffff" .. key .. "|r = |cff1eff0c" .. tostring(value) .. "|r")
 				end
 				return
 			elseif str == "tags" then
@@ -4360,44 +2324,8 @@
 			end
 			return
 		else
-			-- Open the Blizzard settings panel for RGX QoL
-			local function TryOpenQoLOptions()
-				if not (Settings and Settings.OpenToCategory) then return end
-
-				-- Forever/modern clients demand the numeric category ID; names and
-				-- table references crash OpenSettingsPanel. Try ID first, then the
-				-- category object, then legacy name — all pcall'd so no crash.
-				local target = RGXQoLLC.OptionsCategory
-				local id
-				if type(target) == "table" then
-					if type(target.GetID) == "function" then
-						local ok, v = pcall(target.GetID, target)
-						if ok and type(v) == "number" then id = v end
-					end
-					if id == nil and type(target.ID) == "number" then
-						id = target.ID
-					end
-				end
-				if id == nil and type(Settings.GetCategory) == "function" then
-					local ok, cat = pcall(Settings.GetCategory, "RGX QoL")
-					if ok and type(cat) == "table" then
-						if type(cat.GetID) == "function" then
-							local ok2, v = pcall(cat.GetID, cat)
-							if ok2 and type(v) == "number" then id = v end
-						end
-						if id == nil and type(cat.ID) == "number" then id = cat.ID end
-					end
-				end
-
-				if id then
-					Settings.OpenToCategory(id)
-					return
-				end
-				-- No numeric ID resolved: never pass a name (the client turns it
-				-- into an async OpenSettingsPanel call that pcall cannot contain).
-				RGXQoLLC:Print("Open |cff00ff00Options > AddOns > RGX QoL|r from the game menu.")
-			end
-			TryOpenQoLOptions()
+				-- Open the framework-hosted options panel
+				if OpenOptionsShared then OpenOptionsShared() end
 		end
 	end
 
@@ -4417,162 +2345,171 @@
 		ReloadUI()
 	end
 
+
 ----------------------------------------------------------------------
--- 	L90: Create options panel pages (no content yet)
+--	L95: Options panel (RGX-Framework) — one settings page of cards
 ----------------------------------------------------------------------
 
-	-- Function to add menu button
-	function RGXQoLLC:MakeMN(name, text, parent, anchor, x, y, width, height)
+	-- The legacy Leatrix window/pages/nav/gear machinery is gone. Options live
+	-- in a single settings-integrated page built from framework controls.
+	-- Runtime code keeps reading the legacy "On"/"Off" strings in RGXQoLLC;
+	-- the bridge below translates those to booleans for the framework
+	-- controls and back, so existing saved variables and presets keep working.
 
-		local mbtn = CreateFrame("Button", nil, parent)
-		RGXQoLLC[name] = mbtn
-		mbtn:Show();
-		mbtn:SetSize(width, height)
-		mbtn:SetPoint(anchor, x, y)
+	-- Bridge key (framework boolean storage) -> legacy option key
+	local BridgeKeys = {
+		automateQuests        = "AutomateQuests",
+		autoQuestAvailable    = "AutoQuestAvailable",
+		autoQuestCompleted    = "AutoQuestCompleted",
+		autoQuestShift        = "AutoQuestShift",
+		autoQuestKeyMenu      = "AutoQuestKeyMenu",
+		automateGossip        = "AutomateGossip",
+		autoAcceptSummon      = "AutoAcceptSummon",
+		autoAcceptRes         = "AutoAcceptRes",
+		autoResNoCombat       = "AutoResNoCombat",
+		autoReleasePvP        = "AutoReleasePvP",
+		autoReleaseNoAlterac  = "AutoReleaseNoAlterac",
+		autoReleaseDelay      = "AutoReleaseDelay",
+		autoSellJunk          = "AutoSellJunk",
+		autoSellShowSummary   = "AutoSellShowSummary",
+		autoRepairGear        = "AutoRepairGear",
+		autoRepairShowSummary = "AutoRepairShowSummary",
+		showMinimapIcon       = "ShowMinimapIcon",
+		useEnglishLanguage    = "UseEnglishLanguage",
+	}
 
-		-- Selection highlight (the .s texture page navigation toggles)
-		mbtn.s = mbtn:CreateTexture(nil, "OVERLAY")
-		mbtn.s:SetAllPoints()
-		do
-			local pr, pg, pb = 0.55, 0.08, 0.22
-			if _G.RGXDesign then
-				pr, pg, pb = _G.RGXDesign:Unpack("primary")
+	-- Bridge keys that carry numbers (not On/Off)
+	local NumericBridgeKeys = { autoQuestKeyMenu = true, autoReleaseDelay = true }
+
+	local BridgeStore = {}
+	local OpenOptionsShared -- set by BuildOptionsCanvas, used by the minimap button
+	local ReloadButton, ReloadLabel
+
+	-- Read legacy strings into the bridge store (call after profile load)
+	local function SyncBridgeFromLegacy()
+		for bkey, legacy in pairs(BridgeKeys) do
+			local v = RGXQoLLC[legacy]
+			if NumericBridgeKeys[bkey] then
+				BridgeStore[bkey] = tonumber(v) or (bkey == "autoQuestKeyMenu" and 1 or 200)
+			else
+				BridgeStore[bkey] = (v == "On")
 			end
-			mbtn.s:SetColorTexture(pr, pg, pb, 0.35)
 		end
-		mbtn.s:Hide()
+	end
 
-		-- Label (always created, Design-themed or plain)
-		mbtn.f = mbtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-		mbtn.f:SetPoint("CENTER", 0, 0)
-		mbtn.f:SetText(L[text] or text)
-
-		local Design = _G.RGXDesign
-		if Design then
-			local bg = mbtn:CreateTexture(nil, "BACKGROUND")
-			bg:SetAllPoints()
-			bg:SetColorTexture(Design:Unpack("surface"))
-			mbtn.bg = bg
-
-			local border = CreateFrame("Frame", nil, mbtn, "BackdropTemplate")
-			border:SetAllPoints()
-			border:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1 })
-			border:SetBackdropBorderColor(Design:Unpack("border"))
-			mbtn.border = border
-
-			mbtn.f:SetTextColor(Design:Unpack("text"))
-
-			mbtn:SetScript("OnEnter", function(self)
-				self.bg:SetColorTexture(Design:Unpack("hover"))
-				self.f:SetTextColor(Design:Unpack("primary"))
-				self.border:SetBackdropBorderColor(Design:Unpack("primary"))
-			end)
-
-			mbtn:SetScript("OnLeave", function(self)
-				self.bg:SetColorTexture(Design:Unpack("surface"))
-				self.f:SetTextColor(Design:Unpack("text"))
-				self.border:SetBackdropBorderColor(Design:Unpack("border"))
-			end)
+	-- Bridge change -> legacy string + feature setup hook + reload check
+	local function OnBridgeChange(bkey, value)
+		local legacy = BridgeKeys[bkey]
+		if not legacy then return end
+		if NumericBridgeKeys[bkey] then
+			RGXQoLLC[legacy] = math.floor(tonumber(value) or 1)
 		else
-			mbtn:SetAlpha(1.0)
+			RGXQoLLC[legacy] = value and "On" or "Off"
 		end
-
-		return mbtn, mbtn.s
+		local setup = RGXQoLLC.FeatureSetup and RGXQoLLC.FeatureSetup[legacy]
+		if setup then setup() end
+		RGXQoLLC:ReloadCheck()
 	end
 
-	-- Function to create individual options panel pages
-	function RGXQoLLC:MakePage(name, title, menu, menuname, menuparent, menuanchor, menux, menuy, menuwidth, menuheight)
-
-		-- Create frame
-		local oPage = CreateFrame("Frame", nil, RGXQoLLC["PageF"]);
-		RGXQoLLC[name] = oPage
-		oPage:SetAllPoints(RGXQoLLC["PageF"])
-		oPage:Hide();
-
-		-- Add page title
-		oPage.s = oPage:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
-		oPage.s:SetPoint('TOPLEFT', 146, -58)
-		oPage.s:SetText(L[title])
-		if _G.RGXDesign then
-			oPage.s:SetTextColor(_G.RGXDesign:Unpack("primary"))
-		end
-
-		-- Add menu item if needed
-		if menu then
-			RGXQoLLC[menu], RGXQoLLC[menu .. ".s"] = RGXQoLLC:MakeMN(menu, menuname, menuparent, menuanchor, menux, menuy, menuwidth, menuheight)
-			RGXQoLLC[name]:SetScript("OnShow", function() RGXQoLLC[menu .. ".s"]:Show(); end)
-			RGXQoLLC[name]:SetScript("OnHide", function() RGXQoLLC[menu .. ".s"]:Hide(); end)
-		end
-
-		return oPage;
-
-	end
-
-	-- Create options pages
-	RGXQoLLC["Page0"] = RGXQoLLC:MakePage("Page0", "Home"			, "RGXQoLNav0", "Home"			, RGXQoLLC["PageF"], "TOPLEFT", 16, -72, 112, 20)
-	RGXQoLLC["Page1"] = RGXQoLLC:MakePage("Page1", "Automation"	, "RGXQoLNav1", "Automation"	, RGXQoLLC["PageF"], "TOPLEFT", 16, -112, 112, 20)
-	RGXQoLLC["Page8"] = RGXQoLLC:MakePage("Page8", "Settings"		, "RGXQoLNav8", "Settings"		, RGXQoLLC["PageF"], "TOPLEFT", 16, -132, 112, 20)
-
-	-- Page navigation mechanism
-	for i = 0, RGXQoLLC["NumberOfPages"] do
-		if RGXQoLLC["RGXQoLNav"..i] then
-		RGXQoLLC["RGXQoLNav"..i]:SetScript("OnClick", function()
-			RGXQoLLC:HideFrames()
-			RGXQoLLC["PageF"]:Show();
-			RGXQoLLC["Page"..i]:Show();
-			RGXQoLLC["RGXQoLStartPage"] = i
-		end)
+	-- Reload-needed state drives the Addon card reload button
+	function RGXQoLLC:ReloadCheck()
+		local needs = (RGXQoLLC["UseEnglishLanguage"] ~= RGXQoLDB["UseEnglishLanguage"])
+		if ReloadButton then
+			if needs then
+				ReloadButton:Enable()
+				if ReloadLabel then ReloadLabel:Show() end
+			else
+				ReloadButton:Disable()
+				if ReloadLabel then ReloadLabel:Hide() end
+			end
 		end
 	end
 
-	-- Use a variable to contain the page number (makes it easier to move options around)
-	local pg;
+	local function BridgeToggle(frame, label, bkey, tip)
+		frame:Toggle(label, BridgeStore, bkey, BridgeStore[bkey], function(v) OnBridgeChange(bkey, v) end)
+	end
 
-----------------------------------------------------------------------
--- 	LC0: Welcome
-----------------------------------------------------------------------
+	function RGXQoLLC:BuildOptionsCanvas()
 
-	pg = "Page0";
+		local UI = _G.RGXUI
+		if not UI or not UI.CreateOptionsPanel then
+			RGXQoLLC:Print("RGX-Framework UI module not found; options unavailable.")
+			return
+		end
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Welcome to RGX QoL Plus.", 146, -72);
-	RGXQoLLC:MakeWD(RGXQoLLC[pg], "To begin, choose an options page.", 146, -92);
+		SyncBridgeFromLegacy()
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Support", 146, -132);
-	RGXQoLLC:MakeWD(RGXQoLLC[pg], "curseforge.com/wow/addons/RGX QoL-plus", 146, -152);
+		local panel = UI:CreateOptionsPanel({
+			addonName = "RGXQoL",
+			title = "RGX QoL",
+			subtitle = "Quality of life enhancements for WoW Forever",
+			icon = "Interface\\AddOns\\RGX-Framework\\media\\logo.tga",
+			brand = "8B1538",
+			version = "v" .. tostring(RGXQoLLC:GetAddonVersion()),
+			author = "RealmGX, derived from Leatrix Plus by Leatrix",
+			width = 760,
+			height = 620,
+			tabs = {
+				{
+					text = L["General"],
+					content = function(frame)
 
-----------------------------------------------------------------------
--- 	LC1: Automation
-----------------------------------------------------------------------
+						-- Character card
+						frame:Section(L["Character"])
+						BridgeToggle(frame, L["Automate quests"], "automateQuests")
+						BridgeToggle(frame, L["Accept available quests automatically"], "autoQuestAvailable")
+						BridgeToggle(frame, L["Turn-in completed quests automatically"], "autoQuestCompleted")
+						BridgeToggle(frame, L["Require override key for quest automation"], "autoQuestShift")
+						frame:Slider(L["Override key"] .. " (1=SHIFT 2=ALT 3=CTRL 4=CMD)", BridgeStore, "autoQuestKeyMenu", 1, 4, BridgeStore["autoQuestKeyMenu"] or 1, "")
+						BridgeToggle(frame, L["Automate gossip"], "automateGossip")
+						BridgeToggle(frame, L["Accept summon"], "autoAcceptSummon")
+						BridgeToggle(frame, L["Accept resurrection"], "autoAcceptRes")
+						BridgeToggle(frame, L["Exclude combat resurrection"], "autoResNoCombat")
+						BridgeToggle(frame, L["Release in PvP"], "autoReleasePvP")
+						BridgeToggle(frame, L["Exclude Alterac Valley"], "autoReleaseNoAlterac")
+						frame:Slider(L["Release delay"] .. " (ms)", BridgeStore, "autoReleaseDelay", 200, 3000, BridgeStore["autoReleaseDelay"] or 200, "ms")
 
-	pg = "Page1";
+						-- Vendors card
+						frame:Section(L["Vendors"])
+						BridgeToggle(frame, L["Sell junk automatically"], "autoSellJunk")
+						BridgeToggle(frame, L["Show vendor summary in chat"], "autoSellShowSummary")
+						BridgeToggle(frame, L["Repair automatically"], "autoRepairGear")
+						BridgeToggle(frame, L["Show repair summary in chat"], "autoRepairShowSummary")
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Character"					, 	146, -72);
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutomateQuests"			,	"Automate quests"				,	146, -92, 	false,	"If checked, quests will be selected, accepted and turned-in automatically.|n|nQuests which have a gold requirement will not be turned-in automatically.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutomateGossip"			,	"Automate gossip"				,	146, -112, 	false,	"If checked, you can hold down the alt key while opening a gossip window to automatically select a single gossip item.|n|nIf the gossip item type is banker, taxi, trainer, vendor or battlemaster, gossip will be skipped without needing to hold the alt key.  You can hold the shift key down to prevent this.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoAcceptSummon"			,	"Accept summon"					, 	146, -132, 	false,	"If checked, summon requests will be accepted automatically unless you are in combat.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoAcceptRes"				,	"Accept resurrection"			, 	146, -152, 	false,	"If checked, resurrection requests will be accepted automatically.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoReleasePvP"			,	"Release in PvP"				, 	146, -172, 	false,	"If checked, you will release automatically after you die in a battleground.|n|nYou will not release automatically if you have the ability to self-resurrect.")
+						-- Addon card
+						frame:Section(L["Addon"])
+						local mmw = BridgeToggle(frame, L["Show minimap button"], "showMinimapIcon")
+						local engw = BridgeToggle(frame, L["Use English language"], "useEnglishLanguage")
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Vendors"					, 	340, -72);
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoSellJunk"				,	"Sell junk automatically"		,	340, -92, 	false,	"If checked, all grey items in your bags will be sold automatically when you visit a merchant.|n|nYou can hold the shift key down when you talk to a merchant to override this setting.")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "AutoRepairGear"			, 	"Repair automatically"			,	340, -112, 	false,	"If checked, your gear will be repaired automatically when you visit a suitable merchant.|n|nYou can hold the shift key down when you talk to a merchant to override this setting.")
+						-- Reload UI button, wired to the reload-needed state
+						ReloadButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+						ReloadButton:SetSize(120, 22)
+						ReloadButton:SetText(L["Reload UI"])
+						if engw and engw.GetObjectName and engw:GetObjectName() then end
+						local anchorFrame = engw or mmw
+						if anchorFrame then
+							ReloadButton:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -10)
+						else
+							ReloadButton:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, -400)
+						end
+						ReloadButton:SetScript("OnClick", function() ReloadUI() end)
+						ReloadLabel = ReloadButton:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+						ReloadLabel:SetPoint("RIGHT", ReloadButton, "LEFT", -10, 0)
+						ReloadLabel:SetText(L["Your UI needs to be reloaded."])
+						ReloadLabel:Hide()
+						RGXQoLLC:ReloadCheck()
 
-	RGXQoLLC:CfgBtn("AutomateQuestsBtn", RGXQoLCB["AutomateQuests"])
-	RGXQoLLC:CfgBtn("AutoAcceptResBtn", RGXQoLCB["AutoAcceptRes"])
-	RGXQoLLC:CfgBtn("AutoReleasePvPBtn", RGXQoLCB["AutoReleasePvP"])
-	RGXQoLLC:CfgBtn("AutoSellJunkBtn", RGXQoLCB["AutoSellJunk"])
-	RGXQoLLC:CfgBtn("AutoRepairBtn", RGXQoLCB["AutoRepairGear"])
+					end,
+				},
+			},
+		})
 
-----------------------------------------------------------------------
--- 	LC8: Settings
-----------------------------------------------------------------------
+		RGXQoLLC.QoLPanel = panel
 
-	pg = "Page8";
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Addon"						, 146, -72);
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "ShowMinimapIcon"			, "Show minimap button"				, 146, -92,		false,	"If checked, a minimap button will be available.|n|nClick - Toggle options panel.|n|nSHIFT-click - Toggle music.|n|nALT-click - Toggle errors (if enabled).|n|nCTRL/SHIFT-click - Toggle windowed mode.|n|nCTRL/ALT-click - Toggle Zygor (if installed).")
-	RGXQoLLC:MakeCB(RGXQoLLC[pg], "UseEnglishLanguage"		, "Use English language"			, 146, -112,	true,	"If checked, text used throughout the addon will be shown in English regardless of your game locale.")
+		OpenOptionsShared = function()
+			if panel and panel.Open then panel:Open() end
+		end
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Scale", 340, -72);
+	end
 
-	RGXQoLLC:MakeTx(RGXQoLLC[pg], "Transparency", 340, -132);
