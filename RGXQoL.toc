@@ -3,7 +3,7 @@
 ## Title: |cff8B1538RGX|r |cffffffffQoL|r
 ## Notes: Quality of life enhancements for WoW Forever.
 
-## Version: 1.0.1
+## Version: 2.0.0
 ## Author: RealmGX, derived from Leatrix Plus by Leatrix
 ## SavedVariables: RGXQoLDB
 ## LoadSavedVariablesFirst: true

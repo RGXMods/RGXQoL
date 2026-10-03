@@ -53,7 +53,7 @@
 	local void
 
 	-- Version
-	RGXQoLLC["AddonVer"] = "1.15.150"
+	RGXQoLLC["AddonVer"] = "2.0.0"
 
 	-- Get locale table
 	local void, RGXQoLAddon = ...
