@@ -5,6 +5,8 @@
 
 ## Version: 2.0.0
 ## Author: RealmGX, derived from Leatrix Plus by Leatrix
+## Category: RealmGX
+## Group: RealmGX
 ## SavedVariables: RGXQoLDB
 ## LoadSavedVariablesFirst: true
 ## X-RGX-Framework-MinVersion: 2.5.0
