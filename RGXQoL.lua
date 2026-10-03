@@ -4200,12 +4200,22 @@
 		icon:SetTexture("Interface\\AddOns\\RGX-Framework\\media\\logo.tga")
 
 		PageF.mt = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-		PageF.mt:SetPoint("LEFT", icon, "RIGHT", 10, 8)
+		PageF.mt:SetPoint("LEFT", header, "TOPLEFT", 52, -14)
 		PageF.mt:SetText("|cff8B1538RGX|r |cffffffffQoL|r")
 
-		PageF.v = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-		PageF.v:SetPoint("LEFT", icon, "RIGHT", 10, -14)
+		PageF.v = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		PageF.v:SetPoint("LEFT", header, "TOPLEFT", 52, -27)
 		PageF.v:SetText("Quality of life enhancements for WoW Forever")
+
+		local discord = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+		discord:SetPoint("LEFT", header, "TOPLEFT", 52, -39)
+		local dInvite = "discord.gg/N7kdKAHVVF"
+		if C_AddOns and C_AddOns.GetAddOnMetadata then
+			local ok, v = pcall(C_AddOns.GetAddOnMetadata, "RGXQoL", "X-Discord")
+			if ok and v and v ~= "" then dInvite = v end
+		end
+		discord:SetText("|cff7289daDiscord:|r |cffffd700" .. dInvite .. "|r")
+		discord:SetTextColor(0.85, 0.85, 0.85)
 
 		local ver = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 		ver:SetPoint("TOPRIGHT", header, "TOPRIGHT", -14, -12)
@@ -4213,12 +4223,12 @@
 		ver:SetText("v" .. tostring(RGXQoLLC.GetAddonVersion and RGXQoLLC:GetAddonVersion() or RGXQoLLC["AddonVer"]))
 
 		local auth = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-		auth:SetPoint("TOPRIGHT", header, "TOPRIGHT", -14, -27)
+		auth:SetPoint("TOPRIGHT", header, "TOPRIGHT", -14, -25)
 		auth:SetJustifyH("RIGHT")
-		auth:SetText("by RealmGX")
+		auth:SetText("by donniedice")
 
-		local brand = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-		brand:SetPoint("TOPRIGHT", header, "TOPRIGHT", -14, -40)
+		local brand = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		brand:SetPoint("TOPRIGHT", header, "TOPRIGHT", -14, -38)
 		brand:SetJustifyH("RIGHT")
 		brand:SetText("|cff8B1538RGX|r |cffffd700Mods|r")
 
