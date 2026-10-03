@@ -1628,8 +1628,8 @@
 				local MM = RGX:GetMinimap()
 				RGXQoLLC.minimapButton = MM:Create({
 					name = "RGXQoL_MinimapButton",
-					icon = "Interface\\AddOns\\RGX-Framework\\media\\logo.tga",
-					defaultAngle = 220,
+				icon = "Interface\\AddOns\\RGX-Framework\\media\\round.tga",
+				defaultAngle = 220,
 					storage = RGXQoLDB,
 					angleKey = "minimapAngle",
 					tooltip = {
@@ -2115,7 +2115,7 @@
 			author = "donniedice",
 			website = "|cff7289daDiscord:|r |cffffd700discord.gg/N7kdKAHVVF|r",
 			brand = "|cff8B1538RGX|r |cffffd700Mods|r",
-			icon = "Interface\\AddOns\\RGX-Framework\\media\\logo.tga",
+			icon = "Interface\\AddOns\\RGX-Framework\\media\\square.tga",
 			openInSettings = true,
 			registerInSettings = true,
 			content = function(container)
