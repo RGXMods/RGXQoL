@@ -13,11 +13,9 @@
 ## OptionalDeps: ElvUI
 
 ## X-License: See Changelog.txt for Leatrix Plus attribution
+## X-Discord: discord.gg/N7kdKAHVVF
 
 RGXQoL_Library.lua
 RGXQoL_Locale.lua
-RGXQoL_Flight_Alliance.lua
-RGXQoL_Flight_Horde.lua
-RGXQoL_Mute.lua
 RGXQoL.xml
 RGXQoL.lua
