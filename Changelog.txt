@@ -1,4 +1,14 @@
-﻿1.15.148 - 29th July 2026
+2.0.0 - 3rd October 2026
+- Rebuilt the options UI as a single RGX-Framework settings page (one page, three cards: Character, Vendors, Addon).
+- Removed the legacy hand-rolled window/pages/nav/gear machinery; the panel now lives in the game Options canvas and closes with its chrome/Escape.
+- Removed the Chat and Social tabs and all of their options (MR !5).
+- Block duels/party invites/friend requests/shared quests moved to the standalone RGXBlocks addon; invite from whispers moved to the standalone RGXWhisperInvite addon.
+- Removed the five gear sub-panels and the junk-exclusions editbox (saved AutoSellExcludeList still drives the whitelist).
+- Dropped the inherited panel transparency/scale scaffolding (framework-side module is a planned RGX-Framework follow-up).
+- Pruned 12,300+ unused locale strings inherited from the Leatrix Plus fork; the locale file now contains only strings used by live code.
+- The minimap button is framework-owned (left-click opens options, drag repositions, Ctrl+Right-click hides).
+
+1.15.148 - 29th July 2026
 - For 'Enhance minimap', fixed a minor issue with the tracking button scaling when using a square minimap.
 
 1.15.146 - 22nd July 2026
