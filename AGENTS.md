@@ -26,7 +26,7 @@ Quality-of-life enhancements for WoW Forever (and Classic Era), derived from Lea
 - Forbidden patterns that fail `rgx_audit_lua` and must not appear in new code: raw `C_Timer`, manual event frames, `SLASH_` globals, unguarded `SetAttribute`, raw aura plumbing, and raw hook reassignment.
 - Validation: Lua 5.1 (`luac5.1 -p`) and XML (`xmllint`) must pass through the shared CI include before every MR, and the root README stays nonempty and substantive.
 - Dependencies: keep `## RequiredDeps: RGX-Framework` and any `## X-RGX-Framework-MinVersion` accurate against the framework version line, and match the TOC SavedVariables name (`RGXQoLDB`) with the declarative `dbName`.
-- Repo facts: this addon targets WoW Forever and Classic Era (`11509,16001`) and exposes `/qol` and `/rl`. The TOC owns the `X.Y.Z` version and load order (`RGXQoL_Library.lua`, `RGXQoL_Locale.lua`, flight-path data, `RGXQoL_Mute.lua`, then `RGXQoL.xml` and `RGXQoL.lua`). Leatrix Plus attribution lives in `Changelog.txt`; preserve it. Recheck facts in the TOC and README when they change.
+- Repo facts: this addon targets WoW Forever and Classic Era (`11509,16001`) and exposes `/qol` and `/rl`. The TOC owns the `X.Y.Z` version and load order (`RGXQoL_Locale.lua`, then `RGXQoL.lua`; the options UI is a single settings-integrated page built with `UI:CreateOptionsPanel`). Leatrix Plus attribution lives in `Changelog.txt`; preserve it. Recheck facts in the TOC and README when they change.
 
 ## Keeping Interface Versions Current
 
