@@ -598,6 +598,14 @@
 			-- Create event frame
 			local qFrame = CreateFrame("FRAME")
 
+			-- Function to check if RGX Guides is loaded and has an active guide step covering the current NPC/quest
+			-- Contract per realmgx-guides#4: addon name "RGXGuides", guide-state flag via RGXGuides.QuestAutoAccept()
+			local function ShouldDeferToGuides()
+				if C_AddOns.IsAddOnLoaded("RGXGuides") and RGXGuides and RGXGuides.QuestAutoAccept and RGXGuides.QuestAutoAccept() then
+					return true
+				end
+			end
+
 			-- Function to setup events
 			local function SetupEvents()
 				if RGXQoLLC["AutomateQuests"] == "On" then
@@ -637,6 +645,9 @@
 				if RGXQoLLC["AutoQuestShift"] == "On" and not IsOverrideKeyDown() then return
 				elseif RGXQoLLC["AutoQuestShift"] == "Off" and IsOverrideKeyDown() then return
 				end
+
+				-- Defer to RGX Guides when loaded and its guide-state flag reports an active guide step covering the current NPC/quest
+				if ShouldDeferToGuides() then return end
 
 				----------------------------------------------------------------------
 				-- Accept quests automatically
