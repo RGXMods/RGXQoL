@@ -2436,10 +2436,6 @@
 		end
 	end
 
-	local function BridgeToggle(frame, label, bkey, tip)
-		frame:Toggle(label, BridgeStore, bkey, BridgeStore[bkey], function(v) OnBridgeChange(bkey, v) end)
-	end
-
 	function RGXQoLLC:BuildOptionsCanvas()
 
 		local UI = _G.RGXUI
@@ -2465,44 +2461,86 @@
 					text = L["General"],
 					content = function(frame)
 
-						-- Character card
-						frame:Section(L["Character"])
-						BridgeToggle(frame, L["Automate quests"], "automateQuests")
-						BridgeToggle(frame, L["Accept available quests automatically"], "autoQuestAvailable")
-						BridgeToggle(frame, L["Turn-in completed quests automatically"], "autoQuestCompleted")
-						BridgeToggle(frame, L["Require override key for quest automation"], "autoQuestShift")
-						frame:Slider(L["Override key"] .. " (1=SHIFT 2=ALT 3=CTRL 4=CMD)", BridgeStore, "autoQuestKeyMenu", 1, 4, BridgeStore["autoQuestKeyMenu"] or 1, "")
-						BridgeToggle(frame, L["Automate gossip"], "automateGossip")
-						BridgeToggle(frame, L["Accept summon"], "autoAcceptSummon")
-						BridgeToggle(frame, L["Accept resurrection"], "autoAcceptRes")
-						BridgeToggle(frame, L["Exclude combat resurrection"], "autoResNoCombat")
-						BridgeToggle(frame, L["Release in PvP"], "autoReleasePvP")
-						BridgeToggle(frame, L["Exclude Alterac Valley"], "autoReleaseNoAlterac")
-						frame:Slider(L["Release delay"] .. " (ms)", BridgeStore, "autoReleaseDelay", 200, 3000, BridgeStore["autoReleaseDelay"] or 200, "ms")
+						local UI = _G.RGXUI
+						local function CardToggle(card, label, bkey)
+							local w = UI:CreateToggle(card.content, {
+								label = label,
+								storage = BridgeStore,
+								key = bkey,
+								default = BridgeStore[bkey],
+								onChange = function(v) OnBridgeChange(bkey, v) end,
+							})
+							card.flow:Add(w)
+							return w
+						end
+						local function CardSlider(card, label, bkey, min, max, default, suffix)
+							local w = UI:CreateSlider(card.content, {
+								label = label,
+								storage = BridgeStore,
+								key = bkey,
+								min = min or 0,
+								max = max or 100,
+								step = 1,
+								default = default,
+								suffix = suffix or "",
+							})
+							card.flow:Add(w)
+							return w
+						end
+						local function CardText(card, text)
+							local w = UI:CreateLabel(card.content, {
+								text = text,
+								size = "small",
+								color = "muted",
+								wrap = true,
+							})
+							card.flow:Add(w)
+							return w
+						end
+
+						-- Character card (issue #19: real bordered card; description keys are
+						-- new L[] entries with English fallback for issue #3 to translate).
+						local charCard = UI:CreateCard(frame, { title = L["Character"] })
+						frame._rgxFlow:Add(charCard)
+						CardText(charCard, L["Questing, gossip, summon and release automation for your character."])
+						CardToggle(charCard, L["Automate quests"], "automateQuests")
+						CardToggle(charCard, L["Accept available quests automatically"], "autoQuestAvailable")
+						CardToggle(charCard, L["Turn-in completed quests automatically"], "autoQuestCompleted")
+						CardToggle(charCard, L["Require override key for quest automation"], "autoQuestShift")
+						CardSlider(charCard, L["Override key"] .. " (1=SHIFT 2=ALT 3=CTRL 4=CMD)", "autoQuestKeyMenu", 1, 4, BridgeStore["autoQuestKeyMenu"] or 1, "")
+						CardToggle(charCard, L["Automate gossip"], "automateGossip")
+						CardToggle(charCard, L["Accept summon"], "autoAcceptSummon")
+						CardToggle(charCard, L["Accept resurrection"], "autoAcceptRes")
+						CardToggle(charCard, L["Exclude combat resurrection"], "autoResNoCombat")
+						CardToggle(charCard, L["Release in PvP"], "autoReleasePvP")
+						CardToggle(charCard, L["Exclude Alterac Valley"], "autoReleaseNoAlterac")
+						CardSlider(charCard, L["Release delay"] .. " (ms)", "autoReleaseDelay", 200, 3000, BridgeStore["autoReleaseDelay"] or 200, "ms")
+						charCard:AutoHeight()
 
 						-- Vendors card
-						frame:Section(L["Vendors"])
-						BridgeToggle(frame, L["Sell junk automatically"], "autoSellJunk")
-						BridgeToggle(frame, L["Show vendor summary in chat"], "autoSellShowSummary")
-						BridgeToggle(frame, L["Repair automatically"], "autoRepairGear")
-						BridgeToggle(frame, L["Show repair summary in chat"], "autoRepairShowSummary")
+						local vendCard = UI:CreateCard(frame, { title = L["Vendors"] })
+						frame._rgxFlow:Add(vendCard)
+						CardText(vendCard, L["Automatic junk selling and gear repair at vendors."])
+						CardToggle(vendCard, L["Sell junk automatically"], "autoSellJunk")
+						CardToggle(vendCard, L["Show vendor summary in chat"], "autoSellShowSummary")
+						CardToggle(vendCard, L["Repair automatically"], "autoRepairGear")
+						CardToggle(vendCard, L["Show repair summary in chat"], "autoRepairShowSummary")
+						vendCard:AutoHeight()
 
 						-- Addon card
-						frame:Section(L["Addon"])
-						local mmw = BridgeToggle(frame, L["Show minimap button"], "showMinimapIcon")
-						local engw = BridgeToggle(frame, L["Use English language"], "useEnglishLanguage")
+						local addonCard = UI:CreateCard(frame, { title = L["Addon"] })
+						frame._rgxFlow:Add(addonCard)
+						CardText(addonCard, L["Minimap button, language and UI reload options."])
+						CardToggle(addonCard, L["Show minimap button"], "showMinimapIcon")
+						CardToggle(addonCard, L["Use English language"], "useEnglishLanguage")
+						addonCard:AutoHeight()
 
-						-- Reload UI button, wired to the reload-needed state
+						-- Reload UI button, wired to the reload-needed state and anchored
+						-- to the Addon card content bottom.
 						ReloadButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
 						ReloadButton:SetSize(120, 22)
 						ReloadButton:SetText(L["Reload UI"])
-						if engw and engw.GetObjectName and engw:GetObjectName() then end
-						local anchorFrame = engw or mmw
-						if anchorFrame then
-							ReloadButton:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -10)
-						else
-							ReloadButton:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, -400)
-						end
+						ReloadButton:SetPoint("TOPLEFT", addonCard, "BOTTOMLEFT", 0, -8)
 						ReloadButton:SetScript("OnClick", function() ReloadUI() end)
 						ReloadLabel = ReloadButton:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
 						ReloadLabel:SetPoint("RIGHT", ReloadButton, "LEFT", -10, 0)

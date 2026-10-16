@@ -9,7 +9,7 @@
 ## Group: RealmGX
 ## SavedVariables: RGXQoLDB
 ## LoadSavedVariablesFirst: true
-## X-RGX-Framework-MinVersion: 2.5.0
+## X-RGX-Framework-MinVersion: 2.7.12
 ## RequiredDeps: RGX-Framework
 
 ## IconTexture: Interface\AddOns\RGX-Framework\media\logo.tga
